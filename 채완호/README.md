@@ -16,3 +16,7 @@
 # 260226
 - 팀미팅에서의 피드백을 토대로 회의를 거쳐 주제 재선정
 - AI 특강 수강(Quantitation)
+
+# 260227
+- 주제 선정 "소상공인(음식점) 행정심판 AI 보조 서비스" 및 사전조사
+- AI 특강 수강(Pruning and Konwledge Distillation)
