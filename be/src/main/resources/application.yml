@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: objection
+
+  # PostgreSQL
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://3.36.78.186:5432/objection!
+    username: ssafy
+    password: ssafy
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 100
+
+server:
+  port: 8080
