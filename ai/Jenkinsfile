@@ -1,0 +1,20 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Deploy FastAPI') {
+            steps {
+                dir('ai/api/fast_api') {
+                    sh '''
+                        docker build -t fast-api .
+
+                        docker stop fast-api-container || true
+                        docker rm fast-api-container || true
+
+                        docker run -d --name fast-api-container -p 8000:8000 fast-api
+                    '''
+                }
+            }
+        }
+    }
+}
