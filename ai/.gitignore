@@ -1,0 +1,60 @@
+# --- Python 관련 ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- 가상 환경 (Virtual Environments) ---
+.venv/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# --- 환경 변수 및 비밀 정보 (Secrets) ---
+.env
+.flaskenv
+*.env
+secrets.json
+
+# --- 데이터베이스 (SQLite 등) ---
+*.db
+*.sqlite3
+
+# --- 에디터 및 OS 관련 ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# --- 테스트 및 커버리지 ---
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
