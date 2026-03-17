@@ -1,0 +1,78 @@
+pipeline {
+    agent any
+
+    environment {
+        // 1. 도커 허브 이미지 이름 
+        DOCKER_IMAGE_NAME = 'co4331/fe'
+    }
+
+    stages {
+        // 1단계: 도커 이미지 만들기
+        stage('Build Image') {
+            steps {
+                script {
+                    sh """
+                    cd fe
+                    docker build -t ${DOCKER_IMAGE_NAME}:latest .
+                    """
+                }
+            }
+        }
+
+        // 2단계: 도커 허브에 올리기
+        stage('Push to Registry') {
+            steps {
+                script {                
+                    withCredentials([
+                        string(credentialsId: 'FE_DOCKER_PW', variable: 'DOCKER_PW'),
+                        string(credentialsId: 'FE_DOCKER_ID', variable: 'DOCKER_ID')
+                    ]) {
+                        // 보안을 위해 --password-stdin 사용 권장
+                        sh 'echo $DOCKER_PW | docker login -u $DOCKER_ID --password-stdin'
+                        sh "docker push ${DOCKER_IMAGE_NAME}:latest"
+                    }
+                }
+            }
+        }
+
+        // 3단계: 실제 서버에 배포하기
+        stage('Deploy to Server') {
+            steps { 
+                withCredentials([
+                    // 기존에 세팅된 SSH 키 사용
+                    sshUserPrivateKey(credentialsId: 'aws1-ubuntu-ssh', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER'),
+                    string(credentialsId: 'FE_DOCKER_ID', variable: 'DOCKER_ID'),
+                    string(credentialsId: 'FE_DOCKER_PW', variable: 'DOCKER_PW')
+                ]) {
+                    script {
+                        sh """
+                            # 키 파일 권한 설정
+                            chmod 600 "\$SSH_KEY"
+                            
+                            # 서버 접속 및 배포 명령어 실행
+                            ssh -i "\$SSH_KEY" -o StrictHostKeyChecking=no "\$SSH_USER@j14a102.p.ssafy.io" '
+                                echo "${env.DOCKER_PW}" | sudo docker login -u "${env.DOCKER_ID}" --password-stdin
+
+                                sudo docker pull ${DOCKER_IMAGE_NAME}:latest
+                                
+                                # 실행 중인 컨테이너가 있으면 중지하고 삭제
+                                if [ "\$(sudo docker ps -q -f name=fe-container)" ]; then
+                                    sudo docker stop fe-container
+                                    sudo docker rm fe-container
+                                fi
+
+                                # 혹시 모를 잔여 컨테이너 강제 삭제
+                                sudo docker rm fe-container || true
+                                
+                                sudo docker run -d --name fe-container -p 3000:3000 ${DOCKER_IMAGE_NAME}:latest
+                                
+                                # 사용하지 않는 도커 이미지 삭제
+                                sudo docker image prune -f
+                            '
+                        """
+                    }
+                }
+            }
+        }
+    }
+}
