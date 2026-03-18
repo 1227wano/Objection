@@ -1,5 +1,6 @@
 import Link from "next/link"; // Next.js의 내장 링크 컴포넌트입니다. <a> 태그보다 페이지 전환 성능이 뛰어납니다.
 import Image from "next/image"; // Next.js의 내장 이미지 컴포넌트입니다. 이미지 크기와 로딩 속도를 자동으로 최적화해줍니다.
+import { Button } from "@/components/ui/button"; // shadcn/ui 버튼 컴포넌트를 가져옵니다.
 
 // Header 컴포넌트가 받을 옵션(Prop)의 타입을 지정합니다.
 // TypeScript의 장점이며, 아래와 같이 정해둔 변수만 받을 수 있도록 강제하여 버그를 줄입니다.
@@ -30,8 +31,8 @@ export default function Header({ isLoggedIn = false, userName = "OOO" }: HeaderP
           priority // 페이지가 처음 뜰 때 로고 이미지를 우선적으로 불러오라는 의미입니다.
           className="object-contain" // 이미지가 컨테이너를 벗어나지 않고 잘리지 않도록 맞춥니다.
         />
-        <span className="text-xl font-bold text-[#141251] tracking-tight">
-          이의있음!(Objection!)
+        <span className="text-xl font-bold text-[#0f0f70] tracking-tight">
+          이의있음! (Objection!)
         </span>
       </Link>
 
@@ -44,7 +45,7 @@ export default function Header({ isLoggedIn = false, userName = "OOO" }: HeaderP
         {isLoggedIn ? (
           // === 로그인 상태일 때 (true) ===
           <>
-            <span className="text-[#141251] font-medium">
+            <span className="text-[#0f0f70] font-medium">
               {userName}님 환영합니다.
             </span>
             {/* 연필(수정) 아이콘 (히어로 아이콘 등의 SVG를 사용했습니다) */}
@@ -57,17 +58,11 @@ export default function Header({ isLoggedIn = false, userName = "OOO" }: HeaderP
         ) : (
           // === 비로그인 상태일 때 (false) ===
           <>
-            <Link
-              href="/login"
-              className="bg-[#141251] text-white px-6 py-2 rounded font-semibold text-sm hover:bg-[#1a1766] transition-colors"
-            >
-              로그인
+            <Link href="/login">
+              <Button>로그인</Button>
             </Link>
-            <Link
-              href="/regist"
-              className="bg-white border border-[#141251] text-[#141251] px-6 py-2 rounded font-semibold text-sm hover:bg-gray-50 transition-colors"
-            >
-              회원가입
+            <Link href="/regist">
+              <Button variant="outline">회원가입</Button>
             </Link>
           </>
         )}
