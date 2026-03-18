@@ -1,6 +1,7 @@
 'use client';
 import Image from 'next/image';
 import ModalFrame from '@/components/ui/ModalFrame';
+import UploadForm from '@/components/form/UploadForm';
 import { useState } from 'react';
 export default function Home() {
   const [open, setOpen] = useState(false);
@@ -12,8 +13,9 @@ export default function Home() {
         <button className="border px-2" onClick={() => setOpen(true)}>
           열기
         </button>
+        <UploadForm onFileSelect={(file) => console.log(file)} />
       </div>
-      {open && <ModalFrame onClose={() => setOpen(false)}> 멀바 </ModalFrame>}
+      {open && <ModalFrame onClose={() => setOpen(false)}> 올리는중. . . </ModalFrame>}
     </div>
   );
 }
