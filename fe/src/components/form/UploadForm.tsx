@@ -7,7 +7,7 @@ interface UploadFormProps {
   acceptedTypes?: string; // 예: ".pdf, .jpg, .png"
 }
 
-export default function UploadForm({ onFileSelect, acceptedTypes = '*/*' }: UploadFormProps) {
+export default function UploadForm({ onFileSelect, acceptedTypes = '.pdf, .jpg, .png' }: UploadFormProps) {
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -23,13 +23,42 @@ export default function UploadForm({ onFileSelect, acceptedTypes = '*/*' }: Uplo
     setIsDragging(false);
   };
 
+  // 파일 형식(확장자, MIME 타입) 유효성 검사 함수
+  const isValidFile = (file: File) => {
+    if (acceptedTypes === '*/*') return true;
+    const types = acceptedTypes.split(',').map((t) => t.trim().toLowerCase());
+    return types.some((type) => {
+      if (type.startsWith('.')) {
+        return file.name.toLowerCase().endsWith(type);
+      } else if (type.endsWith('/*')) {
+        const baseMimeType = type.replace('/*', '');
+        return file.type.startsWith(baseMimeType);
+      }
+      return file.type === type;
+    });
+  };
+
   // 파일을 드롭했을 때
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      onFileSelect(e.dataTransfer.files[0]);
+      if (e.dataTransfer.files.length > 1) {
+        alert('단일 파일만 업로드 가능합니다.');
+        e.dataTransfer.clearData();
+        return;
+      }
+
+      const file = e.dataTransfer.files[0];
+
+      if (!isValidFile(file)) {
+        alert(`지원하지 않는 파일 형식입니다.\n지원 형식: ${acceptedTypes}`);
+        e.dataTransfer.clearData();
+        return;
+      }
+
+      onFileSelect(file);
       e.dataTransfer.clearData();
     }
   };
@@ -37,7 +66,17 @@ export default function UploadForm({ onFileSelect, acceptedTypes = '*/*' }: Uplo
   // 클릭해서 파일 탐색기에서 파일을 선택했을 때
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      onFileSelect(e.target.files[0]);
+      const file = e.target.files[0];
+      
+      if (!isValidFile(file)) {
+        alert(`지원하지 않는 파일 형식입니다.\n지원 형식: ${acceptedTypes}`);
+        e.target.value = ''; // input 초기화
+        return;
+      }
+
+      onFileSelect(file);
+      // 동일한 파일 재업로드 가능하도록 input 초기화
+      e.target.value = '';
     }
   };
 
