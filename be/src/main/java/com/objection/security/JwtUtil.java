@@ -1,6 +1,5 @@
 package com.objection.security;
 
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -23,12 +22,21 @@ public class JwtUtil {
         );
     }
 
+    public String generateAccessToken(String userId) {
+        return generateToken(userId, jwtProperties.getAccessExpiration());
+    }
+
+    public String generateRefreshToken(String userId) {
+        return generateToken(userId, jwtProperties.getRefreshExpiration());
+    }
+
+
     // 토큰 생성
-    public String generateToken(String userId) {
+    public String generateToken(String userId, long expiration) {
         return Jwts.builder()
                 .subject(userId)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + jwtProperties.getExpiration()))
+                .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey())
                 .compact();
     }
