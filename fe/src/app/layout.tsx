@@ -27,13 +27,10 @@ export default function RootLayout({
   modal: React.ReactNode;
 }) {
   return (
-    // cn과 font-sans 클래스를 결합하여 하위 모든 컴포넌트들에 Pretendard를 상속시킵니다.
     <html lang="ko" className={cn(pretendard.variable, 'font-sans')}>
-      <body className="font-sans antialiased bg-mainbgcolor text-gray-900 min-h-screen">
+      <body className="font-sans antialiased bg-mainbgcolor text-gray-900 h-screen overflow-hidden">
         <Header isLoggedIn={false} />
-        <main className="w-full">
-          {children}
-        </main>
+        <main className="w-full h-full pl-64 overflow-y-auto">{children}</main>
         {modal}
         <div id="modal-root" />
       </body>
