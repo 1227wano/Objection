@@ -13,7 +13,7 @@ import java.util.Date;
 
 @Component
 @RequiredArgsConstructor
-public class JwtUtill {
+public class JwtUtil {
 
     private final JwtProperties jwtProperties;
 
@@ -24,7 +24,7 @@ public class JwtUtill {
     }
 
     // 토큰 생성
-    String generateToken(String userId) {
+    public String generateToken(String userId) {
         return Jwts.builder()
                 .subject(userId)
                 .issuedAt(new Date())
@@ -39,7 +39,7 @@ public class JwtUtill {
     }
 
     // 토큰 유효성 검증
-    public boolean vaildateToken(String token) {
+    public boolean validateToken(String token) {
         try{
             getClaims(token);
             return true;
