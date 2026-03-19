@@ -36,6 +36,15 @@ public class JwtUtill {
         return getClaims(token).getSubject();
     }
 
+    public boolean vaildateToken(String token) {
+        try{
+            getClaims(token);
+            return true;
+        } catch (Exception e){
+            return false;
+        }
+    }
+
     private Claims getClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
