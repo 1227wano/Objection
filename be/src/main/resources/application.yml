@@ -2,6 +2,18 @@ spring:
   application:
     name: objection
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   # PostgreSQL
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -20,6 +32,11 @@ spring:
       hibernate:
         format_sql: true
         default_batch_fetch_size: 100
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 jwt:
   secret: objection-secret-key-must-be-at-least-32-bytes-long
