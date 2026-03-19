@@ -26,12 +26,9 @@ export default function Header({ isLoggedIn = false, userName = 'OOO' }: HeaderP
           alt="이의있음! 로고"
           width={32}
           height={32}
-          priority // 페이지가 처음 뜰 때 로고 이미지를 우선적으로 불러오라는 의미입니다.
           className="object-contain" // 이미지가 컨테이너를 벗어나지 않고 잘리지 않도록 맞춥니다.
         />
-        <span className="text-lg font-bold text-first tracking-tight">
-          이의있음! (Objection!)
-        </span>
+        <span className="text-lg font-bold text-first tracking-tight">이의있음! (Objection!)</span>
       </Link>
 
       {/* 2. 우측 버튼/프로필 영역 */}
@@ -45,7 +42,10 @@ export default function Header({ isLoggedIn = false, userName = 'OOO' }: HeaderP
           <div className="flex items-center gap-2">
             <span className="text-first font-medium mr-2">{userName}님, 환영합니다!</span>
             <Link href="/mypage">
-              <Button variant="outline" className="h-9 px-4 text-sm font-medium border-gray-300 text-gray-700 bg-white hover:bg-gray-50">
+              <Button
+                variant="outline"
+                className="h-9 px-4 text-sm font-medium border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+              >
                 마이페이지
               </Button>
             </Link>
