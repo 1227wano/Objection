@@ -1,9 +1,12 @@
 package com.objection;
 
+import com.objection.security.JwtProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 @SpringBootApplication
+@EnableConfigurationProperties(JwtProperties.class)
 public class ObjectionApplication {
 
     public static void main(String[] args) {
