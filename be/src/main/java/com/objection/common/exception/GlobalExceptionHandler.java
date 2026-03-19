@@ -25,12 +25,21 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(message));
     }
 
+    // 401 - 유효하지 않은 토큰
     @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
     public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(AuthenticationException e) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(ApiResponse.fail("유효하지 않은 토큰입니다."));
     }
+
+   // 404 - 리소스 없음
+   @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(IllegalArgumentException e) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.fail(e.getMessage()));
+   }
 
     // 409 - 중복 데이터
     @ExceptionHandler(IllegalStateException.class)
@@ -40,11 +49,11 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(e.getMessage()));
    }
 
-   // 404 - 리소스 없음 =
-   @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(IllegalArgumentException e) {
+   // 410 - 만료된 데이터 (이메일 인증 코드 등)
+   @ExceptionHandler(ExpiredCodeException.class)
+   public ResponseEntity<ApiResponse<Void>> handleExpiredCodeException(ExpiredCodeException e) {
         return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
+                .status(HttpStatus.GONE)
                 .body(ApiResponse.fail(e.getMessage()));
    }
 
