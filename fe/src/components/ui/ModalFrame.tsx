@@ -8,12 +8,14 @@ interface ModalFrameProps {
   children: React.ReactNode;
   onClose?: () => void;
   closeOnOverlayClick?: boolean;
+  maxWidth?: string;
 }
 
 export default function ModalFrame({
   children,
   onClose,
   closeOnOverlayClick = true,
+  maxWidth = 'max-w-md',
 }: ModalFrameProps) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -63,7 +65,7 @@ export default function ModalFrame({
       onClick={handleOverlayClick}
     >
       {/* 모달 내용 부분 */}
-      <div className="relative w-full max-w-md p-6 bg-white rounded-lg shadow-xl">
+      <div className={`relative w-full ${maxWidth} max-h-[90vh] overflow-y-auto scrollbar-hide p-6 bg-white rounded-lg shadow-xl`}>
         {closeOnOverlayClick && (
           <button
             onClick={handleClose}

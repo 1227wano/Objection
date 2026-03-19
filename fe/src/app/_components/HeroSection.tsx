@@ -22,7 +22,7 @@ export default function HeroSection({ onStartUpload }: HeroSectionProps) {
       </div>
 
       <div className="z-10 flex flex-col items-center px-4">
-        <h1 className="text-4xl md:text-5xl lg:text-5xl font-extrabold text-[#0f0f70] mb-6 leading-tight">
+        <h1 className="text-4xl md:text-5xl lg:text-5xl font-extrabold text-first mb-6 leading-tight">
           초보자도 쉬운 행정심판, <br className="hidden sm:block" />
           당신의 든든한 AI 파트너 이의있음!
         </h1>
