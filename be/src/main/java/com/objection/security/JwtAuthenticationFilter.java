@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        if(Boolean.TRUE.equals(redisTemplate.hasKey("blacklist: " + token))) {
+        if(Boolean.TRUE.equals(redisTemplate.hasKey("blacklist:" + token))) {
             filterChain.doFilter(request, response);
             return;
         }
