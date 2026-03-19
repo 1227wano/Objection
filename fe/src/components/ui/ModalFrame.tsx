@@ -19,13 +19,20 @@ export default function ModalFrame({
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    requestAnimationFrame(() => setMounted(true));
+
+    // 모달이 뜰 때 윈도우 스크롤바가 사라지면서 발생하는 화면 밀림 현상 방지
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
     // 뒷 배경 스크롤 방지
     document.body.style.overflow = 'hidden';
 
     return () => {
-      // 정리 함수 - 원래대로 변경
-      document.body.style.overflow = 'unset';
+      // 정리 함수 - 원래대로 복구
+      document.body.style.paddingRight = '';
+      document.body.style.overflow = '';
     };
   }, []);
 

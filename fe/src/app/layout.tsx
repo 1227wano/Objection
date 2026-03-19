@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
-import Header from '@/components/layout/Header';
 import { cn } from '@/lib/utils';
-import Sidebar from '@/components/layout/LeftSideBar';
+import Header from '@/components/layout/Header';
 
 export const metadata: Metadata = {
   title: '이의있음!',
@@ -20,12 +19,19 @@ const pretendard = localFont({
   variable: '--font-sans', // shadcn과 Tailwind가 기본 폰트로 인식할 수 있게 강제 지정합니다.
 });
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+  modal,
+}: {
+  children: React.ReactNode;
+  modal: React.ReactNode;
+}) {
   return (
     <html lang="ko" className={cn(pretendard.variable, 'font-sans')}>
       <body className="font-sans antialiased bg-mainbgcolor text-gray-900 h-screen overflow-hidden">
         <Header isLoggedIn={false} />
         <main className="w-full h-full pl-64 overflow-y-auto">{children}</main>
+        {modal}
         <div id="modal-root" />
       </body>
     </html>
