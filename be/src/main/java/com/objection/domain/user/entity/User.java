@@ -38,4 +38,12 @@ public class User {
         return this.deletedAt != null;
     }
 
+    public void updatePassword(String encodedPw) {
+        this.userPw = encodedPw;
+    }
+
+    public void softDelete(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
 }
