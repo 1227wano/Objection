@@ -17,7 +17,7 @@ export default function Header({ isLoggedIn = false, userName = 'OOO' }: HeaderP
     // - w-full: 넓이 100%
     // - bg-[#E2E2E2]: 옅은 회색 배경화면
     // - flex justify-between: 안의 요소(로고 / 버튼)를 양 끝으로 멀리 떨어뜨립니다.
-    <header className="sticky top-0 z-50 w-full h-14 bg-[#E2E2E2] px-6 flex justify-between items-center border-b border-gray-300">
+    <header className="sticky top-0 z-50 w-full h-14 bg-white px-6 flex justify-between items-center border-b border-gray-200">
       {/* 1. 좌측 로고 영역 */}
       {/* href="/" : 로고를 클릭하면 프로젝트의 메인 페이지로 이동합니다. */}
       <Link href="/" className="flex items-center gap-2">

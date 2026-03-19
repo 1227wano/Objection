@@ -57,7 +57,7 @@ export default function Sidebar() {
   const startsWith = (path: string) => pathname.startsWith(path);
 
   return (
-    <aside className="w-64 fixed left-0 top-14 h-[calc(100vh-3.5rem)] bg-white border-r border-gray-200 flex flex-col z-40 overflow-y-auto">
+    <aside className="w-64 fixed left-0 top-14 h-[calc(100vh-3.5rem)] bg-[#f4f7fb] border-r border-gray-200 flex flex-col z-40 overflow-y-auto">
       <nav className="flex-1 p-4 space-y-1">
         {/* 진행상황 타이틀 */}
         <div className="px-3 pb-2 pt-2">
