@@ -23,6 +23,7 @@ public class JwtUtill {
         );
     }
 
+    // 토큰 생성
     String generateToken(String userId) {
         return Jwts.builder()
                 .subject(userId)
@@ -32,10 +33,12 @@ public class JwtUtill {
                 .compact();
     }
 
+    // 토큰에서 userId 추출
     public String getUserId(String token) {
         return getClaims(token).getSubject();
     }
 
+    // 토큰 유효성 검증
     public boolean vaildateToken(String token) {
         try{
             getClaims(token);
