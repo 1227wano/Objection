@@ -12,13 +12,7 @@ export default function HeroSection({ onStartUpload }: HeroSectionProps) {
     <section className="relative w-full min-h-[600px] py-28 flex flex-col items-center justify-center text-center overflow-hidden">
       {/* Background Logo */}
       <div className="absolute inset-0 p-4 md:p-8 flex justify-center items-center opacity-[0.03] pointer-events-none z-0">
-        <Image
-          src="/logo.svg"
-          alt="logo background"
-          fill
-          className="object-contain"
-          priority
-        />
+        <Image src="/logo.svg" alt="logo background" fill className="object-contain" />
       </div>
 
       <div className="z-10 flex flex-col items-center px-4">
