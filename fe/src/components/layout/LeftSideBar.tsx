@@ -69,37 +69,24 @@ export default function Sidebar() {
         </NavItem>
 
         <div className="space-y-1">
-          <NavItem
-            href="/appeal/petition"
-            icon={FileEdit}
-            isActive={startsWith('/appeal/petition')}
-          >
+          <NavItem href="/appeal/claim" icon={FileEdit} isActive={startsWith('/appeal/claim')}>
             행정심판청구서 작성
           </NavItem>
-          {startsWith('/appeal/petition') && (
+          {startsWith('/appeal/claim') && (
             <>
-              <SubItem href="/appeal/petition/case" isActive={pathname === '/appeal/petition/case'}>
+              <SubItem href="/appeal/claim/case" isActive={pathname === '/appeal/claim/case'}>
                 사건 경위 작성
               </SubItem>
-              <SubItem
-                href="/appeal/petition/result"
-                isActive={pathname === '/appeal/petition/result'}
-              >
+              <SubItem href="/appeal/claim/result" isActive={pathname === '/appeal/claim/result'}>
                 AI 분석 결과
               </SubItem>
-              <SubItem
-                href="/appeal/petition/suggest"
-                isActive={pathname === '/appeal/petition/suggest'}
-              >
+              <SubItem href="/appeal/claim/suggest" isActive={pathname === '/appeal/claim/suggest'}>
                 AI 제안
               </SubItem>
-              <SubItem
-                href="/appeal/petition/write"
-                isActive={pathname === '/appeal/petition/write'}
-              >
+              <SubItem href="/appeal/claim/write" isActive={pathname === '/appeal/claim/write'}>
                 문서 작성
               </SubItem>
-              <SubItem href="/appeal/petition/done" isActive={pathname === '/appeal/petition/done'}>
+              <SubItem href="/appeal/claim/done" isActive={pathname === '/appeal/claim/done'}>
                 완료
               </SubItem>
             </>
