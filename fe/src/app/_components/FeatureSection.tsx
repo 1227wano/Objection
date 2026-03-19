@@ -17,7 +17,7 @@ export default function FeatureSection() {
             </div>
           </div>
           <div className="flex-1 text-center md:text-left">
-            <h2 className="text-4xl font-bold text-[#0f0f70] mb-5">쉬운 AI 작성</h2>
+            <h2 className="text-4xl font-bold text-first mb-5">쉬운 AI 작성</h2>
             <p className="text-xl text-gray-600 leading-relaxed break-keep">
               누구나 쉽게 완성하는 자동 서식 작성 기술로
               <br className="hidden md:block" />
@@ -39,7 +39,7 @@ export default function FeatureSection() {
             </div>
           </div>
           <div className="flex-1 text-center md:text-right">
-            <h2 className="text-4xl font-bold text-[#0f0f70] mb-5">문서 분석</h2>
+            <h2 className="text-4xl font-bold text-first mb-5">문서 분석</h2>
             <p className="text-xl text-gray-600 leading-relaxed break-keep">
               복잡한 행정 처분서를 AI가 즉시 분석하여
               <br className="hidden md:block" />
@@ -61,7 +61,7 @@ export default function FeatureSection() {
             </div>
           </div>
           <div className="flex-1 text-center md:text-left">
-            <h2 className="text-4xl font-bold text-[#0f0f70] mb-5">법률 안내</h2>
+            <h2 className="text-4xl font-bold text-first mb-5">법률 안내</h2>
             <p className="text-xl text-gray-600 leading-relaxed tracking-tight break-keep">
               개별 상황에 딱 맞는 맞춤형 법률 가이드와 유사 판례 데이터를<br className="hidden md:block" />
               당신의 상황에 딱 맞게 실시간으로 제공합니다.

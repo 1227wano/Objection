@@ -16,7 +16,7 @@ export default function Header({ isLoggedIn = false, userName = 'OOO' }: HeaderP
   return (
     // <header>: HTML의 구조적 의미(시맨틱)를 더해주는 태그입니다.
     // 전체 페이지에서 동일하게 하얀/투명한 배경과 연한 구분선을 유지하며 상단에 고정(sticky)됩니다.
-    <header className="sticky top-0 z-50 w-full h-14 px-6 flex justify-between items-center border-b border-gray-200 bg-[#F8FAFC] transition-colors duration-200">
+    <header className="sticky top-0 z-50 w-full h-14 px-6 flex justify-between items-center border-b border-gray-200 bg-mainbgcolor transition-colors duration-200">
       {/* 1. 좌측 로고 영역 */}
       {/* href="/" : 로고를 클릭하면 프로젝트의 메인 페이지로 이동합니다. */}
       <Link href="/" className="flex items-center gap-2">
@@ -29,7 +29,7 @@ export default function Header({ isLoggedIn = false, userName = 'OOO' }: HeaderP
           priority // 페이지가 처음 뜰 때 로고 이미지를 우선적으로 불러오라는 의미입니다.
           className="object-contain" // 이미지가 컨테이너를 벗어나지 않고 잘리지 않도록 맞춥니다.
         />
-        <span className="text-lg font-bold text-[#0f0f70] tracking-tight">
+        <span className="text-lg font-bold text-first tracking-tight">
           이의있음! (Objection!)
         </span>
       </Link>
@@ -42,29 +42,17 @@ export default function Header({ isLoggedIn = false, userName = 'OOO' }: HeaderP
         */}
         {isLoggedIn ? (
           // === 로그인 상태일 때 (true) ===
-          <>
-            <span className="text-[#0f0f70] font-medium">{userName}님 환영합니다.</span>
-            {/* 연필(수정) 아이콘 (히어로 아이콘 등의 SVG를 사용했습니다) */}
-            <button
-              aria-label="정보 수정"
-              className="p-1 hover:bg-gray-300 rounded-full transition-colors text-gray-700"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.8}
-                stroke="currentColor"
-                className="w-5 h-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
-                />
-              </svg>
-            </button>
-          </>
+          <div className="flex items-center gap-2">
+            <span className="text-first font-medium mr-2">{userName}님, 환영합니다!</span>
+            <Link href="/mypage">
+              <Button variant="outline" className="h-9 px-4 text-sm font-medium border-gray-300 text-gray-700 bg-white hover:bg-gray-50">
+                마이페이지
+              </Button>
+            </Link>
+            <Button className="h-9 px-4 text-sm font-medium bg-first text-white hover:bg-first/80">
+              로그아웃
+            </Button>
+          </div>
         ) : (
           // === 비로그인 상태일 때 (false) ===
           <>

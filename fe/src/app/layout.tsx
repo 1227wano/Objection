@@ -30,7 +30,7 @@ export default function RootLayout({
     <html lang="ko" className={cn(pretendard.variable, 'font-sans')}>
       <body className="font-sans antialiased bg-mainbgcolor text-gray-900 h-screen overflow-hidden">
         <Header isLoggedIn={false} />
-        <main className="w-full h-full pl-64 overflow-y-auto">{children}</main>
+        <main className="w-full h-full overflow-y-auto">{children}</main>
         {modal}
         <div id="modal-root" />
       </body>

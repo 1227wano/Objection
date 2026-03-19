@@ -3,14 +3,14 @@ import { Search, FileEdit, MessageSquare, FilePlus, CheckCircle } from 'lucide-r
 export default function ProcessSection() {
   return (
     <section className="w-full py-20 bg-transparent flex flex-col items-center">
-      <h2 className="text-3xl font-bold text-[#0f0f70] mb-4">행정심판 5단계 프로세스</h2>
+      <h2 className="text-3xl font-bold text-first mb-4">행정심판 5단계 프로세스</h2>
       <p className="text-gray-500 mb-20 px-4 text-center">
         복잡한 절차를 체계적인 5단계 시스템으로 안내합니다.
       </p>
 
       <div className="relative w-full max-w-6xl mx-auto px-4">
         {/* Dotted line connecting steps */}
-        <div className="hidden lg:block absolute top-[40px] left-[10%] right-[10%] border-t-2 border-dashed border-[#0f0f70] opacity-30 z-0"></div>
+        <div className="hidden lg:block absolute top-[40px] left-[10%] right-[10%] border-t-2 border-dashed border-first opacity-30 z-0"></div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-12 relative z-10">
           {[
@@ -47,10 +47,10 @@ export default function ProcessSection() {
           ].map((step) => (
             <div key={step.id} className="flex flex-col items-center text-center">
               <div className="relative mb-6">
-                <div className="w-20 h-20 rounded-full bg-[#0f0f70] flex items-center justify-center shadow-lg">
+                <div className="w-20 h-20 rounded-full bg-first flex items-center justify-center shadow-lg">
                   {step.icon}
                 </div>
-                <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-white border-2 border-[#0f0f70] text-[#0f0f70] font-bold flex items-center justify-center text-sm shadow-sm">
+                <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-white border-2 border-first text-first font-bold flex items-center justify-center text-sm shadow-sm">
                   {step.id}
                 </div>
               </div>
