@@ -73,7 +73,9 @@ export default function Header({ isLoggedIn = false, userName = 'OOO' }: HeaderP
               <Button size="m">로그인</Button>
             </Link>
             <Link href="/regist">
-              <Button variant="outline" size="m">회원가입</Button>
+              <Button variant="outline" size="m">
+                회원가입
+              </Button>
             </Link>
           </>
         )}
