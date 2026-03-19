@@ -30,8 +30,10 @@ export default function CaseDetailsPage() {
         <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
           행정심판 청구를 위한 사건 경위를 작성해 주세요.
         </h1>
-        <p className="mt-2 text-sm text-gray-600 sm:text-base">
-          처분이 부당하다고 느낀 당시의 상황과 억울한 점을 있는 그대로 알려 주세요. 남겨 주신 내용을 바탕으로 설득력 있는 소명 자료를 완성합니다.
+        <p className="mt-3 ml-2 text-sm text-second sm:text-base">
+          처분이 부당하다고 느낀 당시의 상황과 억울한 점을 있는 그대로 알려 주세요.
+          <br />
+          남겨 주신 내용을 바탕으로 설득력 있는 소명 자료를 완성합니다.
         </p>
       </div>
 
@@ -51,9 +53,7 @@ export default function CaseDetailsPage() {
             />
 
             <div className="flex justify-end pt-6">
-              <Button type="submit">
-                다음 단계로 이동하기
-              </Button>
+              <Button type="submit">다음 단계로 이동하기</Button>
             </div>
           </form>
         </DocumentCard>
