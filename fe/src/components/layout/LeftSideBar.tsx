@@ -2,14 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  Search,
-  FileEdit,
-  MessageSquareQuote,
-  FilePlus,
-  Gavel,
-  CheckCircle2,
-} from 'lucide-react';
+import { Search, FileEdit, MessageSquareQuote, FilePlus, Gavel, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ReactNode } from 'react';
 
@@ -68,12 +61,19 @@ export default function Sidebar() {
         </NavItem>
 
         <div className="space-y-1">
-          <NavItem href="/appeal/claim" icon={FileEdit} isActive={startsWith('/appeal/claim')}>
+          <NavItem
+            href="/appeal/claim/incident"
+            icon={FileEdit}
+            isActive={startsWith('/appeal/claim')}
+          >
             행정심판청구서 작성
           </NavItem>
           {startsWith('/appeal/claim') && (
             <>
-              <SubItem href="/appeal/claim/case" isActive={pathname === '/appeal/claim/case'}>
+              <SubItem
+                href="/appeal/claim/incident"
+                isActive={pathname === '/appeal/claim/incident'}
+              >
                 사건 경위 작성
               </SubItem>
               <SubItem href="/appeal/claim/result" isActive={pathname === '/appeal/claim/result'}>
