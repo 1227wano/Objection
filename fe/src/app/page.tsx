@@ -1,43 +1,72 @@
 'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 import ModalFrame from '@/components/ui/ModalFrame';
 import UploadForm from '@/components/form/UploadForm';
-import { useState } from 'react';
+
+import HeroSection from '@/app/_components/HeroSection';
+import ProcessSection from '@/app/_components/ProcessSection';
+import FeatureSection from '@/app/_components/FeatureSection';
+
 export default function Home() {
+  const router = useRouter();
   const [isVerifying, setIsVerifying] = useState(false);
+  const [showUpload, setShowUpload] = useState(false);
+  
+  // 임시 로그인 상태 (실제 서비스에서는 Context, Zustand, 쿠키 등에서 가져옵니다)
+  const isLoggedIn = false;
 
-  const handleFileSelect = async (file: File) => {
-    // 1. 파일이 들어오면 즉시 로딩 모달을 띄웁니다.
-    setIsVerifying(true);
-
-    try {
-      // 2. 서버로 파일을 전송하고 AI 분석 결과를 기다립니다.
-      // 실제 API 호출 코드 예시:
-      // const formData = new FormData();
-      // formData.append('file', file);
-      // const response = await fetch('/api/analyze', { method: 'POST', body: formData });
-
-      // 테스트를 위한 가짜 딜레이 (3초 대기)
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      // 3. 분석이 성공적으로 끝나면 다음 단계(예: 설문조사 페이지)로 이동합니다.
-      setIsVerifying(false);
-    } catch (error) {
-      // 에러 발생 시 처리
-      alert('처분서 분석 중 오류가 발생했습니다. 다시 시도해 주세요.');
-      setIsVerifying(false); // 에러가 나면 모달을 닫고 다시 업로드할 수 있게 합니다.
+  const handleStartConsultation = () => {
+    if (!isLoggedIn) {
+      // 로그인 안되어 있으면 로그인 모달 띄우기 (인터셉팅 라우트 트리거)
+      router.push('/login');
+    } else {
+      // 로그인 되어 있으면 일단 아무 행동도 하지 않음
+      // 나중에 setShowUpload(true) 등을 여기에 넣으면 됩니다.
     }
-    // 페이지 이동(push)이 일어나면 컴포넌트가 언마운트되므로 finally는 생략해도 무방합니다.
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleFileSelect = async (file: File) => {
+    setIsVerifying(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      setIsVerifying(false);
+    } catch (error) {
+      console.error(error);
+      alert('처분서 분석 중 오류가 발생했습니다. 다시 시도해 주세요.');
+      setIsVerifying(false);
+    }
+  };
+
+  // 기존 업로드 폼 (페이지 이동 없이 조건부 렌더링)
+  if (showUpload) {
+    return (
+      <div className="w-full max-w-2xl mx-auto py-20 px-4 flex flex-col">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-bold text-[#0f0f70]">처분서 업로드</h2>
+          <Button variant="outline" onClick={() => setShowUpload(false)}>
+            랜딩 페이지로 돌아가기
+          </Button>
+        </div>
+        <UploadForm onFileSelect={handleFileSelect} acceptedTypes=".pdf, .jpg, .png" />
+        {isVerifying && (
+          <ModalFrame>
+            <div>올리는중. . .</div>
+          </ModalFrame>
+        )}
+      </div>
+    );
+  }
+
+  // 랜딩 페이지 화면 (조립식으로 개선)
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <h2 className="text-xl font-bold mb-4">처분서 업로드</h2>
-
-      {/* 앞서 만든 파일 형식 검증 로직이 포함된 업로드 폼 */}
-      <UploadForm onFileSelect={handleFileSelect} acceptedTypes=".pdf, .jpg, .png" />
-
-      {/* isVerifying 상태에 따라 로딩 모달이 나타납니다. */}
-      {isVerifying && <ModalFrame children={<div>올리는중. . .</div>} />}
+    <div className="w-full flex flex-col bg-[#F8FAFC]">
+      <HeroSection onStartUpload={handleStartConsultation} />
+      <ProcessSection />
+      <FeatureSection />
     </div>
   );
 }

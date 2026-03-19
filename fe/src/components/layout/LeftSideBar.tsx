@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Home,
   Search,
   FileEdit,
   MessageSquareQuote,
@@ -17,7 +16,7 @@ import { ReactNode } from 'react';
 // 1. 개별 메뉴 아이템 컴포넌트 (인라인처럼 쓰기 위해 분리)
 interface NavItemProps {
   href: string;
-  icon?: any;
+  icon?: React.ElementType;
   children: ReactNode;
   isActive?: boolean;
 }

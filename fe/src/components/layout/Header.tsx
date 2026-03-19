@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link'; // Next.js의 내장 링크 컴포넌트입니다. <a> 태그보다 페이지 전환 성능이 뛰어납니다.
 import Image from 'next/image'; // Next.js의 내장 이미지 컴포넌트입니다. 이미지 크기와 로딩 속도를 자동으로 최적화해줍니다.
 import { Button } from '@/components/ui/button'; // shadcn/ui 버튼 컴포넌트를 가져옵니다.
@@ -13,11 +15,8 @@ interface HeaderProps {
 export default function Header({ isLoggedIn = false, userName = 'OOO' }: HeaderProps) {
   return (
     // <header>: HTML의 구조적 의미(시맨틱)를 더해주는 태그입니다.
-    // className="" 안에는 Tailwind CSS의 유틸리티 클래스들이 들어갑니다.
-    // - w-full: 넓이 100%
-    // - bg-[#E2E2E2]: 옅은 회색 배경화면
-    // - flex justify-between: 안의 요소(로고 / 버튼)를 양 끝으로 멀리 떨어뜨립니다.
-    <header className="sticky top-0 z-50 w-full h-14 bg-white px-6 flex justify-between items-center border-b border-gray-200">
+    // 전체 페이지에서 동일하게 하얀/투명한 배경과 연한 구분선을 유지하며 상단에 고정(sticky)됩니다.
+    <header className="sticky top-0 z-50 w-full h-14 px-6 flex justify-between items-center border-b border-gray-200 bg-[#F8FAFC] transition-colors duration-200">
       {/* 1. 좌측 로고 영역 */}
       {/* href="/" : 로고를 클릭하면 프로젝트의 메인 페이지로 이동합니다. */}
       <Link href="/" className="flex items-center gap-2">
@@ -73,7 +72,9 @@ export default function Header({ isLoggedIn = false, userName = 'OOO' }: HeaderP
               <Button size="m">로그인</Button>
             </Link>
             <Link href="/regist">
-              <Button variant="outline" size="m">회원가입</Button>
+              <Button variant="outline" size="m">
+                회원가입
+              </Button>
             </Link>
           </>
         )}
