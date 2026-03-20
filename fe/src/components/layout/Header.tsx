@@ -13,6 +13,15 @@ interface HeaderProps {
 
 // export default: 이 파일(Header.tsx)을 가져다 쓸 때 Header가 기본적으로 제공되도록 합니다.
 export default function Header({ isLoggedIn = false, userName = 'OOO' }: HeaderProps) {
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    } catch (e) {
+      console.error('Logout error:', e);
+    }
+    window.location.href = '/';
+  };
+
   return (
     // <header>: HTML의 구조적 의미(시맨틱)를 더해주는 태그입니다.
     // 전체 페이지에서 동일하게 하얀/투명한 배경과 연한 구분선을 유지하며 상단에 고정(sticky)됩니다.
@@ -46,10 +55,13 @@ export default function Header({ isLoggedIn = false, userName = 'OOO' }: HeaderP
                 variant="outline"
                 className="h-9 px-4 text-sm font-medium border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
               >
-                마이페이지
+                회원수정
               </Button>
             </Link>
-            <Button className="h-9 px-4 text-sm font-medium bg-first text-white hover:bg-first/80">
+            <Button
+              className="h-9 px-4 text-sm font-medium bg-first text-white hover:bg-first/80"
+              onClick={handleLogout}
+            >
               로그아웃
             </Button>
           </div>
