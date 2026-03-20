@@ -7,6 +7,7 @@ import DetailAccordion from './_components/DetailAccordion';
 import UrgentNotice from './_components/UrgentNotice';
 import PrecedentList from './_components/PrecedentList';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 const mockReportData: ReportData = {
   appealType: 'CANCEL',
@@ -46,50 +47,42 @@ const mockReportData: ReportData = {
 
 export default function ReportPage() {
   return (
-    <div className="relative min-h-screen bg-gray-50/30">
+    <div className="mx-auto flex w-full max-w-4xl flex-col items-center justify-center p-4 py-12 md:py-24">
       
-      {/* 본문 콘텐츠 래퍼 */}
-      <div className="max-w-3xl mx-auto bg-white min-h-screen shadow-[0_0_15px_rgba(0,0,0,0.02)]">
+      <div className="w-full flex flex-col gap-8">
         
-        <div className="px-5 py-8 md:px-8 md:py-10 flex flex-col gap-8 pb-10">
-          
-          {/* 1. 헤더 */}
-          <div className="flex flex-col gap-6">
-            <ReportHeader />
-            {/* 2. 전략 요약 */}
-            <StrategySummary 
-              appealType={mockReportData.appealType} 
-              possibility={mockReportData.possibility} 
-            />
-          </div>
-
-          <div className="w-full h-px bg-gray-100 my-1"></div>
-
-          {/* 3. 긴급 권고 */}
-          <UrgentNotice stayOfExecution={mockReportData.stayOfExecution} />
-
-          {/* 4. AI 판단 요약 */}
-          <AiJudgment summation={mockReportData.summation} />
-
-          {/* 5. 상세 아코디언 */}
-          <DetailAccordion 
-            reasons={mockReportData.reasons} 
-            evidences={mockReportData.evidences} 
+        {/* 1. 헤더 */}
+        <div className="flex flex-col gap-6">
+          <ReportHeader />
+          {/* 2. 전략 요약 */}
+          <StrategySummary 
+            appealType={mockReportData.appealType} 
+            possibility={mockReportData.possibility} 
           />
+        </div>
 
-          {/* 6. 유사 판례 */}
-          <PrecedentList precedents={mockReportData.precedents} />
+        <div className="w-full h-px bg-gray-100 my-1"></div>
 
-          {/* 하단 이동 버튼 (스크롤 끝에 배치) */}
-          <div className="pt-4 pb-8 border-t border-gray-100">
-            {/* 연결할 다음 단계 경로를 임시로 '#' 으로 설정. 필요시 수정 가능 */}
-            <Link href="#">
-              <button className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 transition-colors text-white text-[16px] md:text-lg font-bold py-4 rounded-xl flex items-center justify-center shadow-md shadow-blue-600/20">
-                다음 단계로 이동하기
-              </button>
-            </Link>
-          </div>
+        {/* 3. 긴급 권고 */}
+        <UrgentNotice stayOfExecution={mockReportData.stayOfExecution} />
 
+        {/* 4. AI 판단 요약 */}
+        <AiJudgment summation={mockReportData.summation} />
+
+        {/* 5. 상세 아코디언 */}
+        <DetailAccordion 
+          reasons={mockReportData.reasons} 
+          evidences={mockReportData.evidences} 
+        />
+
+        {/* 6. 유사 판례 */}
+        <PrecedentList precedents={mockReportData.precedents} />
+
+        {/* 하단 이동 버튼 */}
+        <div className="flex justify-end pt-8">
+          <Link href="#">
+            <Button>다음 단계로 이동하기</Button>
+          </Link>
         </div>
 
       </div>
