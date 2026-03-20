@@ -19,11 +19,11 @@ export default function SelectionCard({
     <button
       type="button"
       onClick={onSelect}
-      className={`relative flex-1 text-left rounded-2xl border-2 p-6 transition-all duration-200 cursor-pointer
-        ${isSelected
+      className={`relative flex flex-col justify-start flex-1 text-left rounded-2xl border-2 p-6 transition-all duration-200 cursor-pointer        ${
+        isSelected
           ? 'border-blue-500 bg-white shadow-md shadow-blue-500/10'
           : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
-        }`}
+      }`}
     >
       {/* AI 추천 뱃지 */}
       {isRecommended && (
@@ -35,7 +35,8 @@ export default function SelectionCard({
 
       {/* 라디오 인디케이터 */}
       <div className="flex items-start gap-3">
-        <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
+        <div
+          className={`mt-1 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
           ${isSelected ? 'border-blue-500' : 'border-gray-300'}`}
         >
           {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />}
@@ -45,9 +46,7 @@ export default function SelectionCard({
           <span className={`text-lg font-bold ${isSelected ? 'text-gray-900' : 'text-gray-700'}`}>
             {label}
           </span>
-          <p className="text-sm text-gray-500 leading-relaxed">
-            {description}
-          </p>
+          <p className="text-sm text-gray-500 leading-relaxed min-h-[4.5rem]">{description}</p>
         </div>
       </div>
     </button>

@@ -18,7 +18,7 @@ const SELECTION_OPTIONS: { type: AppealType; description: string }[] = [
   {
     type: 'CANCEL',
     description:
-      '부당한 행정처분의 취소 또는 변경을 구하는 절차입니다. 귀하의 사례에서 승소 확률이 가장 높게 분석되었습니다.',
+      '부당한 행정처분의 취소 또는 변경을 구하는 절차입니다. 행정심판 중 가장 일반적인 형태로, 처분의 위법성이나 부당성을 다툴 때 주로 활용됩니다.',
   },
 ];
 

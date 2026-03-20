@@ -43,7 +43,6 @@ export default function ChecklistGroup({ items }: ChecklistGroupProps) {
             key={item.evidenceId}
             title={item.evidenceType}
             checked={checkedIds.has(item.evidenceId)}
-            checkedAt={item.checkedAt}
             onToggle={() => toggle(item.evidenceId)}
           />
         ))}
