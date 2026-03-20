@@ -1,6 +1,6 @@
-package com.objection.domain.user.repository;
+package com.objection.user.repository;
 
-import com.objection.domain.user.entity.User;
+import com.objection.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

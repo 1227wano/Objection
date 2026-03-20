@@ -1,4 +1,4 @@
-package com.objection.domain.user.controller;
+package com.objection.user.controller;
 
 import com.objection.auth.dto.response.UserInfoResponse;
 import com.objection.common.response.ApiResponse;

@@ -1,4 +1,4 @@
-package com.objection.domain.user.entity;
+package com.objection.user.entity;
 
 
 import jakarta.persistence.*;
@@ -20,7 +20,7 @@ public class User {
     @SequenceGenerator(name = "user_seq", sequenceName = "users_user_no_seq", allocationSize = 1)
     private Integer userNo;
 
-    @Column(nullable = false, unique = true,  length = 15)
+    @Column(nullable = false, unique = true,  length = 50)
     private String userId;
 
     @Column(nullable = false, length = 60)

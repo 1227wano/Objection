@@ -1,7 +1,7 @@
 package com.objection.security;
 
-import com.objection.domain.user.entity.User;
-import com.objection.domain.user.repository.UserRepository;
+import com.objection.user.entity.User;
+import com.objection.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
