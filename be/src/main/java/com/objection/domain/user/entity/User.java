@@ -16,7 +16,8 @@ import java.time.LocalDateTime;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
+    @SequenceGenerator(name = "user_seq", sequenceName = "users_user_no_seq", allocationSize = 1)
     private Integer userNo;
 
     @Column(nullable = false, unique = true,  length = 15)
@@ -36,6 +37,14 @@ public class User {
 
     public boolean isDeleted() {
         return this.deletedAt != null;
+    }
+
+    public void updatePassword(String encodedPw) {
+        this.userPw = encodedPw;
+    }
+
+    public void softDelete(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 
 }
