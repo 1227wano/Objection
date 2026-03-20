@@ -36,6 +36,11 @@ pipeline {
                     sh "scp -o StrictHostKeyChecking=no be/build/libs/*SNAPSHOT.jar ${SERVER_USER}@${SERVER_IP}:~/deploy/app.jar"
                     sh "scp -o StrictHostKeyChecking=no be/Dockerfile ${SERVER_USER}@${SERVER_IP}:~/deploy/Dockerfile"
 
+                    // 젠킨스에서 .env 파일 꺼내서 서버로 전송하기
+                    withCredentials([file(credentialsId: 'backend-env', variable: 'SECRET_ENV_FILE')]) {
+                        sh "scp -o StrictHostKeyChecking=no \$SECRET_ENV_FILE ${SERVER_USER}@${SERVER_IP}:~/deploy/.env"
+                    }
+
                     // 3. 서버 1에 접속해서 기존 컨테이너 끄고, 새 이미지 구워서 실행!
                     sh """
                         ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} '
@@ -44,7 +49,7 @@ pipeline {
                             docker rm ${APP_NAME} || true
                             docker rmi ${APP_NAME}:latest || true
                             docker build -t ${APP_NAME}:latest .
-                            docker run -d -p ${PORT}:${PORT} --name ${APP_NAME} ${APP_NAME}:latest
+                            docker run -d -p ${PORT}:${PORT} --name ${APP_NAME} --env-file .env ${APP_NAME}:latest
                         '
                     """
                 }
