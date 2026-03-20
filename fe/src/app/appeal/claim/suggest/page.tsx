@@ -42,7 +42,7 @@ export default function SuggestPage() {
       </div>
 
       {/* ── RightSidebar (우측) ── */}
-      <aside className="hidden lg:flex flex-col gap-4 w-72 shrink-0">
+      <aside className="hidden lg:flex flex-col gap-4 w-72 shrink-0 sticky top-6 self-start">
         {/* AISummaryCard: analysisData 전체를 전달 */}
         <AISummaryCard data={analysisData} />
         {/* CaseAccordion: representativePrecedent 매핑 */}

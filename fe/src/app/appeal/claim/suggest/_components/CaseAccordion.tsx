@@ -9,7 +9,7 @@ interface CaseAccordionProps {
 }
 
 export default function CaseAccordion({ precedent }: CaseAccordionProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
