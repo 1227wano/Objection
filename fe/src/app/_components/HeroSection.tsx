@@ -2,12 +2,11 @@
 
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
-interface HeroSectionProps {
-  onStartUpload: () => void;
-}
+export default function HeroSection() {
+  const router = useRouter();
 
-export default function HeroSection({ onStartUpload }: HeroSectionProps) {
   return (
     <section className="relative w-full min-h-[600px] py-28 flex flex-col items-center justify-center text-center overflow-hidden">
       {/* Background Logo */}
@@ -28,7 +27,7 @@ export default function HeroSection({ onStartUpload }: HeroSectionProps) {
         <Button
           size="lg"
           className="rounded-full text-lg px-8 h-14 font-semibold shadow-lg"
-          onClick={onStartUpload}
+          onClick={() => router.push('/login')}
         >
           무료로 상담 시작하기 →
         </Button>
