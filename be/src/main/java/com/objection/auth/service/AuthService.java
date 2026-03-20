@@ -83,6 +83,7 @@ public class AuthService {
                 accessToken,
                 refreshToken,
                 jwtProperties.getAccessExpiration() / 1000,
+                user.getUserId(),
                 user.getUserName()
         );
     }
