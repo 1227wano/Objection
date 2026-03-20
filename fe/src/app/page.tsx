@@ -8,10 +8,9 @@ import FeatureSection from '@/app/_components/FeatureSection';
 
 export default function Home() {
   const router = useRouter();
-  
+
   // 임시 로그인 상태 (실제 서비스에서는 Context, Zustand, 쿠키 등에서 가져옵니다)
   const isLoggedIn = false;
-
   const handleStartConsultation = () => {
     if (!isLoggedIn) {
       // 로그인 안되어 있으면 로그인 모달 띄우기 (인터셉팅 라우트 트리거)
@@ -25,6 +24,7 @@ export default function Home() {
   // 랜딩 페이지 화면 (조립식으로 개선)
   return (
     <div className="w-full flex flex-col bg-mainbgcolor">
+      <button onClick={() => router.push('/appeal/analysis')}>행정심판으로</button>;
       <HeroSection onStartUpload={handleStartConsultation} />
       <ProcessSection />
       <FeatureSection />
