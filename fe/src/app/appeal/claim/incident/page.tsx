@@ -14,7 +14,11 @@ interface CaseDetailsForm {
 
 export default function CaseDetailsPage() {
   const router = useRouter();
-  const { register, handleSubmit, formState: { errors } } = useForm<CaseDetailsForm>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CaseDetailsForm>({
     defaultValues: {
       facts: '',
       unfairReasons: '',

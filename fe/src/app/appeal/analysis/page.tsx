@@ -34,7 +34,7 @@ export default function AnalysisPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto pt-10 pb-20 px-4 md:px-8">
+    <div className="mx-auto flex w-full max-w-4xl flex-col p-4 py-12 md:py-16">
       {/* 헤더 영역: 제목 */}
       <div className="mb-12 pb-8 border-b border-gray-200">
         <h1 className="text-[28px] md:text-[34px] font-extrabold text-[var(--color-mainbgcolor, #111827)] leading-[1.35] tracking-tight mb-3">
