@@ -16,5 +16,17 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy Data Pipeline') {
+            steps {
+                sh '''
+                    cp -r ai/data-pipeline /opt/ai-server/workspace/hadoop-yarn-cluster/data-pipeline
+
+                    cd /opt/ai-server/workspace/hadoop-yarn-cluster
+                    docker compose build data-pipeline
+                    docker compose up -d data-pipeline
+                    '''
+            }
+        }
     }
 }
