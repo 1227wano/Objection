@@ -1,6 +1,7 @@
 package com.objection.auth.service;
 
 import com.objection.common.exception.ExpiredCodeException;
+import com.objection.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
@@ -16,6 +17,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final StringRedisTemplate redisTemplate;
+    private final UserRepository userRepository;
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     private static final long CODE_TTL_MINUTES = 5;
@@ -23,6 +25,12 @@ public class EmailService {
 
     // 인증 코드 발송
     public void sendVerificationCode(String email, String purpose) {
+
+        // SIGNUP 시 중복 이메일 체크 추가
+        if ("SIGNUP".equals(purpose) && userRepository.existsByUserId(email)) {
+            throw new IllegalStateException("이미 존재하는 이메일입니다.");
+        }
+
         String code = generateCode();
         String redisKey = buildKey(email, purpose);
 
