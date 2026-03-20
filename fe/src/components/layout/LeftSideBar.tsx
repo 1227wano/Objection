@@ -76,7 +76,7 @@ export default function Sidebar() {
               >
                 사건 경위 작성
               </SubItem>
-              <SubItem href="/appeal/claim/result" isActive={pathname === '/appeal/claim/result'}>
+              <SubItem href="/appeal/claim/report" isActive={pathname === '/appeal/claim/report'}>
                 AI 분석 결과
               </SubItem>
               <SubItem href="/appeal/claim/suggest" isActive={pathname === '/appeal/claim/suggest'}>

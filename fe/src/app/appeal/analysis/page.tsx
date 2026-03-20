@@ -65,7 +65,7 @@ export default function AnalysisPage() {
           asChild
           className="rounded-full px-10 shadow-sm tracking-wide bg-[#161453] hover:bg-[#121045]"
         >
-          <Link href="/appeal/petition/case">계속진행</Link>
+          <Link href="/appeal/claim/incident">계속진행</Link>
         </Button>
       </div>
     </div>

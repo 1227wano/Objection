@@ -1,6 +1,7 @@
 'use client';
 
 import { useForm, SubmitHandler } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 import { DocumentCard } from '@/components/ui/DocumentCard';
 import { DocumentInput } from '@/components/ui/DocumentInput';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,8 @@ interface CaseDetailsForm {
 }
 
 export default function CaseDetailsPage() {
-  const { register, handleSubmit } = useForm<CaseDetailsForm>({
+  const router = useRouter();
+  const { register, handleSubmit, formState: { errors } } = useForm<CaseDetailsForm>({
     defaultValues: {
       facts: '',
       unfairReasons: '',
@@ -20,8 +22,7 @@ export default function CaseDetailsPage() {
 
   const onSubmit: SubmitHandler<CaseDetailsForm> = (data) => {
     console.log('임시 저장 데이터:', data);
-    alert('데이터가 임시 저장되었습니다.\n' + JSON.stringify(data, null, 2));
-    // router.push("/appeal/claim/next-step"); // 실제 라우팅 경로로 변경 필요
+    router.push('/appeal/claim/report');
   };
 
   return (
@@ -40,19 +41,25 @@ export default function CaseDetailsPage() {
       <div className="w-full">
         <DocumentCard>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-            <DocumentInput
-              label="1. 사실관계"
-              placeholder="사건이 발생한 경위를 시간 순서대로 상세히 작성해 주세요."
-              {...register('facts', { required: true })}
-            />
+            <div className="flex flex-col gap-2 relative">
+              <DocumentInput
+                label="1. 사실관계"
+                placeholder="사건이 발생한 경위를 시간 순서대로 상세히 작성해 주세요."
+                {...register('facts', { required: true })}
+              />
+              {errors.facts && <span className="text-red-500 text-[14px] font-semibold pl-1 absolute -bottom-6">사연을 입력해주세요.</span>}
+            </div>
 
-            <DocumentInput
-              label="2. 부당하다고 생각하는 이유"
-              placeholder="해당 처분이 왜 부당하거나 위법한지 구체적으로 작성해 주세요."
-              {...register('unfairReasons', { required: true })}
-            />
+            <div className="flex flex-col gap-2 relative mt-4">
+              <DocumentInput
+                label="2. 부당하다고 생각하는 이유"
+                placeholder="해당 처분이 왜 부당하거나 위법한지 구체적으로 작성해 주세요."
+                {...register('unfairReasons', { required: true })}
+              />
+              {errors.unfairReasons && <span className="text-red-500 text-[14px] font-semibold pl-1 absolute -bottom-6">사연을 입력해주세요.</span>}
+            </div>
 
-            <div className="flex justify-end pt-6">
+            <div className="flex justify-end pt-8">
               <Button type="submit">다음 단계로 이동하기</Button>
             </div>
           </form>
