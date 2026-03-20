@@ -7,8 +7,8 @@ import com.objection.auth.dto.request.SignupRequestDto;
 import com.objection.auth.dto.response.LoginResponse;
 import com.objection.auth.dto.response.TokenRefreshResponse;
 import com.objection.common.exception.ExpiredCodeException;
-import com.objection.domain.user.entity.User;
-import com.objection.domain.user.repository.UserRepository;
+import com.objection.user.entity.User;
+import com.objection.user.repository.UserRepository;
 import com.objection.security.JwtProperties;
 import com.objection.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -82,10 +82,10 @@ public class AuthService {
         return LoginResponse.of(
                 accessToken,
                 refreshToken,
-                jwtProperties.getAccessExpiration() / 1000
+                jwtProperties.getAccessExpiration() / 1000,
+                user.getUserName()
         );
     }
-
         // 로그아웃
         public void logout(String accessToken) {
             // Access Token 블랙리스트 등록

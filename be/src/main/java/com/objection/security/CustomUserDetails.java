@@ -1,6 +1,6 @@
 package com.objection.security;
 
-import com.objection.domain.user.entity.User;
+import com.objection.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
