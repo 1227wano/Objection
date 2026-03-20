@@ -6,11 +6,11 @@ import { EvidenceItem } from '../../report/types';
 
 interface ChecklistGroupProps {
   items: EvidenceItem[];
+  onChange?: (selectedIds: number[]) => void; // 추가된 속성
 }
 
-export default function ChecklistGroup({ items }: ChecklistGroupProps) {
+export default function ChecklistGroup({ items, onChange }: ChecklistGroupProps) {
   const [checkedIds, setCheckedIds] = useState<Set<number>>(() => {
-    // submitted가 true인 항목을 초기 체크 상태로 설정
     const initialChecked = new Set<number>();
     items.forEach((item) => {
       if (item.submitted) initialChecked.add(item.evidenceId);
@@ -19,12 +19,22 @@ export default function ChecklistGroup({ items }: ChecklistGroupProps) {
   });
 
   const toggle = (id: number) => {
-    setCheckedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+    // 1. 기존 상태를 바탕으로 새로운 Set을 만듭니다.
+    const next = new Set(checkedIds);
+
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+
+    // 2. ChecklistGroup 내부의 상태를 업데이트합니다.
+    setCheckedIds(next);
+
+    // 3. 상태 업데이트 함수(setState) 밖에서 부모의 onChange를 호출합니다.
+    if (onChange) {
+      onChange(Array.from(next));
+    }
   };
 
   return (
