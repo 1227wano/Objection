@@ -24,7 +24,8 @@ const possibilityLookup: Record<string, PossibilityType> = {
 const reasons: Reason[] = ad.legalIssues.map((issue) => ({
   title: issue.title,
   cause: issue.basisText,
-  opinion: `[${issue.lawBasis}] ${issue.description}`,
+  opinion: issue.description,
+  lawBasis: issue.lawBasis,
 }));
 
 // representativePrecedent → Precedent[]
@@ -44,19 +45,14 @@ const evidences: Evidence[] = MOCK_EVIDENCE_DATA.data.map((e) => ({
 export default function ReportPage() {
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col items-center justify-center p-4 py-12 md:py-24">
-      
       <div className="w-full flex flex-col gap-8">
-        
         {/* 1. 헤더 */}
         <div className="flex flex-col gap-6">
-          <SectionHeader 
-            title="본안 판단 결과 보고서" 
-            badge={{ text: 'AI 검토 완료' }} 
-          />
+          <SectionHeader title="본안 판단 결과 보고서" badge={{ text: 'AI 검토 완료' }} />
           {/* 2. 전략 요약 */}
-          <StrategySummary 
-            appealType={ad.claimType as AppealType} 
-            possibility={possibilityLookup[ad.appealPossibility] ?? 'h'} 
+          <StrategySummary
+            appealType={ad.claimType as AppealType}
+            possibility={possibilityLookup[ad.appealPossibility] ?? 'h'}
           />
         </div>
 
@@ -69,24 +65,18 @@ export default function ReportPage() {
         <AiJudgment summation={ad.strategySummary} />
 
         {/* 5. 상세 아코디언 */}
-        <DetailAccordion 
-          reasons={reasons} 
-          evidences={evidences} 
-        />
+        <DetailAccordion reasons={reasons} evidences={evidences} />
 
         {/* 6. 유사 판례 */}
         <PrecedentList precedents={precedents} />
 
         {/* 하단 이동 버튼 */}
         <div className="flex justify-end pt-8">
-          <Link href="#">
+          <Link href="/appeal/claim/suggest">
             <Button>다음 단계로 이동하기</Button>
           </Link>
         </div>
-
       </div>
-
     </div>
   );
 }
-

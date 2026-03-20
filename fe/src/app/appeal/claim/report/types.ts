@@ -11,6 +11,7 @@ export interface Reason {
   title: string;
   cause: string;
   opinion: string;
+  lawBasis?: string;
 }
 
 export interface Precedent {
