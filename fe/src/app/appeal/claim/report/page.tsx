@@ -44,7 +44,7 @@ const evidences: Evidence[] = MOCK_EVIDENCE_DATA.data.map((e) => ({
 
 export default function ReportPage() {
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col items-center justify-center p-4 py-12 md:py-24">
+    <div className="mx-auto flex w-full max-w-4xl flex-col p-4 py-12 md:py-16 animate-in fade-in duration-500">
       <div className="w-full flex flex-col gap-8">
         {/* 1. 헤더 */}
         <div className="flex flex-col gap-6">

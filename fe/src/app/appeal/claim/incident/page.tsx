@@ -27,8 +27,8 @@ export default function CaseDetailsPage() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col items-center justify-center p-4 py-12 md:py-24">
-      <SectionHeader 
+    <div className="mx-auto flex w-full max-w-4xl flex-col p-4 py-12 md:py-16 animate-in fade-in duration-500">
+      <SectionHeader
         title="행정심판 청구를 위한 사건 경위를 작성해 주세요."
         description={
           <>
@@ -48,7 +48,11 @@ export default function CaseDetailsPage() {
                 placeholder="사건이 발생한 경위를 시간 순서대로 상세히 작성해 주세요."
                 {...register('facts', { required: true })}
               />
-              {errors.facts && <span className="text-red-500 text-[14px] font-semibold pl-1 absolute -bottom-6">사연을 입력해주세요.</span>}
+              {errors.facts && (
+                <span className="text-red-500 text-[14px] font-semibold pl-1 absolute -bottom-6">
+                  사연을 입력해주세요.
+                </span>
+              )}
             </div>
 
             <div className="flex flex-col gap-2 relative mt-4">
@@ -57,7 +61,11 @@ export default function CaseDetailsPage() {
                 placeholder="해당 처분이 왜 부당하거나 위법한지 구체적으로 작성해 주세요."
                 {...register('unfairReasons', { required: true })}
               />
-              {errors.unfairReasons && <span className="text-red-500 text-[14px] font-semibold pl-1 absolute -bottom-6">사연을 입력해주세요.</span>}
+              {errors.unfairReasons && (
+                <span className="text-red-500 text-[14px] font-semibold pl-1 absolute -bottom-6">
+                  사연을 입력해주세요.
+                </span>
+              )}
             </div>
 
             <div className="flex justify-end pt-8">

@@ -33,7 +33,7 @@ export default function SuggestPage() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl pl-4 py-12 md:py-16 animate-in fade-in duration-500">
+    <div className="mx-auto flex w-full max-w-6xl p-4 py-12 md:py-16 animate-in fade-in duration-500">
       {/* ── MainContent (중앙) ── */}
       <div className="flex-1 min-w-0 flex flex-col gap-8 px-8">
         <SectionHeader title="AI 사안 및 법리 검토" description="심판 유형 분석 및 추천 결과" />
