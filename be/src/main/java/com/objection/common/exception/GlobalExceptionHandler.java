@@ -1,6 +1,7 @@
 package com.objection.common.exception;
 
 import com.objection.common.response.ApiResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -58,10 +60,10 @@ public class GlobalExceptionHandler {
    }
 
     // 500 - 서버 내부 오류
-   @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("서버 내부 오류가 발생했습니다."));
-   }
-}
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
+            log.error("서버 내부 오류 발생", e);  // ← 이 줄 추가!
+            return ResponseEntity.status(500)
+                    .body(ApiResponse.error("서버 내부 오류가 발생했습니다."));
+        }
+    }
