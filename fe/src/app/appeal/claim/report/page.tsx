@@ -1,6 +1,6 @@
 import React from 'react';
 import { ReportData } from './types';
-import ReportHeader from './_components/ReportHeader';
+import SectionHeader from '../../_components/SectionHeader';
 import StrategySummary from './_components/StrategySummary';
 import AiJudgment from './_components/AiJudgment';
 import DetailAccordion from './_components/DetailAccordion';
@@ -53,7 +53,10 @@ export default function ReportPage() {
         
         {/* 1. 헤더 */}
         <div className="flex flex-col gap-6">
-          <ReportHeader />
+          <SectionHeader 
+            title="본안 판단 결과 보고서" 
+            badge={{ text: 'AI 검토 완료' }} 
+          />
           {/* 2. 전략 요약 */}
           <StrategySummary 
             appealType={mockReportData.appealType} 
