@@ -16,9 +16,9 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://3.36.78.186:5432/objection
-    username: ssafy
-    password: ssafy
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -28,11 +28,13 @@ spring:
 
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+
 
 jwt:
-  secret: objection-secret-key-must-be-at-least-32-bytes-long
+  secret: ${JWT_SECRET}
   access-expiration: 86400000
   refresh-expiration: 604800000
 
