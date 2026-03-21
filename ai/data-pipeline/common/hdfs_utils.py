@@ -84,7 +84,7 @@ def init_hdfs_dirs():
     """HDFS 기본 디렉토리 구조 생성"""
     dirs = [
         "/raw/precedents",
-        "/raw/crawled",
+        "/raw/new",
         "/deduped",
         "/cleaned",
     ]
