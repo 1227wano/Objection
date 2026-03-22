@@ -1,6 +1,7 @@
 package com.objection.config;
 
 import com.objection.security.JwtAuthenticationFilter;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,9 @@ import java.util.List;
         type = SecuritySchemeType.HTTP,
         scheme = "bearer",
         bearerFormat = "JWT"
+)
+@OpenAPIDefinition(
+        security = @io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "bearerAuth")
 )
 @Configuration
 @EnableWebSecurity
