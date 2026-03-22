@@ -34,7 +34,7 @@ public class CaseService {
                 .stayStatus(StayStatus.NONE)
                 .build();
 
-        Case saved = caseRepository.save(newCase);
+        Case saved = caseRepository.saveAndFlush(newCase);
         saved.updateTitle("행정처분 사건 #" + saved.getCaseNo());
 
         return new CaseCreateResponse(
