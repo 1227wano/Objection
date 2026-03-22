@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CaseCreateResponse {
 
-    private Integer userNo;
+    private Integer caseNo;
     private String title;
     private String status;
     private LocalDateTime createdAt;

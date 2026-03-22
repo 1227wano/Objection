@@ -1,4 +1,4 @@
-package com.objection.cases.dto.response;
+package com.objection.cases.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
