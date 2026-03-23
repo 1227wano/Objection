@@ -8,8 +8,8 @@ import CompletionHeader from './_components/CompletionHeader';
 import ExecutionStopBanner from './_components/ExecutionStopBanner';
 import PortalCopyTab from './_components/PortalCopyTab';
 import FileDownloadTab from './_components/FileDownloadTab';
-import { MOCK_DOCUMENT_DATA } from './_mock/mockDocumentData';
-import { DocumentData } from './_types/document';
+import { MOCK_DOCUMENT_DATA } from '../write/_mock/mockDocumentData';
+import { DocumentData } from '../write/_types/document';
 
 export default function ClaimCompletePage() {
   const router = useRouter();
