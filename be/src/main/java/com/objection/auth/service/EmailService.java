@@ -1,6 +1,7 @@
 package com.objection.auth.service;
 
-import com.objection.common.exception.ExpiredCodeException;
+import com.objection.common.exception.BusinessException;
+import com.objection.common.exception.ErrorCode;
 import com.objection.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -23,18 +24,14 @@ public class EmailService {
     private static final long CODE_TTL_MINUTES = 5;
     private static final String KEY_PREFIX = "email:code:";
 
-    // 인증 코드 발송
     public void sendVerificationCode(String email, String purpose) {
-
-        // SIGNUP 시 중복 이메일 체크 추가
         if ("SIGNUP".equals(purpose) && userRepository.existsByUserId(email)) {
-            throw new IllegalStateException("이미 존재하는 이메일입니다.");
+            throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         String code = generateCode();
         String redisKey = buildKey(email, purpose);
 
-        // redis 5분 TTL로 저장
         redisTemplate.opsForValue().set(redisKey, code, CODE_TTL_MINUTES, TimeUnit.MINUTES);
         sendEmail(email, code);
     }
@@ -43,15 +40,14 @@ public class EmailService {
         String redisKey = buildKey(email, purpose);
         String saved = redisTemplate.opsForValue().get(redisKey);
 
-        if(saved == null) {
-            throw new ExpiredCodeException("만료된 인증 코드입니다.");
+        if (saved == null) {
+            throw new BusinessException(ErrorCode.CODE_EXPIRED);
         }
 
-        if(!saved.equals(code)) {
-            throw new IllegalArgumentException("인증 코드가 올바르지 않습니다.");
+        if (!saved.equals(code)) {
+            throw new BusinessException(ErrorCode.CODE_INVALID);
         }
 
-        // 검증 성공 후 즉시 삭제 - 재사용 공격 방지
         redisTemplate.delete(redisKey);
     }
 
@@ -67,7 +63,6 @@ public class EmailService {
         return KEY_PREFIX + purpose + ":" + email;
     }
 
-    // 6자리 랜덤 숫자 코드 생성
     private String generateCode() {
         return String.format("%06d", SECURE_RANDOM.nextInt(1_000_000));
     }

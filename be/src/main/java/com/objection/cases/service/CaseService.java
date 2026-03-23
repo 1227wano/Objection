@@ -1,16 +1,14 @@
 package com.objection.cases.service;
 
 import com.objection.cases.dto.request.CaseTitleUpdateRequest;
-import com.objection.cases.dto.response.CaseCreateResponse;
-import com.objection.cases.dto.response.CaseListResponse;
-import com.objection.cases.dto.response.CaseStatusResponse;
-import com.objection.cases.dto.response.CaseTitleUpdateResponse;
+import com.objection.cases.dto.response.*;
 import com.objection.cases.entity.Case;
 import com.objection.cases.enums.CaseStatus;
 import com.objection.cases.enums.StayStatus;
 import com.objection.cases.repository.CaseRepository;
+import com.objection.common.exception.BusinessException;
+import com.objection.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +22,6 @@ public class CaseService {
 
     private final CaseRepository caseRepository;
 
-    //사건 생성
     @Transactional
     public CaseCreateResponse createCase(Integer userNo) {
         Case newCase = Case.builder()
@@ -45,7 +42,6 @@ public class CaseService {
         );
     }
 
-    // 사건 목록 조회
     public List<CaseListResponse> getCases(Integer userNo) {
         List<Case> cases = caseRepository.findByUserNoOrderByUpdatedAtDesc(userNo);
 
@@ -64,7 +60,6 @@ public class CaseService {
                 .collect(Collectors.toList());
     }
 
-    // 상태코드 조회
     public CaseStatusResponse getCaseStatus(Integer caseNo, Integer userNo) {
         Case found = getCaseOrThrow(caseNo);
         validateOwner(found, userNo);
@@ -76,7 +71,6 @@ public class CaseService {
         );
     }
 
-    // 사건 제목 수정
     @Transactional
     public CaseTitleUpdateResponse updateTitle(Integer caseNo, Integer userNo, CaseTitleUpdateRequest request) {
         Case found = getCaseOrThrow(caseNo);
@@ -91,18 +85,14 @@ public class CaseService {
         );
     }
 
-    // 사건 조회 (없으면 404)
     private Case getCaseOrThrow(Integer caseNo) {
         return caseRepository.findById(caseNo)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사건입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CASE_NOT_FOUND));
     }
 
-    // 본인 사건 확인 (아니면 403)
     private void validateOwner(Case found, Integer userNo) {
         if (!found.getUserNo().equals(userNo)) {
-            throw new AccessDeniedException("본인 사건이 아닙니다.");
+            throw new BusinessException(ErrorCode.CASE_ACCESS_DENIED);
         }
     }
-
-
 }
