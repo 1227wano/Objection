@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { DocumentData } from '../_types/document';
+import { DocumentData } from '../../write/_types/document';
 
 const KO_ALPHA = ['가', '나', '다', '라', '마'];
 

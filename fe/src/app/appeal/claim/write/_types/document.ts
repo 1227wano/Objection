@@ -1,6 +1,6 @@
+export type { RiskLevel, IssueType, LegalIssue } from '../../_types/shared';
+
 export type HighlightType = 'keyword' | 'block' | 'none';
-export type RiskLevel = 'HIGH' | 'MEDIUM' | 'LOW';
-export type IssueType = 'FACT_MISUNDERSTANDING' | 'PROPORTIONALITY' | string;
 
 // 대표자/관리인/선정대표자/대리인 유형
 export type RepresentativeType = '대표자' | '관리인' | '선정대표자' | '대리인' | null;
@@ -36,12 +36,6 @@ export interface ClaimReason {
   arguments: ArgumentItem[];
 }
 
-export interface LegalIssue {
-  issueType: IssueType;
-  title: string;
-  description: string;
-  riskLevel: RiskLevel;
-}
 
 export interface DocumentData {
   caseNo: string;

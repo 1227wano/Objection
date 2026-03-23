@@ -1,9 +1,10 @@
+export type { RiskLevel, IssueType, LegalIssue } from '../_types/shared';
+export { RISK_LEVEL_MAP } from '../_types/shared';
+
 export type AppealType = 'CANCEL' | 'INVALID' | 'ORDER';
 export type PossibilityType = 'h' | 'm' | 'l' | 'z';
 export type ClaimType = 'CANCEL' | 'INVALID' | 'ORDER';
 export type AppealPossibility = 'HIGH' | 'MEDIUM' | 'LOW';
-export type RiskLevel = 'HIGH' | 'MEDIUM' | 'LOW';
-export type IssueType = 'FACT_MISUNDERSTANDING' | 'PROPORTIONALITY' | string;
 
 // ── 기존 UI 전용 타입 ──────────────────────────────────
 
@@ -36,14 +37,6 @@ export interface ReportData {
 
 // ── API 응답 타입 (Mock 기반) ──────────────────────────
 
-export interface LegalIssue {
-  issueType: IssueType;
-  title: string;
-  description: string;
-  lawBasis: string;
-  basisText: string;
-  riskLevel: RiskLevel;
-}
 
 export interface RepresentativePrecedent {
   precedentNo: string;
@@ -110,8 +103,3 @@ export const APPEAL_POSSIBILITY_MAP: Record<AppealPossibility, { text: string; c
   LOW: { text: '승소 확률 낮음', color: 'text-orange-500' },
 };
 
-export const RISK_LEVEL_MAP: Record<RiskLevel, { text: string; color: string }> = {
-  HIGH: { text: '높음', color: 'text-red-500' },
-  MEDIUM: { text: '보통', color: 'text-orange-500' },
-  LOW: { text: '낮음', color: 'text-green-600' },
-};
