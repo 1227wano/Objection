@@ -1,5 +1,5 @@
 import { FileQuestion } from 'lucide-react';
-import NoticeEntryCard from '../notice-upload/_components/NoticeEntryCard';
+import NoticeEntryCard from './_components/NoticeEntryCard';
 import UploadStartCard from './_components/UploadStartCard';
 
 export default function AppealStartPage() {

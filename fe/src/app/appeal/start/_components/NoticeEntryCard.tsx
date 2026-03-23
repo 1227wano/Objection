@@ -53,7 +53,6 @@ export default function NoticeEntryCard({
         {isUpload ? (
           <p className={topHelperTextClassName}>{helperText}</p>
         ) : (
-          // Keep the CTA aligned with the upload card's slot layout.
           <div className={topHelperTextClassName} />
         )}
 
