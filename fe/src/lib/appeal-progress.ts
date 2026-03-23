@@ -1,6 +1,6 @@
 export const STAGE_CONFIG = {
   '처분서 분석': {
-    detailSteps: [],
+    detailSteps: [] as string[],
     badgeClassName: 'bg-slate-100 text-slate-700',
   },
   '행정심판청구서 작성': {
@@ -20,7 +20,7 @@ export const STAGE_CONFIG = {
     badgeClassName: 'bg-amber-100 text-amber-700',
   },
   '행정심판 완료': {
-    detailSteps: [],
+    detailSteps: [] as string[],
     badgeClassName: 'bg-gray-100 text-gray-700',
   },
 } as const;
@@ -44,11 +44,11 @@ export function getProgressSegments(stage: StageName) {
 }
 
 export function isValidDetailStep(stage: StageName, detailStep: string) {
-  const { detailSteps } = STAGE_CONFIG[stage];
-  const steps = detailSteps as readonly string[];
+  const detailSteps = [...STAGE_CONFIG[stage].detailSteps];
+
   if (detailSteps.length === 0) {
     return detailStep === '';
   }
 
-  return steps.includes(detailStep);
+  return detailSteps.some((item) => item === detailStep);
 }

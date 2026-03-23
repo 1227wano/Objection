@@ -17,6 +17,30 @@ interface MockCase {
   updatedAt: string;
 }
 
+interface StartStagePreview {
+  title: string;
+  description: string;
+  requiredDocuments: string[];
+}
+
+const START_STAGE_PREVIEWS: StartStagePreview[] = [
+  {
+    title: '처음부터 시작하기',
+    description: '처분서를 받은 직후라면 첫 단계부터 차근차근 진행합니다.',
+    requiredDocuments: ['처분서'],
+  },
+  {
+    title: '답변서 등록부터 시작하기',
+    description: '이미 청구를 마쳤다면 답변서를 받은 단계부터 이어서 시작합니다.',
+    requiredDocuments: ['처분서', '행정심판 청구서', '답변서'],
+  },
+  {
+    title: '재결서 등록부터 시작하기',
+    description: '재결서를 받은 경우 결과 확인 단계부터 바로 시작할 수 있습니다.',
+    requiredDocuments: ['재결서'],
+  },
+];
+
 function formatDate(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -88,30 +112,96 @@ const STAGE_ACCENT_STYLES: Record<StageName, { line: string; marker: string }> =
 export default function DashboardHome() {
   return (
     <section className="mx-auto flex w-full max-w-[1440px] flex-col gap-12 px-6 py-16">
-      <Link
-        href="/appeal"
-        className="group block rounded-[28px] border border-[#0b0b5a] bg-[linear-gradient(180deg,#16167d_0%,#0f0f70_100%)] p-6 shadow-[0_16px_38px_rgba(15,15,112,0.18)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_22px_48px_rgba(15,15,112,0.24)] active:translate-y-0"
-      >
-        <div className="rounded-[22px] border border-white/14 bg-[linear-gradient(180deg,rgba(255,255,255,0.12)_0%,rgba(255,255,255,0.04)_42%,rgba(255,255,255,0.02)_100%)] px-6 py-10 transition-colors duration-200 sm:px-10 sm:py-12">
-          <div className="flex flex-col items-center pt-2 text-center sm:pt-3">
-            <div className="text-[104px] font-extralight leading-none text-white transition-transform duration-200 group-hover:scale-105">
-              +
+      <div className="grid grid-cols-1 items-stretch gap-6 xl:grid-cols-[2.15fr_1fr]">
+        <div className="h-full rounded-[28px] border border-[#dce6fb] bg-[linear-gradient(180deg,#f4f8ff_0%,#eaf1ff_100%)] p-7 shadow-[0_10px_28px_rgba(15,15,112,0.08)]">
+          <div className="flex h-full flex-col gap-6">
+            <div className="flex flex-col gap-3">
+              <p className="text-[30px] font-extrabold tracking-[-0.03em] text-gray-900">
+                어느 단계에서든 시작할 수 있어요
+              </p>
+              <p className="max-w-3xl text-[16px] leading-7 text-slate-500">
+                처음부터 진행하셔도 되고, 이미 받은 서류가 있다면 현재 단계에 맞춰 바로
+                이어서 시작하실 수 있습니다.
+              </p>
             </div>
 
-            <p className="mt-4 text-[32px] font-extrabold tracking-[-0.04em] text-white sm:text-[38px]">
-              새 케이스 생성
-            </p>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+              {START_STAGE_PREVIEWS.map((item, index) => (
+                <div key={item.title} className="group/card h-full [perspective:1400px]">
+                  <div className="grid h-full min-h-[220px] transition-transform duration-500 [transform-style:preserve-3d] group-hover/card:[transform:rotateY(180deg)]">
+                    <div className="col-start-1 row-start-1 [backface-visibility:hidden]">
+                      <div className="flex h-full flex-col rounded-[24px] border border-[#dbe4f8] bg-white p-5 shadow-[0_8px_18px_rgba(15,15,112,0.06)] transition-colors duration-200 group-hover/card:border-first/15">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-first text-lg font-bold text-white">
+                          {index + 1}
+                        </div>
 
-            <p className="mt-3 text-base leading-7 text-white/80 sm:text-lg">
-              처음이셔도 괜찮아요. 안내에 따라 천천히 진행하시면 됩니다.
-            </p>
+                        <p className="mt-4 text-[21px] font-extrabold tracking-[-0.03em] text-gray-900">
+                          {item.title}
+                        </p>
 
-            <div className="mt-8 rounded-full bg-white px-6 py-3 text-lg font-bold text-first shadow-[0_8px_20px_rgba(0,0,0,0.12)] transition-transform duration-200 group-hover:scale-105">
-              시작하기
+                        <p className="mt-3 text-[14px] leading-6 text-slate-500">
+                          {item.description}
+                        </p>
+
+                        <div className="mt-auto pt-4 text-[13px] font-semibold text-first/75">
+                          마우스를 올려 자세히 보기
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="col-start-1 row-start-1 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                      <div className="flex h-full flex-col rounded-[24px] border border-[#16135f] bg-first p-5 text-white shadow-[0_12px_26px_rgba(15,15,112,0.12)]">
+                        <p className="text-[20px] font-extrabold tracking-[-0.03em] text-white">
+                          {item.title}
+                        </p>
+
+                        <div className="mt-5">
+                          <p className="text-[18px] font-bold text-white/92">필요 서류</p>
+                          <div className="mt-2 h-px w-full bg-white/30" />
+                        </div>
+
+                        <ul className="mt-4 space-y-2 text-[17px] leading-7 text-white/92">
+                          {item.requiredDocuments.map((listItem) => (
+                            <li key={listItem} className="flex gap-3">
+                              <span className="mt-[12px] h-2 w-2 shrink-0 rounded-full bg-white/85" />
+                              <span className="break-keep">{listItem}</span>
+                            </li>
+                          ))}
+                        </ul>
+
+                        <div className="mt-auto pt-4 text-[13px] font-semibold text-white/80">
+                          필요한 서류를 준비한 뒤 시작할 수 있어요
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      </Link>
+
+        <Link
+          href="/appeal/start"
+          className="group flex h-full min-h-[260px] flex-col items-center justify-center rounded-[28px] bg-[linear-gradient(180deg,#2a2a97_0%,#1b1b84_100%)] px-6 py-8 text-center shadow-[0_16px_38px_rgba(15,15,112,0.18)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_22px_48px_rgba(15,15,112,0.24)] active:translate-y-0"
+        >
+          <div className="text-[84px] font-extralight leading-none text-white transition-transform duration-200 group-hover:scale-105">
+            +
+          </div>
+
+          <p className="mt-3 text-[30px] font-extrabold tracking-[-0.04em] text-white">
+            새 케이스 생성
+          </p>
+
+          <p className="mt-2 text-[15px] leading-7 text-white/80">
+            처음이셔도 괜찮아요. 안내에 따라 천천히 진행하시면 됩니다.
+          </p>
+
+          <div className="mt-6 rounded-full bg-white px-6 py-3 text-lg font-bold text-first shadow-[0_8px_20px_rgba(0,0,0,0.12)] transition-transform duration-200 group-hover:scale-105">
+            시작하기
+          </div>
+        </Link>
+      </div>
 
       <div className="flex flex-col gap-5">
         <h2 className="text-[30px] font-extrabold tracking-[-0.03em] text-gray-900">
@@ -147,7 +237,7 @@ export default function DashboardHome() {
                       className={`mr-2 inline-block h-3 w-3 rounded-full align-middle ${accent.line}`}
                     />
                     <span className="font-semibold">세부 단계:</span>{' '}
-                    {isValid ? item.detailStep || '-' : '설정되지 않은 단계'}
+                    {isValid ? item.detailStep || '-' : '정의되지 않은 단계'}
                   </p>
 
                   <div className="flex items-center gap-2">
@@ -164,9 +254,7 @@ export default function DashboardHome() {
 
                 <div className="mt-2 flex items-center justify-between border-t border-gray-100 pt-2">
                   <span className="text-sm text-gray-400">최근 업데이트: {item.updatedAt}</span>
-                  <span className="text-sm font-semibold text-first">
-                    상세보기 &gt;
-                  </span>
+                  <span className="text-sm font-semibold text-first">상세보기 &gt;</span>
                 </div>
               </Link>
             );
