@@ -29,7 +29,7 @@ public class NarrativeService {
         validateOwner(found, userNo);
 
         GovDocument doc = govDocumentRepository
-                .findByCaseNoAndDocumentType(caseNo, "DISPOSAL_NOTICE")
+                .findByCaseNoAndDocumentType(caseNo, "NOTICE")
                 .orElseThrow(() -> new IllegalArgumentException("처분서가 업로드되지 않았습니다."));
 
         doc.updateNarrative(request.getFact(), request.getOpinion());
@@ -43,7 +43,7 @@ public class NarrativeService {
         validateOwner(found, userNo);
 
         GovDocument doc = govDocumentRepository
-                .findByCaseNoAndDocumentType(caseNo, "DISPOSAL_NOTICE")
+                .findByCaseNoAndDocumentType(caseNo, "NOTICE")
                 .orElseThrow(() -> new IllegalArgumentException("처분서가 업로드되지 않았습니다."));
 
         return new NarrativeResponse(caseNo, doc.getFact(), doc.getOpinion());
