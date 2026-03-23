@@ -65,7 +65,7 @@ export default function PortalCopyTab({ data }: Props) {
   ].join('\n');
 
   return (
-    <div className="flex flex-col gap-6 max-w-3xl mx-auto">
+    <div className="flex flex-col gap-6 w-full">
       <CopyField label="처분내용 요약" value={dispositionSummary} rows={3} />
       <CopyField label="청구취지" value={data.claimPurpose} rows={4} />
       <CopyField label="청구원인" value={claimReasonText} showCount rows={8} />
