@@ -1,5 +1,4 @@
 import subprocess
-import os
 from datetime import datetime
 
 
@@ -75,19 +74,17 @@ def hdfs_get(hdfs_path: str, local_path: str) -> bool:
     return True
 
 
-def generate_filename(source: str, batch_id: str = None) -> str:
-    """파일명 규칙: {소스명}_{수집시각}_{배치ID}.csv"""
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    if batch_id:
-        return f"{source}_{timestamp}_{batch_id}.csv"
-    return f"{source}_{timestamp}.csv"
+def generate_filename(source: str, ext: str = "jsonl") -> str:
+    """파일명 규칙: {소스명}_{날짜}.{확장자}"""
+    date = datetime.now().strftime("%Y%m%d")
+    return f"{source}_{date}.{ext}"
 
 
 def init_hdfs_dirs():
     """HDFS 기본 디렉토리 구조 생성"""
     dirs = [
         "/raw/precedents",
-        "/raw/crawled",
+        "/raw/new",
         "/deduped",
         "/cleaned",
     ]
