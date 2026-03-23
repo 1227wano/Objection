@@ -20,7 +20,7 @@ export default function AppealStartPage() {
 
           <NoticeEntryCard
             title="통지서가 없어요"
-            description="처분서가 없으신가요? 수동 입력을 통해 계속 진행하실 수 있습니다."
+            description="처분서가 없어도 수동 입력으로 바로 진행할 수 있어요."
             helperText="나중에 내용을 다시 보완할 수 있어요"
             href="/appeal/claim/incident"
             ctaLabel="수동으로 진행하기"
