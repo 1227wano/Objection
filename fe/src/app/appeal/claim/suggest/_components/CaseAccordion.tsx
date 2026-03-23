@@ -12,7 +12,7 @@ export default function CaseAccordion({ precedent }: CaseAccordionProps) {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+    <div className="shrink-0 rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"

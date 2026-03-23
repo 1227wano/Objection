@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import ChecklistCard from './ChecklistCard';
 import IssuePointCard from './IssuePointCard';
 import { LegalIssue } from '../_types/document';
+import RightSidebarFrame from '@/components/layout/RightSidebarFrame';
 
 interface Props {
   legalIssues: LegalIssue[];
@@ -10,7 +11,7 @@ interface Props {
 
 export default function RightSidebar({ legalIssues }: Props) {
   return (
-    <div className="w-80 shrink-0 border-l border-gray-200 bg-[#f8fafc] flex flex-col gap-4 p-5 sticky top-0 self-start h-screen overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+    <RightSidebarFrame>
       {/* 체크리스트 */}
       <ChecklistCard />
 
@@ -32,6 +33,6 @@ export default function RightSidebar({ legalIssues }: Props) {
           </Button>
         </Link>
       </div>
-    </div>
+    </RightSidebarFrame>
   );
 }
