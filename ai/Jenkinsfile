@@ -11,7 +11,9 @@ pipeline {
                         docker stop fast-api-container || true
                         docker rm fast-api-container || true
 
-                        docker run -d --name fast-api-container -p 127.0.0.1:8000:8000 fast-api
+                        docker run -d --name fast-api-container \
+                          -p 127.0.0.1:8000:8000 \
+                          fast-api
                     '''
                 }
             }
@@ -20,12 +22,14 @@ pipeline {
         stage('Deploy Data Pipeline') {
             steps {
                 sh '''
-                    cp -r ai/data-pipeline /opt/ai-server/workspace/hadoop-yarn-cluster/data-pipeline
+                    mkdir -p /opt/ai-server/workspace/hadoop-yarn-cluster/data-pipeline
+                    rm -rf /opt/ai-server/workspace/hadoop-yarn-cluster/data-pipeline/*
+                    cp -r ai/data-pipeline/. /opt/ai-server/workspace/hadoop-yarn-cluster/data-pipeline/
 
                     cd /opt/ai-server/workspace/hadoop-yarn-cluster
                     docker compose build data-pipeline
                     docker compose up -d data-pipeline
-                    '''
+                '''
             }
         }
     }
