@@ -33,23 +33,25 @@ export default function SuggestPage() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl p-4 py-12 md:py-16 animate-in fade-in duration-500">
+    <div className="flex w-full min-h-screen animate-in fade-in duration-500">
       {/* ── MainContent (중앙) ── */}
-      <div className="flex-1 min-w-0 flex flex-col gap-8 px-8">
-        <SectionHeader title="AI 사안 및 법리 검토" description="심판 유형 분석 및 추천 결과" />
+      <div className="flex-1 flex justify-center py-12 md:py-16">
+        <div className="w-full max-w-4xl px-8 flex flex-col gap-8">
+          <SectionHeader title="AI 사안 및 법리 검토" description="심판 유형 분석 및 추천 결과" />
 
-        <SelectionGroup
-          recommended={analysisData.claimType as AppealType}
-          onSelect={setSelectedType}
-        />
+          <SelectionGroup
+            recommended={analysisData.claimType as AppealType}
+            onSelect={setSelectedType}
+          />
 
-        <div className="w-full h-px bg-gray-100" />
+          <div className="w-full h-px bg-gray-100" />
 
-        <ChecklistGroup items={evidenceData} onChange={setSelectedChecklists} />
+          <ChecklistGroup items={evidenceData} onChange={setSelectedChecklists} />
 
-        {/* NavigationAction (우측 정렬로 수정: justify-end) */}
-        <div className="flex justify-end pt-4">
-          <Button onClick={handleNextClick}>다음 단계로 이동하기</Button>
+          {/* NavigationAction (우측 정렬로 수정: justify-end) */}
+          <div className="flex justify-end pt-4">
+            <Button onClick={handleNextClick}>다음 단계로 이동하기</Button>
+          </div>
         </div>
       </div>
 

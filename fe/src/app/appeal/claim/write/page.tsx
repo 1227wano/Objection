@@ -26,17 +26,17 @@ export default function WritePage() {
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full overflow-hidden animate-in fade-in duration-500">
+      <form onSubmit={methods.handleSubmit(onSubmit)} className="flex w-full min-h-screen bg-mainbgcolor animate-in fade-in duration-500">
         {/* 중앙 편집기 영역 */}
-        <div className="flex-1 overflow-y-auto bg-mainbgcolor">
-          <div className="px-8 py-10">
+        <div className="flex-1 flex justify-center py-10">
+          <div className="w-full max-w-4xl px-8 flex flex-col">
             <SectionHeader
               title="행정심판 청구서 초안이 완성되었습니다."
               description="제출 전 사실관계가 맞는지 꼼꼼히 확인하고, 수정이 필요한 부분을 직접 편집해 주세요"
             />
 
             {/* 탭 네비게이션 */}
-            <div className="flex border-b border-gray-200 mb-8">
+            <div className="flex border-b border-gray-200 mt-6 mb-8">
               {TABS.map((tab, idx) => (
                 <button
                   type="button"
@@ -59,7 +59,7 @@ export default function WritePage() {
             {activeTab === 2 && <FileDownloadTab />}
 
             {/* 수정 완료 버튼 */}
-            <div className="flex justify-end mt-10 pb-10">
+            <div className="flex justify-end pt-10 pb-10">
               <Button type="submit">수정 완료</Button>
             </div>
           </div>

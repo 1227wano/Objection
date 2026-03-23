@@ -8,9 +8,9 @@ interface RightSidebarProps {
 
 export default function RightSidebar({ data }: RightSidebarProps) {
   return (
-    <aside className="hidden lg:flex flex-col gap-4 w-70 shrink-0 sticky top-6 self-start animate-in fade-in slide-in-from-right-8 duration-500 delay-150 fill-mode-both">
+    <div className="w-80 shrink-0 border-l border-gray-200 bg-[#f8fafc] flex flex-col gap-4 p-5">
       <AISummaryCard data={data} />
       <CaseAccordion precedent={data.representativePrecedent} />
-    </aside>
+    </div>
   );
 }

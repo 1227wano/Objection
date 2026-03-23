@@ -10,7 +10,7 @@ interface Props {
 
 export default function RightSidebar({ legalIssues }: Props) {
   return (
-    <div className="w-80 shrink-0 border-l border-gray-200 bg-[#f8fafc] overflow-y-auto flex flex-col gap-4 p-5">
+    <div className="w-80 shrink-0 border-l border-gray-200 bg-[#f8fafc] flex flex-col gap-4 p-5">
       {/* 체크리스트 */}
       <ChecklistCard />
 
