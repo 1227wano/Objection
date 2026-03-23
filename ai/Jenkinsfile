@@ -4,17 +4,22 @@ pipeline {
     stages {
         stage('Deploy FastAPI') {
             steps {
-                dir('ai/api/fast_api') {
-                    sh '''
-                        docker build -t fast-api .
+                withCredentials([
+                    string(credentialsId: 'gms-key', variable: 'GMS_KEY')
+                ]) {
+                    dir('ai/api/fast_api') {
+                        sh '''
+                            docker build -t fast-api .
 
-                        docker stop fast-api-container || true
-                        docker rm fast-api-container || true
+                            docker stop fast-api-container || true
+                            docker rm fast-api-container || true
 
-                        docker run -d --name fast-api-container \
-                          -p 127.0.0.1:8000:8000 \
-                          fast-api
-                    '''
+                            docker run -d --name fast-api-container \
+                              -p 127.0.0.1:8000:8000 \
+                              -e GMS_KEY="$GMS_KEY" \
+                              fast-api
+                        '''
+                    }
                 }
             }
         }
