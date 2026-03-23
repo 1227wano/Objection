@@ -264,12 +264,12 @@ def get_law_text_cached(ref: dict, case: dict) -> str:
 def _format_date(date_str: str) -> str:
     if not date_str:
         return ""
-    s = date_str.strip().rstrip(".").replace("-", ".").replace(" ", "")
-    if re.match(r'^\d{4}\.\d{2}\.\d{2}$', s):
+    s = date_str.strip().rstrip(".").replace(".", "-")
+    if re.match(r'^\d{4}-\d{2}-\d{2}$', s):
         return s
-    s_digits = s.replace(".", "")
+    s_digits = s.replace("-", "")
     if re.match(r'^\d{8}$', s_digits):
-        return f"{s_digits[:4]}.{s_digits[4:6]}.{s_digits[6:8]}"
+        return f"{s_digits[:4]}-{s_digits[4:6]}-{s_digits[6:8]}"
     return s
 
 
