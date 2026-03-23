@@ -21,7 +21,7 @@ const MENU_STEPS = [
       { path: '/appeal/claim/report', title: 'AI 분석 결과' },
       { path: '/appeal/claim/suggest', title: 'AI 제안' },
       { path: '/appeal/claim/write', title: '문서 작성' },
-      { path: '/appeal/claim/done', title: '완료' },
+      { path: '/appeal/claim/complete', title: '완료' },
     ],
   },
   {
