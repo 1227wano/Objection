@@ -1,192 +1,167 @@
 """
-중복 제거 스크립트
+중복 제거 스크립트 (PySpark + YARN)
 사용법: python3 /app/dedup/dedup.py
 
+정석 방식: Spark가 폴더 단위로 저장. 폴더 = 하나의 데이터셋.
+읽을 때는 spark.read.json("/deduped/") 로 폴더 안의 모든 part 파일을 자동으로 읽음.
+
 흐름:
-- 첫 실행 (/deduped/ 비어있음): /raw/precedents/ + /raw/new/ 전부 로드 → 중복 제거 → /deduped/ 저장
-- 이후 실행 (/deduped/ 데이터 있음): /raw/new/만 로드 → 기존 /deduped/와 비교 → 신규분만 추가
+- 첫 실행 (/deduped/ 비어있음): /raw/precedents/ + /raw/new/ 전부 로드 → 중복 제거 → /deduped/init/
+- 이후 실행: /raw/new/만 로드 → 기존 /deduped/와 비교 → 신규분만 /deduped/batch_날짜/
 """
 
 import sys
 import os
-import json
-import subprocess
 from datetime import datetime
 
 sys.path.insert(0, "/app")
-from common.hdfs_utils import (
-    hdfs_put, hdfs_mkdir, hdfs_ls, hdfs_cat,
-    hdfs_exists, generate_filename
-)
+from common.hdfs_utils import hdfs_mkdir, hdfs_ls, hdfs_exists, generate_filename
+
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+from pyspark.sql.window import Window
 
 
-def make_key(record: dict) -> str:
-    """중복 판별 키 생성: 사건번호 + 의결일자"""
-    case_no = record.get("사건번호", "").strip()
-    date = record.get("의결일자", "").strip().rstrip(".")
-    return f"{case_no}|{date}"
+def get_spark():
+    """YARN 연결된 SparkSession 생성"""
+    return SparkSession.builder \
+        .appName("DedupPipeline") \
+        .master("yarn") \
+        .config("spark.submit.deployMode", "client") \
+        .getOrCreate()
 
 
-def load_jsonl_from_hdfs(hdfs_path: str) -> list[dict]:
-    """HDFS의 JSONL 파일 내용을 읽어서 리스트로 반환"""
-    content = hdfs_cat(hdfs_path)
-    if not content:
-        return []
-
-    records = []
-    for line in content.strip().split("\n"):
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            records.append(json.loads(line))
-        except json.JSONDecodeError:
-            continue
-    return records
+def has_jsonl_files(hdfs_path: str) -> bool:
+    """HDFS 경로에 .jsonl 파일이 있는지 확인"""
+    if not hdfs_exists(hdfs_path):
+        return False
+    files = hdfs_ls(hdfs_path)
+    return any(f.endswith(".jsonl") or f.endswith(".json") for f in files)
 
 
-def load_existing_keys() -> set:
-    """기존 /deduped/ 의 모든 파일에서 키 목록 추출"""
-    keys = set()
-
-    if not hdfs_exists("/deduped"):
-        return keys
-
-    files = hdfs_ls("/deduped")
-    for f in files:
-        if not f.endswith(".jsonl"):
-            continue
-        print(f"  기존 파일 로드: {f}")
-        records = load_jsonl_from_hdfs(f)
-        for r in records:
-            keys.add(make_key(r))
-
-    return keys
+def has_deduped_data(hdfs_path: str) -> bool:
+    """HDFS /deduped/ 에 데이터가 있는지 확인 (하위 폴더 포함)"""
+    if not hdfs_exists(hdfs_path):
+        return False
+    files = hdfs_ls(hdfs_path)
+    # init/ 이나 batch_날짜/ 하위 폴더가 있으면 데이터 있음
+    return len(files) > 0
 
 
-def load_new_data() -> list[dict]:
-    """/raw/new/ 데이터 로드"""
-    all_records = []
-
-    if not hdfs_exists("/raw/new"):
-        return all_records
-
-    files = hdfs_ls("/raw/new")
-    for f in files:
-        if not f.endswith(".jsonl"):
-            continue
-        print(f"  신규 파일 로드: {f}")
-        records = load_jsonl_from_hdfs(f)
-        all_records.extend(records)
-
-    return all_records
-
-
-def load_precedents_data() -> list[dict]:
-    """/raw/precedents/ 과거 데이터 로드"""
-    all_records = []
-
-    if not hdfs_exists("/raw/precedents"):
-        return all_records
-
-    files = hdfs_ls("/raw/precedents")
-    for f in files:
-        if not f.endswith(".jsonl"):
-            continue
-        print(f"  과거 파일 로드: {f}")
-        records = load_jsonl_from_hdfs(f)
-        all_records.extend(records)
-
-    return all_records
+def clean_columns(df):
+    """사건번호 공백 제거 + 의결일자 뒤 점 제거"""
+    return df \
+        .withColumn("사건번호", F.regexp_replace(F.trim(F.col("사건번호")), r"\s+", "")) \
+        .withColumn("의결일자", F.trim(F.regexp_replace("의결일자", r"\.$", "")))
 
 
 def main():
     print("=" * 60)
-    print(f"중복 제거 시작: {datetime.now()}")
+    print(f"중복 제거 시작 (PySpark + YARN): {datetime.now()}")
     print("=" * 60)
 
     hdfs_mkdir("/deduped")
 
-    # 1. 기존 deduped 키 로드
-    print("\n[1/4] 기존 deduped 키 로드 중...")
-    existing_keys = load_existing_keys()
-    is_first_run = len(existing_keys) == 0
-    print(f"  기존 키: {len(existing_keys)}개")
+    # 1. 첫 실행 여부 판별
+    is_first_run = not has_deduped_data("/deduped")
+    print(f"\n[1/4] 첫 실행 여부: {'첫 실행 (과거 + 신규 전부)' if is_first_run else '이후 실행 (신규만)'}")
 
-    if is_first_run:
-        print("  → 첫 실행: 과거 + 신규 전부 로드")
-    else:
-        print("  → 이후 실행: 신규(/raw/new/)만 로드")
+    # 2. Spark 세션 생성
+    print("\n[2/4] Spark 세션 생성 중...")
+    spark = get_spark()
+    spark.sparkContext.setLogLevel("WARN")
+    print(f"  Spark version: {spark.version}")
 
-    # 2. 데이터 로드
-    print("\n[2/4] 원본 데이터 로드 중...")
-    new_records = load_new_data()
-    print(f"  신규(new): {len(new_records)}건")
+    try:
+        # 3. 데이터 로드 + 중복 제거
+        print("\n[3/4] 데이터 로드 중...")
 
-    if is_first_run:
-        precedents_records = load_precedents_data()
-        print(f"  과거(precedents): {len(precedents_records)}건")
-        all_raw = precedents_records + new_records
-    else:
-        all_raw = new_records
+        if is_first_run:
+            # 과거 + 신규 전부 로드
+            paths = []
+            if has_jsonl_files("/raw/precedents"):
+                paths.append("hdfs:///raw/precedents/*.jsonl")
+                print("  과거 데이터 로드: /raw/precedents/")
+            if has_jsonl_files("/raw/new"):
+                paths.append("hdfs:///raw/new/*.jsonl")
+                print("  신규 데이터 로드: /raw/new/")
 
-    print(f"  로드 대상 합계: {len(all_raw)}건")
+            if not paths:
+                print("  원본 데이터 없음. 종료.")
+                return
 
-    if not all_raw:
-        print("\n원본 데이터 없음. 종료.")
-        return
+            df_raw = spark.read.json(paths)
+            total = df_raw.count()
+            print(f"  전체 로드: {total}건")
 
-    # 3. 중복 제거
-    print("\n[3/4] 중복 제거 중...")
-    seen = set()
-    unique_records = []
-    dup_with_existing = 0
-    dup_in_raw = 0
+            # 사건번호 공백 제거 + 의결일자 정리
+            df_raw = clean_columns(df_raw)
 
-    for r in all_raw:
-        key = make_key(r)
+            # Window로 중복 제거 (사건번호 + 의결일자 기준, 1건 유지)
+            window = Window.partitionBy("사건번호", "의결일자").orderBy("사건번호")
+            df_numbered = df_raw.withColumn("_rn", F.row_number().over(window))
+            df_deduped = df_numbered.filter(F.col("_rn") == 1).drop("_rn")
 
-        # 기존 deduped에 이미 있으면 스킵
-        if key in existing_keys:
-            dup_with_existing += 1
-            continue
+            deduped_count = df_deduped.count()
+            removed = total - deduped_count
+            print(f"  원본: {total}건 → 중복 제거: {removed}건 → 최종: {deduped_count}건")
 
-        # 현재 처리 중인 데이터 내 중복 스킵
-        if key in seen:
-            dup_in_raw += 1
-            continue
+            # /deduped/init/ 에 폴더 단위로 저장
+            output_path = "hdfs:///deduped/init"
+            df_deduped.write.mode("overwrite").json(output_path)
+            print(f"\n[4/4] 저장 완료! {deduped_count}건 → /deduped/init/")
 
-        seen.add(key)
-        unique_records.append(r)
+        else:
+            # 신규만 로드 + 기존 deduped와 비교
+            if not has_jsonl_files("/raw/new"):
+                print("  신규 데이터 없음. 종료.")
+                return
 
-    print(f"  기존 deduped와 중복: {dup_with_existing}건 제거")
-    print(f"  데이터 내 자체 중복: {dup_in_raw}건 제거")
-    print(f"  신규 유니크: {len(unique_records)}건")
+            df_new = spark.read.json("hdfs:///raw/new/*.jsonl")
+            new_count = df_new.count()
+            print(f"  신규 데이터: {new_count}건")
 
-    if not unique_records:
-        print("\n신규 유니크 데이터 없음. 종료.")
-        return
+            # 기존 deduped 전체 읽기 (하위 폴더 포함)
+            df_existing = spark.read.json("hdfs:///deduped/*/")
+            existing_count = df_existing.count()
+            print(f"  기존 deduped: {existing_count}건")
 
-    # 4. /deduped/ 에 저장
-    print("\n[4/4] HDFS /deduped/ 에 저장 중...")
-    filename = generate_filename("deduped")
-    local_path = f"/tmp/{filename}"
+            # 사건번호 공백 제거 + 의결일자 정리
+            df_new = clean_columns(df_new)
+            df_existing = clean_columns(df_existing)
 
-    with open(local_path, "w", encoding="utf-8") as f:
-        for r in unique_records:
-            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+            # 신규 내부 중복 제거
+            window = Window.partitionBy("사건번호", "의결일자").orderBy("사건번호")
+            df_new_deduped = df_new.withColumn("_rn", F.row_number().over(window)) \
+                .filter(F.col("_rn") == 1).drop("_rn")
 
-    hdfs_path = f"/deduped/{filename}"
-    success = hdfs_put(local_path, hdfs_path)
+            # 기존 deduped에 없는 것만 추출 (left_anti join)
+            df_result = df_new_deduped.join(
+                df_existing.select("사건번호", "의결일자"),
+                on=["사건번호", "의결일자"],
+                how="left_anti"
+            )
 
-    if success:
-        print(f"\n완료! {len(unique_records)}건 → {hdfs_path}")
-    else:
-        print("\n[ERROR] HDFS 적재 실패")
-        sys.exit(1)
+            deduped_count = df_result.count()
+            internal_dup = new_count - df_new_deduped.count()
+            external_dup = df_new_deduped.count() - deduped_count
+            print(f"  신규 내부 중복: {internal_dup}건 제거")
+            print(f"  기존과 중복: {external_dup}건 제거")
+            print(f"  신규 유니크: {deduped_count}건")
 
-    os.remove(local_path)
-    print(f"\n중복 제거 종료: {datetime.now()}")
+            if deduped_count == 0:
+                print("\n신규 유니크 데이터 없음. 종료.")
+                return
+
+            # /deduped/batch_날짜/ 에 신규분만 저장 (기존 데이터는 안 건드림)
+            today = datetime.now().strftime("%Y%m%d")
+            output_path = f"hdfs:///deduped/batch_{today}"
+            df_result.write.mode("overwrite").json(output_path)
+            print(f"\n[4/4] 저장 완료! {deduped_count}건 → /deduped/batch_{today}/")
+
+    finally:
+        spark.stop()
+        print(f"\n중복 제거 종료: {datetime.now()}")
 
 
 if __name__ == "__main__":
