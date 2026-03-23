@@ -45,10 +45,10 @@ export function getProgressSegments(stage: StageName) {
 
 export function isValidDetailStep(stage: StageName, detailStep: string) {
   const { detailSteps } = STAGE_CONFIG[stage];
-
+  const steps = detailSteps as readonly string[];
   if (detailSteps.length === 0) {
     return detailStep === '';
   }
 
-  return detailSteps.includes(detailStep);
+  return steps.includes(detailStep);
 }
