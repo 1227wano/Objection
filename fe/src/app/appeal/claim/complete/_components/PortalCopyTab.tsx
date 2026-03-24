@@ -28,9 +28,7 @@ function CopyField({ label, value, showCount, rows = 5 }: CopyFieldProps) {
         <label className="font-semibold text-sm text-gray-700">{label}</label>
         <div className="flex items-center gap-2">
           {showCount && (
-            <span className="text-xs text-gray-400">
-              {value.length.toLocaleString()}/4000
-            </span>
+            <span className="text-xs text-gray-400">{value.length.toLocaleString()}/4000</span>
           )}
           <Button size="m" variant="outline" onClick={handleCopy}>
             {copied ? '복사됨!' : '복사하기'}
@@ -59,9 +57,7 @@ export default function PortalCopyTab({ data }: Props) {
     data.claimReason.background,
     ``,
     `2. 이 사건 처분의 부당성`,
-    ...data.claimReason.arguments.map(
-      (a, i) => `${KO_ALPHA[i]}. ${a.title}\n${a.content}`,
-    ),
+    ...data.claimReason.arguments.map((a, i) => `${KO_ALPHA[i]}. ${a.title}\n${a.content}`),
   ].join('\n');
 
   return (

@@ -37,7 +37,7 @@ export default function AnswerAttachPage() {
         throw new Error(errorData.message || '파일 업로드에 실패했습니다.');
       }
 
-      router.push('/appeal/answer/result');
+      router.push('/appeal/answer/report');
     } catch (err) {
       alert(err instanceof Error ? err.message : '파일 업로드 중 오류가 발생했습니다.');
     } finally {

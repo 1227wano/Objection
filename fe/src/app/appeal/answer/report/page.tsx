@@ -30,7 +30,7 @@ export default function RebuttalAnalysisPage() {
 
         {/* 하단 CTA */}
         <div className="flex items-center justify-end pt-8">
-          <Link href="/appeal/rebuttal/write">
+          <Link href="/appeal/supplement/case">
             <Button>다음 단계로 이동하기</Button>
           </Link>
         </div>

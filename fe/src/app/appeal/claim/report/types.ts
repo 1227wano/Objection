@@ -6,6 +6,7 @@ export type PossibilityType = 'h' | 'm' | 'l' | 'z';
 export type ClaimType = 'CANCEL' | 'INVALID' | 'ORDER';
 export type AppealPossibility = 'HIGH' | 'MEDIUM' | 'LOW';
 
+import type { LegalIssue } from '../_types/shared';
 // ── 기존 UI 전용 타입 ──────────────────────────────────
 
 export interface Reason {
@@ -36,7 +37,6 @@ export interface ReportData {
 }
 
 // ── API 응답 타입 (Mock 기반) ──────────────────────────
-
 
 export interface RepresentativePrecedent {
   precedentNo: string;
@@ -102,4 +102,3 @@ export const APPEAL_POSSIBILITY_MAP: Record<AppealPossibility, { text: string; c
   MEDIUM: { text: '승소 확률 보통', color: 'text-green-600' },
   LOW: { text: '승소 확률 낮음', color: 'text-orange-500' },
 };
-
