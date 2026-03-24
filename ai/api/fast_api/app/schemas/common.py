@@ -40,14 +40,45 @@ class CaseGovResponse(BaseSchema, Generic[ResultType]):
     warnings: list[str] = Field(default_factory=list)
 
 
-class ParsedFields(BaseSchema):
-    disposalDate: str | None = None
-    awareDate: str | None = None
-    agencyName: str | None = None
+# -----------------------------------------------
+# typeSpecific 스키마 (문서 종류별)
+# -----------------------------------------------
+
+class NoticeTypeSpecific(BaseModel):
+    model_config = ConfigDict(extra="ignore", populate_by_name=True)
     sanctionType: str | None = None
     sanctionDays: int | None = Field(default=None, gt=0)
+    legalBasis: list[str] = Field(default_factory=list)
+    dispositionContent: str | None = None
+
+
+class AnswerTypeSpecific(BaseModel):
+    model_config = ConfigDict(extra="ignore", populate_by_name=True)
+    respondent: str | None = None
+    answerSummary: str | None = None
+    defensePoints: list[str] = Field(default_factory=list)
+
+
+class DecisionTypeSpecific(BaseModel):
+    model_config = ConfigDict(extra="ignore", populate_by_name=True)
+    caseNumber: str | None = None
+    decisionResult: str | None = None
+    orderText: str | None = None
+    reasonSummary: str | None = None
+
+
+# -----------------------------------------------
+# ParsedFields — 명세서 기준
+# -----------------------------------------------
+
+class ParsedFields(BaseModel):
+    model_config = ConfigDict(extra="ignore", populate_by_name=True)
+    disposalDate: str | None = None
+    agencyName: str | None = None
+    claimant: str | None = None
     businessName: str | None = None
     businessAddress: str | None = None
+    typeSpecific: NoticeTypeSpecific | AnswerTypeSpecific | DecisionTypeSpecific | None = None
 
 
 class DocumentExtractResultBase(BaseSchema):
@@ -85,20 +116,13 @@ class LegalIssueDocumentExtractResult(BaseSchema):
 class DocumentExtractResult(BaseSchema):
     documentType: InputDocumentType
     isValidForStage: bool
-    invalidReason: str | None
-    caseTitle: str
-    title: str
-    rawText: str
-    summary: str
-    parsedFields: ParsedFields
-    searchHints: list[str]
-
-    @field_validator("searchHints")
-    @classmethod
-    def validateSearchHints(cls, value: list[str]) -> list[str]:
-        if not value:
-            raise ValueError("must not be empty")
-        return value
+    invalidReason: str | None = None
+    caseTitle: str | None = None
+    title: str | None = None
+    rawText: str | None = None
+    summary: str | None = None
+    parsedFields: ParsedFields = Field(default_factory=ParsedFields)
+    searchHints: list[str] = Field(default_factory=list)
 
 
 class CaseContext(BaseSchema):
