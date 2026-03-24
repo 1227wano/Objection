@@ -4,6 +4,7 @@ import { useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, FileText, FileUp, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import NoticeDocumentConfirmModal from './NoticeDocumentConfirmModal';
 
 const ACCEPTED_FILE_TYPES = '.pdf,.jpg,.jpeg,.png';
 
@@ -20,6 +21,7 @@ export default function UploadStartCard() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const isCompleted = !!selectedFile;
 
   const cardClassName = `flex h-[460px] flex-col rounded-[28px] px-10 ${
@@ -32,14 +34,14 @@ export default function UploadStartCard() {
         : 'border border-dashed border-first/25 bg-white'
   }`;
   const contentClassName = `flex h-full flex-1 flex-col items-center text-center ${
-    isCompleted ? 'justify-center pt-6 pb-2' : ''
+    isCompleted ? 'justify-center pt-4 pb-1' : ''
   }`;
   const iconWrapperClassName = `mx-auto flex h-16 w-16 shrink-0 items-center justify-center rounded-[20px] ${
     isCompleted ? 'bg-first/8 text-first' : 'bg-first text-white'
   }`;
-  const titleClassName = `${isCompleted ? 'mt-4' : 'mt-5'} min-h-[44px] text-[30px] font-extrabold tracking-[-0.04em] text-slate-900`;
-  const descriptionClassName = `${isCompleted ? 'mt-3' : 'mt-4'} min-h-[48px] max-w-[520px] break-keep text-[16px] leading-8 text-slate-500`;
-  const actionRowClassName = `${isCompleted ? 'mt-5' : 'mt-6'} flex min-h-[48px] items-center justify-center`;
+  const titleClassName = `${isCompleted ? 'mt-3' : 'mt-5'} min-h-[44px] text-[30px] font-extrabold tracking-[-0.04em] text-slate-900`;
+  const descriptionClassName = `${isCompleted ? 'mt-2' : 'mt-4'} min-h-[48px] max-w-[520px] break-keep text-[16px] leading-8 text-slate-500`;
+  const actionRowClassName = `${isCompleted ? 'mt-4' : 'mt-6'} flex min-h-[48px] items-center justify-center`;
 
   function handleSelectFile(file: File | null) {
     if (!file) {
@@ -68,21 +70,43 @@ export default function UploadStartCard() {
   }
 
   function handleStart() {
-    router.push('/appeal/analysis');
+    setIsConfirmModalOpen(true);
   }
 
   return (
     <div
-      role="button"
-      tabIndex={0}
-      onClick={() => inputRef.current?.click()}
+      role={isCompleted ? undefined : 'button'}
+      tabIndex={isCompleted ? undefined : 0}
+      onClick={() => {
+        if (!isCompleted) {
+          inputRef.current?.click();
+        }
+      }}
       onDragOver={(event) => {
+        if (isCompleted) {
+          return;
+        }
+
         event.preventDefault();
         setIsDragging(true);
       }}
-      onDragLeave={() => setIsDragging(false)}
-      onDrop={handleDrop}
+      onDragLeave={() => {
+        if (!isCompleted) {
+          setIsDragging(false);
+        }
+      }}
+      onDrop={(event) => {
+        if (isCompleted) {
+          return;
+        }
+
+        handleDrop(event);
+      }}
       onKeyDown={(event) => {
+        if (isCompleted) {
+          return;
+        }
+
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           inputRef.current?.click();
@@ -110,7 +134,7 @@ export default function UploadStartCard() {
         </p>
 
         {isCompleted ? (
-          <div className="mt-3 flex w-full justify-center">
+          <div className="mt-2 flex w-full justify-center">
             <div className="w-full max-w-[360px] rounded-[20px] border border-first/15 bg-white px-5 py-4 text-left shadow-[0_8px_18px_rgba(15,15,112,0.04)]">
               <div className="flex items-start gap-3">
                 <div className="mt-0.5 text-first">
@@ -183,6 +207,14 @@ export default function UploadStartCard() {
         className="hidden"
         onChange={handleInputChange}
       />
+
+      {isConfirmModalOpen && selectedFile ? (
+        <NoticeDocumentConfirmModal
+          fileName={selectedFile.name}
+          onClose={() => setIsConfirmModalOpen(false)}
+          onConfirm={() => router.push('/appeal/analysis')}
+        />
+      ) : null}
     </div>
   );
 }
