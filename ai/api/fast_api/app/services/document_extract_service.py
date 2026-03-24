@@ -31,7 +31,7 @@ OCR_MODEL = "gpt-4o-mini"
 # Step 2: 필드 매핑 — 텍스트에서 구조화된 JSON 추출 (Text, gpt-4.1-mini)
 MAPPING_MODEL = "gpt-4.1-mini"
 
-MAX_IMAGE_SIZE = (800, 800)
+MAX_IMAGE_SIZE = (2048, 2048)
 JPEG_QUALITY = 70
 
 # -----------------------------------------------
