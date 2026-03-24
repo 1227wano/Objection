@@ -1,6 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type Dispatch,
+  type FormEvent,
+  type SetStateAction,
+} from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -34,25 +41,38 @@ const ACTION_OPTIONS = ['영업 정지', '과징금 부과', '영업 허가 취�
 const DATE_HELP_TEXT = {
   recognizedDate: {
     meaning: '처분이 있음을 실제로 알게 된 날',
-    example: '우편(등기)을 직접 수령한 날,\n 처분 사실을 통지받은 날',
+    example: '우편(등기)을 직접 수령한 날, 처분 사실을 통지받은 날',
     deadline: '90일 이내',
   },
   actionDate: {
-    meaning: '행정기관이 처분을 결정하고\n 효력이 발생한 날',
-    example: '처분서에 적힌 처분일자,\n 공고가 효력을 발생한 날',
+    meaning: '행정기관이 처분을 결정하고 효력이 발생한 날',
+    example: '처분서에 적힌 처분일자, 공고가 효력을 발생한 날',
     deadline: '180일 이내',
   },
 } as const;
 
-export default function ClaimSurveyPage() {
+function sanitizeDateInput(value: string) {
+  if (!value) {
+    return '';
+  }
+
+  const [rawYear = '', rawMonth = '', rawDay = ''] = value.split('-');
+  const year = rawYear.replace(/\D/g, '').slice(0, 4);
+  const month = rawMonth.replace(/\D/g, '').slice(0, 2);
+  const day = rawDay.replace(/\D/g, '').slice(0, 2);
+
+  return [year, month, day].filter(Boolean).join('-');
+}
+
+export default function AppealSurveyPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const hasUploadedNotice = searchParams.get('source') === 'upload';
   const helpLayerRef = useRef<HTMLDivElement | null>(null);
 
-  const [claimantType, setClaimantType] = useState<(typeof CLAIMANT_OPTIONS)[number]['value'] | ''>(
-    '',
-  );
+  const [claimantType, setClaimantType] = useState<
+    (typeof CLAIMANT_OPTIONS)[number]['value'] | ''
+  >('');
   const [actionType, setActionType] = useState<(typeof ACTION_OPTIONS)[number] | ''>('');
   const [recognizedDate, setRecognizedDate] = useState('');
   const [actionDate, setActionDate] = useState('');
@@ -60,7 +80,7 @@ export default function ClaimSurveyPage() {
   const [openHelp, setOpenHelp] = useState<keyof typeof DATE_HELP_TEXT | null>(null);
 
   const selectedOptionClassName =
-    'border-first/35 bg-[linear-gradient(180deg,#eef2ff_0%,#dfe6ff_100%)] text-first shadow-[0_18px_45px_rgba(15,15,112,0.14)]';
+    'border-first/35 bg-[linear-gradient(180deg,#eef2ff_0%,#dfe6ff_100%)] text-first shadow-[0_8px_18px_rgba(15,15,112,0.07)]';
 
   useEffect(() => {
     if (!openHelp) {
@@ -87,25 +107,32 @@ export default function ClaimSurveyPage() {
       return;
     }
 
-    router.push('/appeal/claim/incident');
+    router.push('/appeal/documents');
   }
 
   function toggleHelp(key: keyof typeof DATE_HELP_TEXT) {
     setOpenHelp((current) => (current === key ? null : key));
   }
 
+  function handleDateChange(
+    setter: Dispatch<SetStateAction<string>>,
+    nextValue: string,
+  ) {
+    setter(sanitizeDateInput(nextValue));
+  }
+
   return (
     <div className="min-h-full bg-[linear-gradient(180deg,#eef2ff_0%,#ffffff_20%,#f3f6ff_100%)]">
       <div className="mx-auto w-full max-w-[1120px] px-5 py-8 md:px-8 md:py-10 xl:px-10">
         <section className="mx-auto w-full max-w-[980px]">
-          <div className="rounded-[32px] border border-first/12 bg-white p-6 shadow-[0_24px_80px_rgba(15,15,112,0.08)] backdrop-blur md:p-10 xl:p-12">
+          <div className="rounded-[32px] border border-first/12 bg-white p-6 shadow-[0_18px_56px_rgba(15,15,112,0.07)] backdrop-blur md:p-10 xl:p-12">
             <div className="flex flex-col gap-4 pb-8">
               <div className="space-y-3">
                 <h1 className="text-[30px] font-extrabold tracking-[-0.04em] text-slate-950 md:text-[38px]">
                   행정심판 진행에 필요한 기본 정보를 확인할게요
                 </h1>
-                <p className="break-keep text-[15px] leading-7 text-slate-600 md:text-base">
-                  청구인 자격과 처분 내용을 확인하면 청구서 작성이 훨씬 쉬워져요.
+                <p className="mt-3 max-w-3xl whitespace-pre-line break-keep text-[17px] leading-8 text-second">
+                  청구인 자격과 처분 내용을 확인하면 청구서 작성과 이후 절차가 훨씬 쉬워져요.
                 </p>
               </div>
 
@@ -147,7 +174,7 @@ export default function ClaimSurveyPage() {
                         className={`group rounded-[28px] border p-6 text-left transition-all duration-200 ${
                           isSelected
                             ? selectedOptionClassName
-                            : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-first/25 hover:shadow-[0_18px_45px_rgba(15,15,112,0.08)]'
+                            : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-first/25 hover:shadow-[0_12px_28px_rgba(15,15,112,0.07)]'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-4">
@@ -169,7 +196,7 @@ export default function ClaimSurveyPage() {
                           <p className="text-[24px] font-bold tracking-[-0.03em] text-slate-950">
                             {option.title}
                           </p>
-                          <p className="break-keep text-[15px] leading-7 text-slate-500">
+                          <p className="whitespace-pre-line break-keep text-[15px] leading-7 text-slate-500">
                             {option.description}
                           </p>
                         </div>
@@ -237,7 +264,7 @@ export default function ClaimSurveyPage() {
                         </button>
 
                         {openHelp === 'recognizedDate' ? (
-                          <div className="absolute left-0 top-8 z-20 w-[320px] rounded-2xl border border-first/12 bg-white p-4 shadow-[0_16px_40px_rgba(15,15,112,0.16)]">
+                          <div className="absolute left-0 top-8 z-20 w-[320px] rounded-2xl border border-first/12 bg-white p-4 shadow-[0_12px_28px_rgba(15,15,112,0.12)]">
                             <div className="space-y-3 text-sm">
                               <div className="grid grid-cols-[72px_1fr] gap-2 border-b border-slate-100 pb-3">
                                 <p className="font-semibold text-slate-500">의미</p>
@@ -265,7 +292,11 @@ export default function ClaimSurveyPage() {
                     <input
                       type="date"
                       value={recognizedDate}
-                      onChange={(event) => setRecognizedDate(event.target.value)}
+                      min="1900-01-01"
+                      max="9999-12-31"
+                      onChange={(event) =>
+                        handleDateChange(setRecognizedDate, event.target.value)
+                      }
                       className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-slate-900 outline-none transition focus:border-first/45 focus:bg-[#f7f8ff]"
                       required
                     />
@@ -287,7 +318,7 @@ export default function ClaimSurveyPage() {
                         </button>
 
                         {openHelp === 'actionDate' ? (
-                          <div className="absolute left-0 top-8 z-20 w-[320px] rounded-2xl border border-first/12 bg-white p-4 shadow-[0_16px_40px_rgba(15,15,112,0.16)]">
+                          <div className="absolute left-0 top-8 z-20 w-[320px] rounded-2xl border border-first/12 bg-white p-4 shadow-[0_12px_28px_rgba(15,15,112,0.12)]">
                             <div className="space-y-3 text-sm">
                               <div className="grid grid-cols-[72px_1fr] gap-2 border-b border-slate-100 pb-3">
                                 <p className="font-semibold text-slate-500">의미</p>
@@ -315,7 +346,9 @@ export default function ClaimSurveyPage() {
                     <input
                       type="date"
                       value={actionDate}
-                      onChange={(event) => setActionDate(event.target.value)}
+                      min="1900-01-01"
+                      max="9999-12-31"
+                      onChange={(event) => handleDateChange(setActionDate, event.target.value)}
                       className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-slate-900 outline-none transition focus:border-first/45 focus:bg-[#f7f8ff]"
                       required
                     />
@@ -355,7 +388,7 @@ export default function ClaimSurveyPage() {
 
                 <Button
                   type="submit"
-                  className="h-14 rounded-[20px] px-8 text-base font-semibold shadow-[0_18px_40px_rgba(15,15,112,0.18)]"
+                  className="h-14 rounded-[20px] px-8 text-base font-semibold shadow-[0_14px_32px_rgba(15,15,112,0.14)]"
                 >
                   다음으로 넘어가기
                 </Button>

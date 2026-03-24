@@ -21,25 +21,29 @@ interface StartStagePreview {
   title: string;
   description: string;
   requiredDocuments: string[];
+  footerText: string;
 }
 
 const START_STAGE_PREVIEWS: StartStagePreview[] = [
   {
-    title: '처음부터 시작하기',
-    description: '처분서를 받은 직후라면 첫 단계부터 차근차근 진행합니다.',
+    title: '처분서 단계',
+    description: '처음 단계부터 차근차근 진행할 수 있어요.',
     requiredDocuments: ['처분서'],
+    footerText: '설문부터 차근차근 진행할 수 있어요',
   },
   {
-    title: '답변서 등록부터 시작하기',
-    description: '이미 청구를 마쳤다면 답변서를 받은 단계부터 이어서 시작합니다.',
+    title: '답변서 단계',
+    description: '답변서를 받은 단계부터 이어서 \n시작할 수 있어요.',
     requiredDocuments: ['처분서', '행정심판 청구서', '답변서'],
+    footerText: '청구서와 답변서를 올리면 분석을 시작해요',
   },
   {
-    title: '재결서 등록부터 시작하기',
-    description: '재결서를 받은 경우 결과 확인 단계부터 바로 시작할 수 있습니다.',
+    title: '재결서 단계',
+    description: '재결서를 받은 경우 결과 확인 단계부터\n 바로 시작할 수 있어요.',
     requiredDocuments: ['재결서'],
+    footerText: '재결서를 올리면 결과 확인 단계로 이어집니다',
   },
-];
+] as const;
 
 function formatDate(date: Date) {
   const year = date.getFullYear();
@@ -54,7 +58,7 @@ const TODAY = formatDate(new Date());
 const MOCK_CASES: MockCase[] = [
   {
     id: 1,
-    title: '마포구 사무실 용도변경 허가 거부 취소',
+    title: '마포구 세무서 용도변경 허가 거부 취소',
     majorStage: '행정심판청구서 작성',
     detailStep: '사건 경위 작성',
     updatedAt: TODAY,
@@ -70,7 +74,7 @@ const MOCK_CASES: MockCase[] = [
     id: 3,
     title: '영업정지 처분 취소 청구',
     majorStage: '보충서면 작성',
-    detailStep: '문서작성',
+    detailStep: '문서 작성',
     updatedAt: TODAY,
   },
   {
@@ -80,7 +84,7 @@ const MOCK_CASES: MockCase[] = [
     detailStep: '재결서 분석',
     updatedAt: TODAY,
   },
-];
+] as const;
 
 const STAGE_ACCENT_STYLES: Record<StageName, { line: string; marker: string }> = {
   '처분서 분석': {
@@ -119,9 +123,9 @@ export default function DashboardHome() {
               <p className="text-[30px] font-extrabold tracking-[-0.03em] text-gray-900">
                 어느 단계에서든 시작할 수 있어요
               </p>
-              <p className="max-w-3xl text-[16px] leading-7 text-slate-500">
-                처음부터 진행하셔도 되고, 이미 받은 서류가 있다면 현재 단계에 맞춰 바로
-                이어서 시작하실 수 있습니다.
+              <p className="max-w-3xl whitespace-pre-line text-[16px] leading-7 text-slate-500">
+                처음부터 진행하셔도 되고, 이미 받은 서류가 있다면 현재 단계에 맞춰 바로 이어서
+                시작할 수도 있어요.
               </p>
             </div>
 
@@ -139,7 +143,7 @@ export default function DashboardHome() {
                           {item.title}
                         </p>
 
-                        <p className="mt-3 text-[14px] leading-6 text-slate-500">
+                        <p className="mt-3 whitespace-pre-line text-[14px] leading-6 text-slate-500">
                           {item.description}
                         </p>
 
@@ -169,8 +173,8 @@ export default function DashboardHome() {
                           ))}
                         </ul>
 
-                        <div className="mt-auto pt-4 text-[13px] font-semibold text-white/80">
-                          필요한 서류를 준비한 뒤 시작할 수 있어요
+                        <div className="mt-auto whitespace-pre-line pt-4 text-[13px] font-semibold text-white/80">
+                          {item.footerText}
                         </div>
                       </div>
                     </div>
@@ -194,7 +198,7 @@ export default function DashboardHome() {
           </p>
 
           <p className="mt-2 text-[15px] leading-7 text-white/80">
-            처음이셔도 괜찮아요. 안내에 따라 천천히 진행하시면 됩니다.
+            처음이라도 괜찮아요. 안내에 따라 차근차근 진행하시면 됩니다.
           </p>
 
           <div className="mt-6 rounded-full bg-white px-6 py-3 text-lg font-bold text-first shadow-[0_8px_20px_rgba(0,0,0,0.12)] transition-transform duration-200 group-hover:scale-105">
@@ -219,7 +223,9 @@ export default function DashboardHome() {
                 href={`/appeal/${item.id}`}
                 className="relative flex flex-col gap-6 rounded-2xl border border-[#eef2f9] bg-white p-8 pl-10 shadow-[0_10px_28px_rgba(15,15,112,0.08)] transition-all duration-200 hover:-translate-y-1 hover:border-blue-100 hover:shadow-[0_18px_36px_rgba(15,15,112,0.10)]"
               >
-                <div className={`absolute bottom-0 left-0 top-0 w-1 rounded-l-2xl ${accent.line}`} />
+                <div
+                  className={`absolute bottom-0 left-0 top-0 w-1 rounded-l-2xl ${accent.line}`}
+                />
 
                 <p className="line-clamp-2 text-[24px] font-bold leading-tight tracking-[-0.02em] text-gray-900">
                   {item.title}
@@ -236,7 +242,7 @@ export default function DashboardHome() {
                     <span
                       className={`mr-2 inline-block h-3 w-3 rounded-full align-middle ${accent.line}`}
                     />
-                    <span className="font-semibold">세부 단계:</span>{' '}
+                    <span className="font-semibold">현재 단계:</span>{' '}
                     {isValid ? item.detailStep || '-' : '정의되지 않은 단계'}
                   </p>
 
