@@ -1,6 +1,7 @@
 package com.objection.cases.service;
 
 import com.objection.cases.dto.request.CaseTitleUpdateRequest;
+import com.objection.cases.dto.request.SurveyRequest;
 import com.objection.cases.dto.response.*;
 import com.objection.cases.entity.Case;
 import com.objection.cases.enums.CaseStatus;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -83,6 +85,22 @@ public class CaseService {
                 found.getTitle(),
                 found.getUpdatedAt()
         );
+    }
+
+    @Transactional
+    public SurveySaveResponse saveSurvey(Integer caseNo, Integer userNo, SurveyRequest request) {
+        Case found = getCaseOrThrow(caseNo);
+        validateOwner(found, userNo);
+
+        found.updateSurvey(
+                request.getIsDirect(),
+                request.getSanctionType(),
+                request.getDisposalDate() != null ? LocalDate.parse(request.getDisposalDate()) : null,
+                request.getAwareDate() != null ? LocalDate.parse(request.getAwareDate()) : null,
+                request.getAgencyName()
+        );
+
+        return new SurveySaveResponse(found.getCaseNo(), found.getUpdatedAt());
     }
 
     private Case getCaseOrThrow(Integer caseNo) {

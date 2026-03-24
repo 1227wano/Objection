@@ -1,10 +1,8 @@
 package com.objection.cases.controller;
 
 import com.objection.cases.dto.request.CaseTitleUpdateRequest;
-import com.objection.cases.dto.response.CaseCreateResponse;
-import com.objection.cases.dto.response.CaseListResponse;
-import com.objection.cases.dto.response.CaseStatusResponse;
-import com.objection.cases.dto.response.CaseTitleUpdateResponse;
+import com.objection.cases.dto.request.SurveyRequest;
+import com.objection.cases.dto.response.*;
 import com.objection.cases.service.CaseService;
 import com.objection.common.response.ApiResponse;
 import com.objection.security.CustomUserDetails;
@@ -71,5 +69,20 @@ public class CaseController {
 
         return ResponseEntity
                 .ok(ApiResponse.success("제목이 수정되었습니다.", response));
+    }
+
+    // 설문조사 저장
+    @PostMapping("/{caseNo}/survey")
+    public ResponseEntity<ApiResponse<SurveySaveResponse>> saveSurvey(
+            @PathVariable Integer caseNo,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody SurveyRequest request) {
+
+        SurveySaveResponse response = caseService.saveSurvey(
+                caseNo, userDetails.getUserNo(), request);
+
+        return ResponseEntity
+                .ok(ApiResponse.success("설문조사가 저장되었습니다.", response));
+
     }
 }

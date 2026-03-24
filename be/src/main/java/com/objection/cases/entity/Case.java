@@ -66,6 +66,8 @@ public class Case {
     @Column(length = 100)
     private String businessAddress;
 
+    private Boolean isDirect;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -75,5 +77,15 @@ public class Case {
 
     public void updateTitle(String title) {
         this.title = title;
+    }
+
+    public void updateSurvey(Boolean isDirect, String sanctionType,
+                             LocalDate disposalDate, LocalDate awareDate,
+                             String agencyName) {
+        this.isDirect = isDirect;
+        this.sanctionType = sanctionType;
+        this.disposalDate = disposalDate;
+        this.awareDate = awareDate;
+        this.agencyName = agencyName;
     }
 }
