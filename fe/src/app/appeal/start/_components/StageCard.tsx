@@ -27,7 +27,7 @@ export default function StageCard({
       <div className="group h-full [perspective:1400px]">
         <div className="grid h-[380px] transition-transform duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
           <div className="col-start-1 row-start-1 [backface-visibility:hidden]">
-            <div className="flex h-full flex-col overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/92 p-8 shadow-[0_14px_32px_rgba(15,15,112,0.08)]">
+            <div className="flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white/92 p-8 shadow-[0_10px_28px_rgba(15,15,112,0.06)]">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-first text-white">
                 <Icon className="h-6 w-6" />
               </div>
@@ -52,7 +52,7 @@ export default function StageCard({
           </div>
 
           <div className="col-start-1 row-start-1 [backface-visibility:hidden] [transform:rotateY(180deg)]">
-            <div className="flex h-full flex-col overflow-hidden rounded-[28px] border border-[#16135f] bg-first p-8 text-white shadow-[0_14px_32px_rgba(15,15,112,0.14)]">
+            <div className="flex h-full flex-col overflow-hidden rounded-3xl border border-[#16135f] bg-first p-8 text-white shadow-[0_18px_40px_rgba(15,15,112,0.10)]">
               <h3 className="text-[24px] font-extrabold leading-tight tracking-[-0.04em] text-white">
                 {title}
               </h3>
@@ -91,10 +91,10 @@ export default function StageCard({
 
   return (
     <div
-      className={`flex h-[380px] flex-col rounded-[28px] border p-8 transition-all duration-200 ${
+      className={`flex h-[380px] flex-col rounded-3xl border p-8 transition-all duration-200 ${
         emphasized
           ? 'border-first/18 bg-white shadow-[0_18px_40px_rgba(15,15,112,0.10)]'
-          : 'border-slate-200/80 bg-white/92 shadow-[0_14px_32px_rgba(15,15,112,0.08)]'
+          : 'border-slate-200/80 bg-white/92 shadow-[0_10px_28px_rgba(15,15,112,0.06)]'
       }`}
     >
       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-first text-white">

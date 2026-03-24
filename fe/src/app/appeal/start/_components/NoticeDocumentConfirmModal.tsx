@@ -19,7 +19,7 @@ interface GuidePanelProps {
 
 function PreNoticePreview() {
   return (
-    <div className="relative h-[560px] overflow-hidden rounded-[24px] border border-rose-200 bg-white shadow-[0_24px_64px_rgba(15,23,42,0.08)]">
+    <div className="relative h-[560px] overflow-hidden rounded-3xl border border-rose-200 bg-white shadow-[0_18px_40px_rgba(15,15,112,0.10)]">
       <div className="flex h-[210px] flex-col border-b border-slate-200 px-8 py-7">
         <div className="flex items-start justify-between gap-4 text-[11px] text-slate-400">
           <div className="h-2 w-16 rounded-full bg-slate-200" />
@@ -76,7 +76,7 @@ function PreNoticePreview() {
 
 function DispositionPreview() {
   return (
-    <div className="relative h-[560px] overflow-hidden rounded-[24px] border border-emerald-200 bg-white shadow-[0_24px_64px_rgba(15,23,42,0.08)]">
+    <div className="relative h-[560px] overflow-hidden rounded-3xl border border-emerald-200 bg-white shadow-[0_18px_40px_rgba(15,15,112,0.10)]">
       <div className="flex h-[210px] flex-col border-b border-slate-200 px-8 py-7">
         <div className="flex items-start justify-between gap-4 text-[11px] text-slate-400">
           <div className="h-2 w-16 rounded-full bg-slate-200" />
@@ -131,7 +131,7 @@ function GuidePanel({ title, description, tone }: GuidePanelProps) {
   return (
     <div
       className={cn(
-        'flex h-full flex-col rounded-[30px] border p-6 md:p-7',
+        'flex h-full flex-col rounded-3xl border p-6 md:p-7',
         isWarning
           ? 'border-rose-200 bg-[linear-gradient(180deg,#fffafb_0%,#fff5f6_100%)]'
           : 'border-emerald-200 bg-[linear-gradient(180deg,#f8fffc_0%,#f2fbf7_100%)]',
@@ -166,7 +166,7 @@ export default function NoticeDocumentConfirmModal({
 
   return (
     <ModalFrame onClose={onClose} maxWidth="max-w-7xl">
-      <div className="overflow-hidden rounded-[30px] bg-[linear-gradient(180deg,#ffffff_0%,#f9fbff_100%)]">
+      <div className="overflow-hidden rounded-3xl bg-[linear-gradient(180deg,#ffffff_0%,#f9fbff_100%)]">
         <div className="border-b border-slate-100 px-8 py-7 md:px-12 md:py-7">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="mt-5 text-[32px] font-extrabold tracking-[-0.02em] text-slate-900 md:text-[38px]">
@@ -179,7 +179,7 @@ export default function NoticeDocumentConfirmModal({
 
             <div
               className={cn(
-                'mt-4 rounded-[22px] border px-5 py-4 text-left',
+                'mt-4 rounded-2xl border px-5 py-4 text-left',
                 includesPreNotice
                   ? 'border-amber-200 bg-amber-50 text-amber-900'
                   : 'border-slate-200 bg-slate-50 text-slate-700',

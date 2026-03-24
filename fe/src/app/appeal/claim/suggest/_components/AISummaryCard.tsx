@@ -1,4 +1,5 @@
 import { AnalysisData, APPEAL_TYPE_MAP, APPEAL_POSSIBILITY_MAP } from '../../report/types';
+import { SidebarCard } from '@/components/ui/SidebarCard';
 
 interface AISummaryCardProps {
   data: AnalysisData;
@@ -9,8 +10,7 @@ export default function AISummaryCard({ data }: AISummaryCardProps) {
   const possInfo = APPEAL_POSSIBILITY_MAP[data.appealPossibility];
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex flex-col gap-5">
-      <h3 className="text-base font-bold text-gray-900">AI 분석 요약</h3>
+    <SidebarCard title="AI 분석 요약">
 
       {/* 최적 전략 */}
       <div className="flex flex-col gap-1.5">
@@ -40,6 +40,6 @@ export default function AISummaryCard({ data }: AISummaryCardProps) {
           ))}
         </ul>
       </div>
-    </div>
+    </SidebarCard>
   );
 }

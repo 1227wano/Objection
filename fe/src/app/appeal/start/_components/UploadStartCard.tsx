@@ -22,14 +22,10 @@ interface SelectedFileSummaryProps {
   onClear: (event: MouseEvent<HTMLButtonElement>) => void;
 }
 
-function SelectedFileSummary({
-  fileName,
-  fileSizeLabel,
-  onClear,
-}: SelectedFileSummaryProps) {
+function SelectedFileSummary({ fileName, fileSizeLabel, onClear }: SelectedFileSummaryProps) {
   return (
     <div className="mt-2 flex w-full justify-center">
-      <div className="w-full max-w-[360px] rounded-[20px] border border-first/15 bg-white px-5 py-4 text-left shadow-[0_8px_18px_rgba(15,15,112,0.04)]">
+      <div className="w-full max-w-[360px] rounded-2xl border border-first/15 bg-white px-5 py-4 text-left shadow-sm">
         <div className="flex items-start gap-3">
           <div className="mt-0.5 text-first">
             <FileText className="h-5 w-5" />
@@ -60,7 +56,7 @@ export default function UploadStartCard() {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const isCompleted = !!selectedFile;
 
-  const cardClassName = `flex h-[460px] flex-col rounded-[28px] px-10 ${
+  const cardClassName = `flex h-[460px] flex-col rounded-3xl px-10 ${
     isCompleted ? 'py-12' : 'py-16'
   } text-center shadow-[0_10px_28px_rgba(15,15,112,0.06)] transition-colors ${
     isDragging
@@ -69,6 +65,15 @@ export default function UploadStartCard() {
         ? 'border border-first/12 bg-white'
         : 'border border-dashed border-first/25 bg-white'
   }`;
+  const contentClassName = `flex h-full flex-1 flex-col items-center text-center ${
+    isCompleted ? 'justify-center pt-4 pb-1' : ''
+  }`;
+  const iconWrapperClassName = `mx-auto flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl ${
+    isCompleted ? 'bg-first/8 text-first' : 'bg-first text-white'
+  }`;
+  const titleClassName = `${isCompleted ? 'mt-3' : 'mt-5'} min-h-[44px] text-[30px] font-extrabold tracking-[-0.04em] text-slate-900`;
+  const descriptionClassName = `${isCompleted ? 'mt-2' : 'mt-4'} min-h-[48px] max-w-[520px] break-keep text-[16px] leading-8 text-slate-500`;
+  const actionRowClassName = `${isCompleted ? 'mt-4' : 'mt-6'} flex min-h-[48px] items-center justify-center`;
 
   function handleSelectFile(file: File | null) {
     if (!file) {
@@ -137,7 +142,9 @@ export default function UploadStartCard() {
       }}
       className={cardClassName}
     >
-      <div className={`flex h-full flex-1 flex-col items-center text-center ${isCompleted ? 'justify-center pt-4 pb-1' : ''}`}>
+      <div
+        className={`flex h-full flex-1 flex-col items-center text-center ${isCompleted ? 'justify-center pt-4 pb-1' : ''}`}
+      >
         <div
           className={`mx-auto flex h-16 w-16 shrink-0 items-center justify-center rounded-[20px] ${
             isCompleted ? 'bg-first/8 text-first' : 'bg-first text-white'
@@ -146,11 +153,15 @@ export default function UploadStartCard() {
           {isCompleted ? <CheckCircle2 className="h-8 w-8" /> : <FileUp className="h-8 w-8" />}
         </div>
 
-        <h2 className={`${isCompleted ? 'mt-3' : 'mt-5'} min-h-[44px] text-[30px] font-extrabold tracking-[-0.04em] text-slate-900`}>
+        <h2
+          className={`${isCompleted ? 'mt-3' : 'mt-5'} min-h-[44px] text-[30px] font-extrabold tracking-[-0.04em] text-slate-900`}
+        >
           {isCompleted ? '업로드 완료' : '처분서 업로드'}
         </h2>
 
-        <p className={`${isCompleted ? 'mt-2' : 'mt-4'} min-h-[48px] max-w-[520px] break-keep text-[16px] leading-8 text-slate-500`}>
+        <p
+          className={`${isCompleted ? 'mt-2' : 'mt-4'} min-h-[48px] max-w-[520px] break-keep text-[16px] leading-8 text-slate-500`}
+        >
           {isCompleted
             ? '업로드한 파일을 확인하고 바로 다음 단계로 진행할 수 있어요.'
             : '파일을 드래그하거나 버튼을 눌러 처분서를 업로드해 주세요.'}
@@ -171,7 +182,9 @@ export default function UploadStartCard() {
           </p>
         )}
 
-        <div className={`${isCompleted ? 'mt-4' : 'mt-6'} flex min-h-[48px] items-center justify-center`}>
+        <div
+          className={`${isCompleted ? 'mt-4' : 'mt-6'} flex min-h-[48px] items-center justify-center`}
+        >
           {!isCompleted ? (
             <Button
               type="button"

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { SidebarCard } from '@/components/ui/SidebarCard';
 import ChecklistCard from '../../../claim/write/_components/ChecklistCard';
 import IssuePointCard from '../../../claim/write/_components/IssuePointCard';
 import RightSidebarFrame from '@/components/layout/RightSidebarFrame';
@@ -39,23 +40,20 @@ export default function RightSidebar() {
       <ChecklistCard title="보충서면 제출 전 필수 확인" items={SUPPLEMENT_CHECKLIST} />
 
       {/* AI 주요 검토 쟁점 */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5">
-        <h3 className="font-bold text-sm text-gray-900 mb-4">AI 주요 검토 쟁점</h3>
+      <SidebarCard title="AI 주요 검토 쟁점">
         <div className="flex flex-col gap-3">
           {MOCK_SUPPLEMENT_ISSUES.map((issue, idx) => (
             <IssuePointCard key={idx} issue={issue} />
           ))}
         </div>
-      </div>
+      </SidebarCard>
 
       {/* 보충 경위서 보기 */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5">
-        <Link href="/appeal/supplement/case">
-          <Button variant="outline" className="w-full text-sm">
-            내가 작성한 보충 경위서 보기
-          </Button>
-        </Link>
-      </div>
+      <SidebarCard>
+        <Button asChild variant="outline" className="w-full text-sm">
+          <Link href="/appeal/supplement/case">내가 작성한 보충 경위서 보기</Link>
+        </Button>
+      </SidebarCard>
     </RightSidebarFrame>
   );
 }

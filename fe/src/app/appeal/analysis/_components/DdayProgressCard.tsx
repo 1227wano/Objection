@@ -50,35 +50,35 @@ export default function DdayProgressCard({ deadline }: DdayProgressCardProps) {
     switch (mode) {
       case 'danger':
         return {
-          border: 'border-[#fecaca]',
-          bg: 'bg-[#fef2f2]',
-          iconBg: 'bg-[#fee2e2]',
-          iconText: 'text-[#dc2626]',
-          titleText: 'text-[#991b1b]',
-          subtitleText: 'text-[#b91c1c]',
+          border: 'border-red-200',
+          bg: 'bg-red-50',
+          iconBg: 'bg-red-100',
+          iconText: 'text-red-600',
+          titleText: 'text-red-800',
+          subtitleText: 'text-red-700',
           titleStr: '경고 : 청구 기한이 임박했습니다!',
           subtitleStr: '서둘러 행정 심판 청구를 준비해주세요.',
         };
       case 'warning':
         return {
           border: 'border-point',
-          bg: 'bg-[#fffdf2]',
-          iconBg: 'bg-[#fff5cc]',
-          iconText: 'text-[#d97706]',
-          titleText: 'text-[#b45309]',
-          subtitleText: 'text-[#d97706]',
+          bg: 'bg-amber-50',
+          iconBg: 'bg-amber-100',
+          iconText: 'text-amber-600',
+          titleText: 'text-amber-700',
+          subtitleText: 'text-amber-600',
           titleStr: '주의 : 청구 기한이 다가오고 있습니다.',
           subtitleStr: '필요한 서류와 절차를 미리 점검해 주세요.',
         };
       case 'good':
       default:
         return {
-          border: 'border-[#bbf7d0]',
-          bg: 'bg-[#f0fdf4]',
-          iconBg: 'bg-[#dcfce7]',
-          iconText: 'text-[#16a34a]',
-          titleText: 'text-[#166534]',
-          subtitleText: 'text-[#15803d]',
+          border: 'border-green-200',
+          bg: 'bg-green-50',
+          iconBg: 'bg-green-100',
+          iconText: 'text-green-600',
+          titleText: 'text-green-800',
+          subtitleText: 'text-green-700',
           titleStr: '양호 : 청구 기한까지 여유가 있습니다.',
           subtitleStr: '남은 기간 동안 꼼꼼하게 심판 청구를 준비할 수 있습니다.',
         };
@@ -89,7 +89,7 @@ export default function DdayProgressCard({ deadline }: DdayProgressCardProps) {
 
   return (
     <div className="mb-12">
-      <h2 className="text-lg font-extrabold text-[#111827] mb-4 flex items-center">
+      <h2 className="text-lg font-extrabold text-gray-900 mb-4 flex items-center">
         <span className="text-first font-extrabold mr-3 text-[24px]">03</span>
         행정 심판 청구까지 남은 날짜
       </h2>
@@ -124,7 +124,7 @@ export default function DdayProgressCard({ deadline }: DdayProgressCardProps) {
                 남은 기간
               </div>
               <div
-                className={`text-[56px] font-extrabold tracking-tighter leading-none ${statusMode === 'danger' ? 'text-[#ef4444]' : statusMode === 'warning' ? 'text-[#f59e0b]' : 'text-[#22c55e]'}`}
+                className={`text-[56px] font-extrabold tracking-tighter leading-none ${statusMode === 'danger' ? 'text-red-500' : statusMode === 'warning' ? 'text-amber-500' : 'text-green-500'}`}
               >
                 {timeRemainingText}
               </div>
@@ -133,9 +133,9 @@ export default function DdayProgressCard({ deadline }: DdayProgressCardProps) {
               <div className="text-[12.5px] text-gray-400 font-bold mb-1.5 tracking-wider">
                 처분일로부터
               </div>
-              <div className="text-[40px] font-extrabold text-[#111827] tracking-tighter leading-none">
+              <div className="text-[40px] font-extrabold text-gray-900 tracking-tighter leading-none">
                 {timeElapsed}
-                <span className="text-[20px] text-[#111827] font-extrabold ml-1">일</span>
+                <span className="text-[20px] text-gray-900 font-extrabold ml-1">일</span>
               </div>
             </div>
           </div>
@@ -155,7 +155,7 @@ export default function DdayProgressCard({ deadline }: DdayProgressCardProps) {
             >
               {/* Point Indicator */}
               <div
-                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-[18px] h-[18px] rounded-full bg-white border-[4px] ${statusMode === 'danger' ? 'border-[#ef4444]' : statusMode === 'warning' ? 'border-point' : 'border-[#22c55e]'} shadow-sm`}
+                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-[18px] h-[18px] rounded-full bg-white border-[4px] ${statusMode === 'danger' ? 'border-red-500' : statusMode === 'warning' ? 'border-point' : 'border-green-500'} shadow-sm`}
               ></div>
             </div>
           </div>
@@ -165,10 +165,10 @@ export default function DdayProgressCard({ deadline }: DdayProgressCardProps) {
             <span
               className={
                 statusMode === 'danger'
-                  ? 'text-[#ef4444]'
+                  ? 'text-red-500'
                   : statusMode === 'warning'
-                    ? 'text-[#f59e0b]'
-                    : 'text-[#22c55e]'
+                    ? 'text-amber-500'
+                    : 'text-green-500'
               }
             >
               청구 기한

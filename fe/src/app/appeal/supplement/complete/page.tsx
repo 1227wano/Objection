@@ -24,9 +24,9 @@ export default function SupplementCompletePage() {
 
   return (
     <FormProvider {...methods}>
-      <div className="flex w-full min-h-screen bg-mainbgcolor animate-in fade-in duration-500">
-        <div className="flex-1 flex justify-center py-10">
-          <div className="w-full max-w-7xl px-8 flex flex-col">
+      <div className="flex w-full min-h-screen animate-in fade-in duration-500">
+        <div className="flex-1 flex justify-center py-12 md:py-16">
+          <div className="w-full max-w-6xl px-8 flex flex-col">
             <StepProgress steps={SUPPLEMENT_STEPS} completedSteps={4} />
 
             <CompletionHeader
@@ -53,7 +53,8 @@ export default function SupplementCompletePage() {
                     서면 제출 및 첨부파일용 (다운로드)
                   </h2>
                   <p className="text-base text-gray-500">
-                    온라인 제출 시 첨부파일로 활용하거나, 인쇄하여 등기 우편으로 제출하실 수 있습니다.
+                    온라인 제출 시 첨부파일로 활용하거나, 인쇄하여 등기 우편으로 제출하실 수
+                    있습니다.
                   </p>
                 </div>
                 <FileDownloadTab />
@@ -61,8 +62,8 @@ export default function SupplementCompletePage() {
             </div>
 
             <div className="flex justify-end pb-10">
-              <Button variant="outline" onClick={() => router.push('/appeal')}>
-                다음 절차로 이동
+              <Button variant="outline" onClick={() => router.push('/appeal/ruling/upload')}>
+                다음 절차로
               </Button>
             </div>
           </div>

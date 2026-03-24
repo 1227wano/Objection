@@ -39,7 +39,7 @@ export default function DetailAccordion({ reasons, evidences }: DetailAccordionP
                 {reasons.map((reason, idx) => (
                   <div
                     key={idx}
-                    className="bg-white border border-gray-100 p-5 rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.02)] flex flex-col gap-3.5"
+                    className="bg-white border border-gray-100 p-5 rounded-xl shadow-sm flex flex-col gap-3.5"
                   >
                     <h4 className="font-bold text-blue-700 text-[15px]">{reason.title}</h4>
 
@@ -76,7 +76,7 @@ export default function DetailAccordion({ reasons, evidences }: DetailAccordionP
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
                 관련 증거
               </h3>
-              <div className="bg-white border border-gray-100 p-5 rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+              <div className="bg-white border border-gray-100 p-5 rounded-xl shadow-sm">
                 <ul className="list-none space-y-3">
                   {evidences.map((evidence, idx) => (
                     <li key={idx} className="flex gap-3 text-[15px] text-gray-700 relative">
