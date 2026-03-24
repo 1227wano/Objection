@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FileText, X } from 'lucide-react';
 import UploadForm from '@/components/form/UploadForm';
 import SectionHeader from '../../_components/SectionHeader';
 import { Button } from '@/components/ui/button';
@@ -54,28 +53,14 @@ export default function AnswerAttachPage() {
 
       <div className="w-full space-y-4 mt-8">
         <div className="min-h-64">
-          <UploadForm acceptedTypes=".pdf, .jpg, .png" onFileSelect={handleFileSelect} />
+          <UploadForm
+            acceptedTypes=".pdf, .jpg, .png"
+            onFileSelect={handleFileSelect}
+            onFileRemove={handleRemoveFile}
+            selectedFile={uploadedFile}
+          />
         </div>
-
-        {uploadedFile && (
-          <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-            <FileText className="size-5 shrink-0 text-blue-500" />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-gray-800">{uploadedFile.name}</p>
-              <p className="text-xs text-gray-500">{fileSizeMB} MB</p>
-            </div>
-            <button
-              type="button"
-              onClick={handleRemoveFile}
-              className="shrink-0 rounded-full p-1 text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-colors"
-              aria-label="파일 삭제"
-            >
-              <X className="size-4" />
-            </button>
-          </div>
-        )}
-
-        <div className="flex justify-end">
+        <div className="flex justify-end mt-10">
           <Button onClick={handleSubmit} disabled={!uploadedFile || isSubmitting}>
             {isSubmitting ? '업로드 중...' : '업로드 및 다음으로'}
           </Button>
