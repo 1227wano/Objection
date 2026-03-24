@@ -20,10 +20,10 @@ export default function WritePage() {
     <FormProvider {...methods}>
       <form
         onSubmit={methods.handleSubmit(onSubmit)}
-        className="flex w-full min-h-screen bg-mainbgcolor animate-in fade-in duration-500"
+        className="flex w-full min-h-screen animate-in fade-in duration-500"
       >
         {/* 중앙 편집기 영역 */}
-        <div className="flex-1 flex justify-center py-10">
+        <div className="flex-1 flex justify-center py-12 md:py-16">
           <div className="w-full max-w-4xl px-8 flex flex-col">
             <SectionHeader
               title="행정심판 청구서 초안이 완성되었습니다."

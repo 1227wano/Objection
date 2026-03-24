@@ -17,8 +17,8 @@ export default function ClaimCompletePage() {
 
   return (
     <FormProvider {...methods}>
-      <div className="flex w-full min-h-screen bg-mainbgcolor animate-in fade-in duration-500">
-        <div className="flex-1 flex justify-center py-10">
+      <div className="flex w-full min-h-screen animate-in fade-in duration-500">
+        <div className="flex-1 flex justify-center py-12 md:py-16">
           <div className="w-full max-w-6xl px-8 flex flex-col">
             {/* 스텝 진행 인디케이터 */}
             <StepProgress />
