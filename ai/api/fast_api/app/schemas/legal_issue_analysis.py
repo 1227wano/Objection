@@ -1,38 +1,34 @@
-from pydantic import Field, model_validator
+from pydantic import Field
 
 from app.schemas.common import (
+    AnswerParsedFields,
     BaseSchema,
     CaseContext,
     CaseGovResponse,
-    LegalIssueDocumentExtractResult,
+    DecisionParsedFields,
     LawRetrieval,
     LegalIssueAnalysisResult,
+    NoticeParsedFields,
 )
-from app.schemas.enums import InputDocumentType, Stage
+from app.schemas.enums import InputDocumentType
 
-STAGE_DOCUMENT_TYPE_MAP = {
-    Stage.APPEAL: InputDocumentType.NOTICE,
-    Stage.ANSWER_RESPONSE: InputDocumentType.ANSWER,
-    Stage.DECISION_REVIEW: InputDocumentType.DECISION,
-}
+
+class A1CaseInfo(BaseSchema):
+    disposalDate: str | None = None
+    agencyName: str | None = None
+    sanctionType: str | None = None
+    sanctionValue: int | None = Field(default=None, gt=0)
+    parsedFields: NoticeParsedFields | AnswerParsedFields | DecisionParsedFields
+    rawText: str | None = None
 
 
 class LegalIssueAnalysisRequest(BaseSchema):
     caseNo: int = Field(gt=0)
     govDocNo: int = Field(gt=0)
-    stage: Stage
-    documentExtractResult: LegalIssueDocumentExtractResult
+    sourceDocumentType: InputDocumentType
+    caseInfo: A1CaseInfo
     caseContext: CaseContext
-    lawRetrievals: list[LawRetrieval]
-
-    @model_validator(mode="after")
-    def validateStageDocumentType(self) -> "LegalIssueAnalysisRequest":
-        expectedDocumentType = STAGE_DOCUMENT_TYPE_MAP[self.stage]
-        if self.documentExtractResult.documentType != expectedDocumentType:
-            raise ValueError("documentType is not valid for stage")
-        if not self.lawRetrievals:
-            raise ValueError("lawRetrievals must not be empty")
-        return self
+    lawRetrievals: list[LawRetrieval] = Field(min_length=1)
 
 
 class LegalIssueAnalysisResponse(CaseGovResponse[LegalIssueAnalysisResult]):

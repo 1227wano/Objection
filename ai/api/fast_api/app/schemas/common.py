@@ -140,6 +140,7 @@ class LegalIssue(BaseSchema):
 
 
 class LegalIssueAnalysisResult(BaseSchema):
+    sourceDocumentType: InputDocumentType
     legalIssueSummary: str
     legalWeaknessFound: bool
     legalIssues: list[LegalIssue]
