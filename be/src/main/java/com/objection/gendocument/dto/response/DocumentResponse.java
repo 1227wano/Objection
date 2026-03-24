@@ -17,4 +17,6 @@ public class DocumentResponse {
     private String documentType;
     private Object contentJson;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
 }
