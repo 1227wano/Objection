@@ -24,6 +24,7 @@ export default function RebuttalAnalysisPage() {
         {/* 섹션 2: 보충서면 대응 전략 (콜아웃 카드 - AI 분석) */}
         <div className="flex flex-col gap-6">
           <AiJudgment label="보충서면 대응 전략" summation={rd.strategySummary} />
+          <div className="my-1" />
           <MainPointCard points={rd.mainPoints} />
         </div>
 

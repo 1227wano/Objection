@@ -6,7 +6,7 @@ export default function RespondentSummary({ summary }: RespondentSummaryProps) {
   return (
     <div className="flex flex-col gap-3">
       <h2 className="text-xl font-bold text-gray-900">답변서 요약</h2>
-      <div className="bg-gray-50 border-l-4 border-gray-300 px-5 py-4 rounded-r-xl text-gray-700 text-base leading-relaxed whitespace-pre-wrap shadow-sm">
+      <div className="mt-2 bg-gray-50 border-l-4 border-gray-300 px-5 py-4 rounded-r-xl text-gray-700 text-lg leading-relaxed whitespace-pre-wrap shadow-sm">
         {summary}
       </div>
     </div>
