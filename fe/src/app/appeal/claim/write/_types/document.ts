@@ -1,4 +1,4 @@
-export type { RiskLevel, IssueType, LegalIssue } from '../../_types/shared';
+import type { IssueType } from '../../_types/shared';
 
 export type HighlightType = 'keyword' | 'block' | 'none';
 
