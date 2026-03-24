@@ -1,5 +1,6 @@
 import RightSidebarFrame from '@/components/layout/RightSidebarFrame';
 import { MOCK_REBUTTAL_DATA } from '../../../answer/report/_mock/mockdata';
+import { SidebarCard } from '@/components/ui/SidebarCard';
 
 const rd = MOCK_REBUTTAL_DATA.data;
 
@@ -7,8 +8,7 @@ export default function RightSidebar() {
   return (
     <RightSidebarFrame>
       {/* AI 분석 요약 — 일반 카드 스타일 (콜아웃 아님) */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex flex-col gap-5">
-        <h3 className="text-base font-bold text-gray-900">AI 분석 요약</h3>
+      <SidebarCard title="AI 분석 요약">
 
         {/* 전략 요약 */}
         <div className="flex flex-col gap-1.5">
@@ -31,7 +31,7 @@ export default function RightSidebar() {
             ))}
           </ul>
         </div>
-      </div>
+      </SidebarCard>
     </RightSidebarFrame>
   );
 }

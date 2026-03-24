@@ -60,7 +60,7 @@ export default function ClaimSurveyPage() {
   const [openHelp, setOpenHelp] = useState<keyof typeof DATE_HELP_TEXT | null>(null);
 
   const selectedOptionClassName =
-    'border-first/35 bg-[linear-gradient(180deg,#eef2ff_0%,#dfe6ff_100%)] text-first shadow-[0_18px_45px_rgba(15,15,112,0.14)]';
+    'border-first/35 bg-[linear-gradient(180deg,#eef2ff_0%,#dfe6ff_100%)] text-first shadow-[0_18px_40px_rgba(15,15,112,0.10)]';
 
   useEffect(() => {
     if (!openHelp) {
@@ -98,7 +98,7 @@ export default function ClaimSurveyPage() {
     <div className="min-h-full bg-[linear-gradient(180deg,#eef2ff_0%,#ffffff_20%,#f3f6ff_100%)]">
       <div className="mx-auto w-full max-w-[1120px] px-5 py-8 md:px-8 md:py-10 xl:px-10">
         <section className="mx-auto w-full max-w-[980px]">
-          <div className="rounded-[32px] border border-first/12 bg-white p-6 shadow-[0_24px_80px_rgba(15,15,112,0.08)] backdrop-blur md:p-10 xl:p-12">
+          <div className="rounded-3xl border border-first/12 bg-white p-6 shadow-[0_18px_40px_rgba(15,15,112,0.10)] backdrop-blur md:p-10 xl:p-12">
             <div className="flex flex-col gap-4 pb-8">
               <div className="space-y-3">
                 <h1 className="text-[30px] font-extrabold tracking-[-0.04em] text-slate-950 md:text-[38px]">
@@ -110,7 +110,7 @@ export default function ClaimSurveyPage() {
               </div>
 
               {hasUploadedNotice ? (
-                <div className="rounded-[24px] border border-first/15 bg-[linear-gradient(135deg,#f2f5ff_0%,#e6ebff_100%)] p-5">
+                <div className="rounded-3xl border border-first/15 bg-[linear-gradient(135deg,#f2f5ff_0%,#e6ebff_100%)] p-5">
                   <div className="flex items-start gap-3">
                     <div className="mt-0.5 rounded-2xl bg-first/10 p-2 text-first">
                       <Bot className="h-5 w-5" />
@@ -144,14 +144,14 @@ export default function ClaimSurveyPage() {
                         key={option.value}
                         type="button"
                         onClick={() => setClaimantType(option.value)}
-                        className={`group rounded-[28px] border p-6 text-left transition-all duration-200 ${
+                        className={`group rounded-3xl border p-6 text-left transition-all duration-200 ${
                           isSelected
                             ? selectedOptionClassName
-                            : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-first/25 hover:shadow-[0_18px_45px_rgba(15,15,112,0.08)]'
+                            : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-first/25 hover:shadow-[0_18px_40px_rgba(15,15,112,0.10)]'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-4">
-                          <div className="rounded-[18px] bg-slate-100 p-3 text-slate-500 transition-colors group-hover:bg-first/8 group-hover:text-first">
+                          <div className="rounded-2xl bg-slate-100 p-3 text-slate-500 transition-colors group-hover:bg-first/8 group-hover:text-first">
                             <Icon className="h-6 w-6" />
                           </div>
                           <div
@@ -237,7 +237,7 @@ export default function ClaimSurveyPage() {
                         </button>
 
                         {openHelp === 'recognizedDate' ? (
-                          <div className="absolute left-0 top-8 z-20 w-[320px] rounded-2xl border border-first/12 bg-white p-4 shadow-[0_16px_40px_rgba(15,15,112,0.16)]">
+                          <div className="absolute left-0 top-8 z-20 w-[320px] rounded-2xl border border-first/12 bg-white p-4 shadow-[0_18px_40px_rgba(15,15,112,0.10)]">
                             <div className="space-y-3 text-sm">
                               <div className="grid grid-cols-[72px_1fr] gap-2 border-b border-slate-100 pb-3">
                                 <p className="font-semibold text-slate-500">의미</p>
@@ -287,7 +287,7 @@ export default function ClaimSurveyPage() {
                         </button>
 
                         {openHelp === 'actionDate' ? (
-                          <div className="absolute left-0 top-8 z-20 w-[320px] rounded-2xl border border-first/12 bg-white p-4 shadow-[0_16px_40px_rgba(15,15,112,0.16)]">
+                          <div className="absolute left-0 top-8 z-20 w-[320px] rounded-2xl border border-first/12 bg-white p-4 shadow-[0_18px_40px_rgba(15,15,112,0.10)]">
                             <div className="space-y-3 text-sm">
                               <div className="grid grid-cols-[72px_1fr] gap-2 border-b border-slate-100 pb-3">
                                 <p className="font-semibold text-slate-500">의미</p>
@@ -355,9 +355,9 @@ export default function ClaimSurveyPage() {
 
                 <Button
                   type="submit"
-                  className="h-14 rounded-[20px] px-8 text-base font-semibold shadow-[0_18px_40px_rgba(15,15,112,0.18)]"
+                  className="h-14 rounded-2xl px-8 text-base font-semibold shadow-[0_18px_40px_rgba(15,15,112,0.10)]"
                 >
-                  다음으로 넘어가기
+                  다음 단계로
                 </Button>
               </div>
             </form>
