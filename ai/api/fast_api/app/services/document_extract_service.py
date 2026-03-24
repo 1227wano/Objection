@@ -8,10 +8,9 @@ from pathlib import Path
 from app.core.exceptions import ServiceException
 from app.schemas.common import (
     DocumentExtractResult,
-    ParsedFields,
-    NoticeTypeSpecific,
-    AnswerTypeSpecific,
-    DecisionTypeSpecific,
+    NoticeParsedFields,
+    AnswerParsedFields,
+    DecisionParsedFields,
 )
 from app.schemas.document_extract import DocumentExtractRequest, DocumentExtractResponse
 from app.schemas.enums import InputDocumentType, Stage, Status
@@ -138,25 +137,38 @@ def _callVisionLLM(
 
 def _buildPrompt(documentType: InputDocumentType) -> str:
     if documentType == InputDocumentType.NOTICE:
-        typeSpecificPrompt = """    "typeSpecific": {
-      "sanctionType": "영업정지 / 허가취소 / 과징금 등 또는 null",
-      "sanctionDays": 처분 일수 숫자 또는 null,
-      "legalBasis": ["근거 법조항 배열 (예: 식품위생법 제44조)"],
-      "dispositionContent": "처분 내용 요약 또는 null"
-    }"""
+        parsedFieldsPrompt = """\
+  "parsedFields": {
+    "disposalDate": "YYYY-MM-DD 형식 또는 null",
+    "agencyName": "처분 기관명 또는 null",
+    "sanctionType": "영업정지 / 과징금 / 영업허가취소 / 영업폐쇄명령 중 하나 또는 null",
+    "sanctionValue": 영업정지/영업폐쇄명령 시 일수(숫자), 과징금 시 금액(원, 숫자), 영업허가취소 시 null,
+    "businessName": "업소명 또는 null",
+    "businessAddress": "업소 주소 또는 null",
+    "title": "AI가 생성한 사건 제목",
+    "Inform": true 또는 false (처분청의 불복절차고지 유무),
+    "InformContent": "고지 내용 또는 null",
+    "legalBasis": ["근거 법조항 배열 (예: 식품위생법 제44조)"],
+    "etc": {"추가 파싱 주요 정보 key": "value"}
+  }"""
+
     elif documentType == InputDocumentType.ANSWER:
-        typeSpecificPrompt = """    "typeSpecific": {
-      "respondent": "피청구인(처분 기관) 또는 null",
-      "answerSummary": "답변서 핵심 주장 요약 또는 null",
-      "defensePoints": ["주요 방어 논거 배열"]
-    }"""
+        parsedFieldsPrompt = """\
+  "parsedFields": {
+    "caseNum": "사건번호 (예: 2026-01234) 또는 null",
+    "caseName": "사건명 또는 null",
+    "legalBasis": ["근거 법조항 배열 (예: 식품위생법 제44조)"],
+    "etc": {"추가 파싱 주요 정보 key": "value"}
+  }"""
+
     elif documentType == InputDocumentType.DECISION:
-        typeSpecificPrompt = """    "typeSpecific": {
-      "caseNumber": "사건번호 (예: 2026-행심-1234) 또는 null",
-      "decisionResult": "인용 / 기각 / 각하 또는 null",
-      "orderText": "주문 원문 또는 null",
-      "reasonSummary": "재결 이유 요약 또는 null"
-    }"""
+        parsedFieldsPrompt = """\
+  "parsedFields": {
+    "etc": {"추가 파싱 주요 정보 key": "value"}
+  }"""
+
+    else:
+        parsedFieldsPrompt = '  "parsedFields": {}'
 
     return f"""다음은 한국 행정처분 관련 문서입니다. 문서 종류는 {documentType.value}입니다.
 
@@ -165,19 +177,9 @@ def _buildPrompt(documentType: InputDocumentType) -> str:
 {{
   "isValidForStage": true 또는 false (문서 제목에 "사전통지서"가 포함된 경우 반드시 false),
   "invalidReason": null 또는 "사유 문자열" (isValidForStage가 false인 경우 이유 작성),
-  "caseTitle": "사건 제목",
-  "title": "문서 제목",
   "rawText": "문서 전체 원문을 그대로 입력",
   "summary": "문서를 1~2줄로 요약",
-  "parsedFields": {{
-    "disposalDate": "YYYY-MM-DD 형식 또는 null",
-    "agencyName": "처분 기관명 또는 null",
-    "claimant": "청구인(업주) 이름 또는 null",
-    "businessName": "업소명 또는 null",
-    "businessAddress": "업소 주소 또는 null",
-{typeSpecificPrompt}
-  }},
-  "searchHints": ["판례 검색에 유용한 키워드를 5~10개 배열로"]
+{parsedFieldsPrompt}
 }}"""
 
 
@@ -196,29 +198,31 @@ def _parseResponse(
         raise ServiceException(f"failed to parse LLM response: {responseBody}") from exc
 
     isValid = data.get("isValidForStage", True)
-    parsedFieldsData = data.get("parsedFields", {})
-    typeSpecificData = parsedFieldsData.pop("typeSpecific", None)
+    rawParsedFields = data.get("parsedFields", {})
 
-    if isValid and typeSpecificData:
+    if isValid:
         if documentType == InputDocumentType.NOTICE:
-            typeSpecific = NoticeTypeSpecific(**typeSpecificData)
+            parsedFields = NoticeParsedFields(**rawParsedFields)
         elif documentType == InputDocumentType.ANSWER:
-            typeSpecific = AnswerTypeSpecific(**typeSpecificData)
+            parsedFields = AnswerParsedFields(**rawParsedFields)
         elif documentType == InputDocumentType.DECISION:
-            typeSpecific = DecisionTypeSpecific(**typeSpecificData)
+            parsedFields = DecisionParsedFields(**rawParsedFields)
         else:
-            typeSpecific = None
+            parsedFields = DecisionParsedFields()
     else:
-        typeSpecific = None
+        # 유효하지 않은 문서는 빈 parsedFields 반환
+        if documentType == InputDocumentType.NOTICE:
+            parsedFields = NoticeParsedFields()
+        elif documentType == InputDocumentType.ANSWER:
+            parsedFields = AnswerParsedFields()
+        else:
+            parsedFields = DecisionParsedFields()
 
     return DocumentExtractResult(
-        documentType=documentType,
+        sourceDocumentType=documentType,
         isValidForStage=isValid,
         invalidReason=data.get("invalidReason") or None,
-        caseTitle=data.get("caseTitle") or None,
-        title=data.get("title") or None,
         rawText=data.get("rawText") or None,
         summary=data.get("summary") or None,
-        parsedFields=ParsedFields(**parsedFieldsData, typeSpecific=typeSpecific) if isValid else ParsedFields(),
-        searchHints=data.get("searchHints", []) if isValid else [],
+        parsedFields=parsedFields,
     )

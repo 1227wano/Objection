@@ -41,34 +41,57 @@ class CaseGovResponse(BaseSchema, Generic[ResultType]):
 
 
 # -----------------------------------------------
-# typeSpecific 스키마 (문서 종류별)
+# ParsedFields — 문서 종류별 분리
 # -----------------------------------------------
 
-class NoticeTypeSpecific(BaseModel):
+class NoticeParsedFields(BaseModel):
+    """처분서(NOTICE) 파싱 결과"""
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
-    sanctionType: str | None = None
-    sanctionDays: int | None = Field(default=None, gt=0)
+    disposalDate: str | None = None
+    agencyName: str | None = None
+    sanctionType: str | None = None          # 영업정지 / 과징금 / 영업허가취소 / 영업폐쇄명령
+    sanctionValue: int | None = Field(default=None, gt=0)  # 영업정지/영업폐쇄명령 → 일수, 과징금 → 금액(원), 영업허가취소 → null
+    businessName: str | None = None
+    businessAddress: str | None = None
+    title: str | None = None                 # AI 생성 사건 제목
+    Inform: bool | None = None               # 처분청의 불복절차고지 유무
+    InformContent: str | None = None         # 불복절차고지 내용
     legalBasis: list[str] = Field(default_factory=list)
-    dispositionContent: str | None = None
+    etc: dict[str, str] = Field(default_factory=dict)
 
 
-class AnswerTypeSpecific(BaseModel):
+class AnswerParsedFields(BaseModel):
+    """답변서(ANSWER) 파싱 결과"""
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
-    respondent: str | None = None
-    answerSummary: str | None = None
-    defensePoints: list[str] = Field(default_factory=list)
+    caseNum: str | None = None
+    caseName: str | None = None
+    legalBasis: list[str] = Field(default_factory=list)
+    etc: dict[str, str] = Field(default_factory=dict)
 
 
-class DecisionTypeSpecific(BaseModel):
+class DecisionParsedFields(BaseModel):
+    """재결서(DECISION) 파싱 결과"""
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
-    caseNumber: str | None = None
-    decisionResult: str | None = None
-    orderText: str | None = None
-    reasonSummary: str | None = None
+    etc: dict[str, str] = Field(default_factory=dict)
 
 
 # -----------------------------------------------
-# ParsedFields — 명세서 기준
+# DocumentExtractResult — 최상위 응답 result
+# -----------------------------------------------
+
+class DocumentExtractResult(BaseSchema):
+    sourceDocumentType: InputDocumentType
+    isValidForStage: bool
+    invalidReason: str | None = None
+    rawText: str | None = None
+    summary: str | None = None
+    parsedFields: NoticeParsedFields | AnswerParsedFields | DecisionParsedFields = Field(
+        default_factory=DecisionParsedFields
+    )
+
+
+# -----------------------------------------------
+# 하위 Agent 호환 스키마 (A-1, A-2에서 사용)
 # -----------------------------------------------
 
 class ParsedFields(BaseModel):
@@ -78,30 +101,14 @@ class ParsedFields(BaseModel):
     claimant: str | None = None
     businessName: str | None = None
     businessAddress: str | None = None
-    typeSpecific: NoticeTypeSpecific | AnswerTypeSpecific | DecisionTypeSpecific | None = None
 
 
-class DocumentExtractResultBase(BaseSchema):
+class DocumentExtractResultSummary(BaseSchema):
     documentType: InputDocumentType
-    parsedFields: ParsedFields
-
-
-class DocumentExtractResultSummary(DocumentExtractResultBase):
     caseTitle: str
     summary: str
     searchHints: list[str]
-
-    @field_validator("searchHints")
-    @classmethod
-    def validateSearchHints(cls, value: list[str]) -> list[str]:
-        if not value:
-            raise ValueError("must not be empty")
-        return value
-
-
-class DocumentExtractResultDetail(DocumentExtractResultSummary):
-    title: str
-    rawText: str
+    parsedFields: ParsedFields
 
 
 class LegalIssueDocumentExtractResult(BaseSchema):
@@ -111,18 +118,6 @@ class LegalIssueDocumentExtractResult(BaseSchema):
     rawText: str
     summary: str
     parsedFields: ParsedFields
-
-
-class DocumentExtractResult(BaseSchema):
-    documentType: InputDocumentType
-    isValidForStage: bool
-    invalidReason: str | None = None
-    caseTitle: str | None = None
-    title: str | None = None
-    rawText: str | None = None
-    summary: str | None = None
-    parsedFields: ParsedFields = Field(default_factory=ParsedFields)
-    searchHints: list[str] = Field(default_factory=list)
 
 
 class CaseContext(BaseSchema):
@@ -185,7 +180,7 @@ class CaseInfo(BaseSchema):
     businessName: str
     businessAddress: str
     sanctionType: str
-    sanctionDays: int = Field(gt=0)
+    sanctionValue: int | None = Field(default=None, gt=0)  # 영업정지/영업폐쇄명령 → 일수, 과징금 → 금액(원), 영업허가취소 → nul
     claimType: str
 
 
