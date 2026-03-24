@@ -24,8 +24,8 @@ export default function SupplementCompletePage() {
 
   return (
     <FormProvider {...methods}>
-      <div className="flex w-full min-h-screen bg-mainbgcolor animate-in fade-in duration-500">
-        <div className="flex-1 flex justify-center py-10">
+      <div className="flex w-full min-h-screen animate-in fade-in duration-500">
+        <div className="flex-1 flex justify-center py-12 md:py-16">
           <div className="w-full max-w-6xl px-8 flex flex-col">
             <StepProgress steps={SUPPLEMENT_STEPS} completedSteps={4} />
 

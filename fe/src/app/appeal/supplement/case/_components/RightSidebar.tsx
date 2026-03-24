@@ -8,7 +8,7 @@ export default function RightSidebar() {
   return (
     <RightSidebarFrame>
       <SidebarCard title="답변서 요약">
-        <div className="bg-gray-50 border-l-4 border-gray-300 px-4 py-3 rounded-r-lg text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">
+        <div className="text-gray-700 text-[14.5px] leading-relaxed whitespace-pre-wrap">
           {rd.respondentSummary}
         </div>
       </SidebarCard>
