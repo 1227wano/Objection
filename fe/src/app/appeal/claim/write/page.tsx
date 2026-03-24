@@ -16,10 +16,12 @@ export default function WritePage() {
   const onSubmit = (data: DocumentData) => {
     console.log('폼 제출 데이터:', data);
   };
-
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className="flex w-full min-h-screen bg-mainbgcolor animate-in fade-in duration-500">
+      <form
+        onSubmit={methods.handleSubmit(onSubmit)}
+        className="flex w-full min-h-screen bg-mainbgcolor animate-in fade-in duration-500"
+      >
         {/* 중앙 편집기 영역 */}
         <div className="flex-1 flex justify-center py-10">
           <div className="w-full max-w-4xl px-8 flex flex-col">

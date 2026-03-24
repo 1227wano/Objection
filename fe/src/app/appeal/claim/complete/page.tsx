@@ -60,7 +60,7 @@ export default function ClaimCompletePage() {
 
             {/* 하단 네비게이션 */}
             <div className="flex justify-end pb-10">
-              <Button variant="outline" onClick={() => router.push('/appeal/claim/next')}>
+              <Button variant="outline" onClick={() => router.push('/appeal/answer/upload')}>
                 다음 절차로 이동
               </Button>
             </div>
