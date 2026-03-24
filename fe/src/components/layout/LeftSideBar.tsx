@@ -31,7 +31,7 @@ const MENU_STEPS = [
     basePath: '/appeal/answer',
     subMenus: [
       { path: '/appeal/answer/upload', title: '답변서 첨부' },
-      { path: '/appeal/answer/result', title: 'AI 분석 결과' },
+      { path: '/appeal/answer/report', title: 'AI 분석 결과' },
     ],
   },
   {
@@ -43,7 +43,7 @@ const MENU_STEPS = [
       { path: '/appeal/supplement/case', title: '보충 경위서 작성' },
       { path: '/appeal/supplement/suggest', title: 'AI 제안' },
       { path: '/appeal/supplement/write', title: '문서 작성' },
-      { path: '/appeal/supplement/done', title: '완료' },
+      { path: '/appeal/supplement/complete', title: '완료' },
     ],
   },
   {
@@ -52,7 +52,7 @@ const MENU_STEPS = [
     icon: Gavel,
     basePath: '/appeal/ruling',
     subMenus: [
-      { path: '/appeal/ruling/attach', title: '재결서 첨부' },
+      { path: '/appeal/ruling/upload', title: '재결서 첨부' },
       { path: '/appeal/ruling/analysis', title: '재결서 분석' },
     ],
   },

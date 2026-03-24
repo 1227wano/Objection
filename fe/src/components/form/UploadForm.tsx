@@ -1,20 +1,29 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { FileText, X, UploadCloud } from 'lucide-react';
 
 interface UploadFormProps {
   onFileSelect: (file: File) => void | Promise<void>;
+  onFileRemove?: () => void;
+  selectedFile?: File | null;
   acceptedTypes?: string;
 }
 
 export default function UploadForm({
   onFileSelect,
+  onFileRemove,
+  selectedFile,
   acceptedTypes = '.pdf, .jpg, .png',
 }: UploadFormProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const currentFile = selectedFile !== undefined ? selectedFile : null;
+  const currentFileName = currentFile ? currentFile.name : fileName;
+  const currentFileSizeMB = currentFile ? (currentFile.size / (1024 * 1024)).toFixed(2) : null;
 
   // 파일이 드롭존 위로 올라왔을 때
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -101,15 +110,17 @@ export default function UploadForm({
 
   // 드롭존 클릭 시 숨겨진 input을 대신 클릭하도록 처리
   const handleClick = () => {
-    if (!isUploading) {
+    if (!isUploading && !currentFileName) {
       inputRef.current?.click();
     }
   };
 
   return (
     <div
-      className={`flex flex-col items-center justify-center p-10 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
-        isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-100'
+      className={`relative flex h-80 w-full flex-col items-center justify-center px-4 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+        isDragging
+          ? 'border-gray-400 bg-gray-50'
+          : 'border-gray-300 bg-transparent hover:bg-gray-50'
       }`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -126,29 +137,48 @@ export default function UploadForm({
       />
 
       {/* 화면에 보여지는 UI */}
-      <div className="text-gray-500 text-center pointer-events-none">
+      <div className="w-full h-full flex flex-col items-center justify-center text-center pointer-events-none">
         {isUploading ? (
-          <>
-            <span className="block text-4xl mb-3">⏳</span>
-            <p className="font-semibold text-lg text-blue-600">파일 검증중...</p>
-            <p className="text-sm mt-2">잠시만 기다려주세요.</p>
-          </>
-        ) : fileName ? (
-          <>
-            <span className="block text-4xl mb-3 text-blue-500">✅</span>
-            <p className="font-semibold text-lg text-blue-600 break-all">{fileName}</p>
-            <p className="text-sm mt-2">파일이 성공적으로 선택되었습니다.</p>
-          </>
+          <div className="flex flex-col items-center">
+            <div className="flex items-center justify-center w-24 h-24 mb-5">
+              <span className="block text-6xl">⏳</span>
+            </div>
+            <p className="font-semibold text-2xl text-blue-600">파일 검증중...</p>
+            <p className="text-lg mt-3 text-gray-500">잠시만 기다려주세요.</p>
+          </div>
+        ) : currentFileName ? (
+          <div className="pointer-events-auto flex flex-col items-center justify-center">
+            {/* 연한 보라색 파일 아이콘 */}
+            <FileText className="w-16 h-16 text-purple-300 mb-5" strokeWidth={1.5} />
+            
+            {/* 파일명 및 용량 */}
+            <p className="text-lg font-semibold text-gray-800 px-6 truncate max-w-[320px] md:max-w-lg">{currentFileName}</p>
+            <p className="text-base text-gray-400 mt-2">{currentFileSizeMB ? `${currentFileSizeMB} MB` : ''}</p>
+            
+            {/* 삭제 버튼 - 흐름과 무관하게 우측 상단으로 이동 */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onFileRemove) onFileRemove();
+                setFileName(null);
+                if (inputRef.current) inputRef.current.value = '';
+              }}
+              className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+            >
+              <X className="w-4 h-4" />
+              파일 삭제
+            </button>
+          </div>
         ) : (
-          <>
-            <span className="block text-4xl mb-3">📄</span>
-            <p className="font-semibold text-lg">
-              네모 안으로 파일을 드래그 하거나, 클릭해서 업로드해주세요
-            </p>
-            <p className="text-sm mt-2">
-              지원 형식: {acceptedTypes === '*/*' ? '모든 파일' : acceptedTypes}
-            </p>
-          </>
+          <div className="flex flex-col items-center">
+            <div className="flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-6">
+              <UploadCloud className="w-10 h-10 text-gray-500" strokeWidth={1.5} />
+            </div>
+            
+            <p className="text-xl font-medium text-gray-700">여기로 파일을 드래그 하거나, 클릭해서 업로드해주세요</p>
+            <p className="text-lg mt-3 text-gray-400">지원 형식: {acceptedTypes === '*/*' ? '모든 파일' : acceptedTypes}</p>
+          </div>
         )}
       </div>
     </div>

@@ -86,12 +86,16 @@ export const MOCK_LEGAL_ISSUES: LegalIssue[] = [
     title: '사실오인',
     description:
       '위조 신분증 제시 여부와 업주의 주의의무 이행 정도가 충분히 반영되지 않았을 가능성이 있습니다.',
+    lawBasis: '',
+    basisText: '',
     riskLevel: 'HIGH',
   },
   {
     issueType: 'PROPORTIONALITY',
     title: '비례의 원칙',
     description: '영업정지 1개월 처분이 구체적 사정이나 업체 규모에 비해 과중할 수 있습니다.',
+    lawBasis: '',
+    basisText: '',
     riskLevel: 'MEDIUM',
   },
 ];

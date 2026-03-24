@@ -29,7 +29,7 @@ export default function SuggestPage() {
     console.log('선택된 심판 종류:', selectedType);
     console.log('선택된 체크리스트 ID 배열:', selectedChecklists);
 
-    //router.push('/appeal/claim/document');
+    router.push('/appeal/claim/write');
   };
 
   return (
