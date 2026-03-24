@@ -26,7 +26,7 @@ export default function SupplementCompletePage() {
     <FormProvider {...methods}>
       <div className="flex w-full min-h-screen bg-mainbgcolor animate-in fade-in duration-500">
         <div className="flex-1 flex justify-center py-10">
-          <div className="w-full max-w-7xl px-8 flex flex-col">
+          <div className="w-full max-w-6xl px-8 flex flex-col">
             <StepProgress steps={SUPPLEMENT_STEPS} completedSteps={4} />
 
             <CompletionHeader
@@ -63,7 +63,7 @@ export default function SupplementCompletePage() {
 
             <div className="flex justify-end pb-10">
               <Button variant="outline" onClick={() => router.push('/appeal/ruling/upload')}>
-                다음 절차로 이동
+                다음 절차로
               </Button>
             </div>
           </div>

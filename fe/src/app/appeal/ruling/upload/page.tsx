@@ -46,7 +46,7 @@ export default function RulingUploadPage() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col p-4 py-12 md:py-16 animate-in fade-in duration-500">
+    <div className="mx-auto flex w-full max-w-3xl flex-col p-4 py-12 md:py-16 animate-in fade-in duration-500">
       <SectionHeader
         title="재결서를 수령하셨나요?"
         description="수령하신 재결서를 올려주세요"
@@ -63,7 +63,7 @@ export default function RulingUploadPage() {
         </div>
         <div className="flex justify-end mt-10">
           <Button onClick={handleSubmit} disabled={!uploadedFile || isSubmitting}>
-            {isSubmitting ? '업로드 중...' : '업로드 및 다음으로'}
+            {isSubmitting ? '업로드 중...' : '업로드 및 분석 시작'}
           </Button>
         </div>
       </div>

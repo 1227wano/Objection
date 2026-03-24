@@ -44,7 +44,7 @@ const evidences: Evidence[] = MOCK_EVIDENCE_DATA.data.map((e) => ({
 
 export default function ReportPage() {
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col p-4 py-12 md:py-16 animate-in fade-in duration-500">
+    <div className="mx-auto flex w-full max-w-3xl flex-col p-4 py-12 md:py-16 animate-in fade-in duration-500">
       <div className="w-full flex flex-col gap-8">
         {/* 1. 헤더 */}
         <div className="flex flex-col gap-6">
@@ -72,9 +72,9 @@ export default function ReportPage() {
 
         {/* 하단 이동 버튼 */}
         <div className="flex justify-end pt-8">
-          <Link href="/appeal/claim/suggest">
-            <Button>다음 단계로 이동하기</Button>
-          </Link>
+          <Button asChild>
+            <Link href="/appeal/claim/suggest">다음 단계로</Link>
+          </Button>
         </div>
       </div>
     </div>

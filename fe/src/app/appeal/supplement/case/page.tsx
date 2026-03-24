@@ -73,7 +73,7 @@ export default function SupplementCasePage() {
                 </div>
 
                 <div className="flex justify-end pt-8">
-                  <Button type="submit">계속진행</Button>
+                  <Button type="submit">다음 단계로</Button>
                 </div>
               </form>
             </DocumentCard>

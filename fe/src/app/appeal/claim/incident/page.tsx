@@ -31,7 +31,7 @@ export default function CaseDetailsPage() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col p-4 py-12 md:py-16 animate-in fade-in duration-500">
+    <div className="mx-auto flex w-full max-w-3xl flex-col p-4 py-12 md:py-16 animate-in fade-in duration-500">
       <SectionHeader
         title="행정심판 청구를 위한 사건 경위를 작성해 주세요."
         description={
@@ -73,7 +73,7 @@ export default function CaseDetailsPage() {
             </div>
 
             <div className="flex justify-end pt-8">
-              <Button type="submit">다음 단계로 이동하기</Button>
+              <Button type="submit">다음 단계로</Button>
             </div>
           </form>
         </DocumentCard>
