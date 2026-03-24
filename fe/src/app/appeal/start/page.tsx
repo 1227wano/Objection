@@ -11,7 +11,7 @@ export default function AppealStartPage() {
             처분서가 있으신가요?
           </h1>
           <p className="mt-4 text-[18px] leading-8 text-first/80">
-            모든 절차의 기준이 되는 통지서를 올려주시면 정확한 분석을 시작하겠습니다.
+            업로드하셔도 되고, 없어도 바로 설문으로 넘어가서 행정심판 준비를 시작할 수 있어요.
           </p>
         </div>
 
@@ -19,11 +19,11 @@ export default function AppealStartPage() {
           <UploadStartCard />
 
           <NoticeEntryCard
-            title="통지서가 없어요"
-            description="처분서가 없어도 수동 입력으로 바로 진행할 수 있어요."
-            helperText="나중에 내용을 다시 보완할 수 있어요"
-            href="/appeal/claim/incident"
-            ctaLabel="수동으로 진행하기"
+            title="처분서가 없어요"
+            description="처분서를 아직 받지 못했거나 바로 입력부터 시작하고 싶다면 빈 설문으로 이어집니다."
+            helperText="필요한 정보는 다음 단계에서 직접 차근차근 작성할 수 있어요."
+            href="/appeal/claim/survey"
+            ctaLabel="설문으로 진행하기"
             icon={FileQuestion}
             variant="manual"
           />
