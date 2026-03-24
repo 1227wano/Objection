@@ -6,7 +6,9 @@ import Sidebar from '@/components/layout/LeftSideBar';
 export default function AppealLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isStandalonePage =
-    pathname === '/appeal/start' || pathname === '/appeal/claim/survey';
+    pathname === '/appeal/start' ||
+    pathname === '/appeal/survey' ||
+    pathname === '/appeal/documents';
 
   if (isStandalonePage) {
     return (

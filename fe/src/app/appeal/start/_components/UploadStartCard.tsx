@@ -22,11 +22,7 @@ interface SelectedFileSummaryProps {
   onClear: (event: MouseEvent<HTMLButtonElement>) => void;
 }
 
-function SelectedFileSummary({
-  fileName,
-  fileSizeLabel,
-  onClear,
-}: SelectedFileSummaryProps) {
+function SelectedFileSummary({ fileName, fileSizeLabel, onClear }: SelectedFileSummaryProps) {
   return (
     <div className="mt-2 flex w-full justify-center">
       <div className="w-full max-w-[360px] rounded-2xl border border-first/15 bg-white px-5 py-4 text-left shadow-sm">
@@ -105,10 +101,6 @@ export default function UploadStartCard() {
     }
   }
 
-  function handleStart() {
-    setIsConfirmModalOpen(true);
-  }
-
   return (
     <div
       role={isCompleted ? undefined : 'button'}
@@ -150,23 +142,29 @@ export default function UploadStartCard() {
       }}
       className={cardClassName}
     >
-      <div className={contentClassName}>
-        {isCompleted ? (
-          <div className={iconWrapperClassName}>
-            <CheckCircle2 className="h-8 w-8" />
-          </div>
-        ) : (
-          <div className={iconWrapperClassName}>
-            <FileUp className="h-8 w-8" />
-          </div>
-        )}
+      <div
+        className={`flex h-full flex-1 flex-col items-center text-center ${isCompleted ? 'justify-center pt-4 pb-1' : ''}`}
+      >
+        <div
+          className={`mx-auto flex h-16 w-16 shrink-0 items-center justify-center rounded-[20px] ${
+            isCompleted ? 'bg-first/8 text-first' : 'bg-first text-white'
+          }`}
+        >
+          {isCompleted ? <CheckCircle2 className="h-8 w-8" /> : <FileUp className="h-8 w-8" />}
+        </div>
 
-        <h2 className={titleClassName}>{isCompleted ? '업로드 완료' : '처분서 업로드'}</h2>
+        <h2
+          className={`${isCompleted ? 'mt-3' : 'mt-5'} min-h-[44px] text-[30px] font-extrabold tracking-[-0.04em] text-slate-900`}
+        >
+          {isCompleted ? '업로드 완료' : '처분서 업로드'}
+        </h2>
 
-        <p className={descriptionClassName}>
+        <p
+          className={`${isCompleted ? 'mt-2' : 'mt-4'} min-h-[48px] max-w-[520px] break-keep text-[16px] leading-8 text-slate-500`}
+        >
           {isCompleted
             ? '업로드한 파일을 확인하고 바로 다음 단계로 진행할 수 있어요.'
-            : '파일을 드래그하거나 버튼을 눌러 처분서를 올려주세요.'}
+            : '파일을 드래그하거나 버튼을 눌러 처분서를 업로드해 주세요.'}
         </p>
 
         {isCompleted && selectedFile ? (
@@ -184,7 +182,9 @@ export default function UploadStartCard() {
           </p>
         )}
 
-        <div className={actionRowClassName}>
+        <div
+          className={`${isCompleted ? 'mt-4' : 'mt-6'} flex min-h-[48px] items-center justify-center`}
+        >
           {!isCompleted ? (
             <Button
               type="button"
@@ -202,9 +202,9 @@ export default function UploadStartCard() {
               type="button"
               onClick={(event) => {
                 event.stopPropagation();
-                handleStart();
+                setIsConfirmModalOpen(true);
               }}
-              className="rounded-2xl bg-first shadow-none ring-0 outline-none focus-visible:ring-0 focus-visible:outline-none hover:bg-first/90"
+              className="rounded-2xl bg-first hover:bg-first/90"
             >
               분석 시작하기
             </Button>
@@ -213,7 +213,7 @@ export default function UploadStartCard() {
 
         {!isCompleted ? (
           <p className="mt-4 min-h-[28px] text-sm font-medium text-first/70">
-            선택된 파일이 없습니다
+            선택한 파일이 없습니다
           </p>
         ) : null}
       </div>
@@ -230,7 +230,7 @@ export default function UploadStartCard() {
         <NoticeDocumentConfirmModal
           fileName={selectedFile.name}
           onClose={() => setIsConfirmModalOpen(false)}
-          onConfirm={() => router.push('/appeal/claim/survey?source=upload')}
+          onConfirm={() => router.push('/appeal/survey?source=upload')}
         />
       ) : null}
     </div>
