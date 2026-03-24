@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import ChecklistCard from './ChecklistCard';
 import IssuePointCard from './IssuePointCard';
-import { LegalIssue } from '../_types/document';
+import { LegalIssue } from '../../_types/shared';
 import RightSidebarFrame from '@/components/layout/RightSidebarFrame';
 
 interface Props {
