@@ -17,7 +17,7 @@ export default function EvidenceAndRequestSection() {
         <td className="border border-black p-2 text-center text-sm">증거 서류</td>
         <td colSpan={3} className="border border-black p-1.5 px-3">
           <div className="flex flex-col gap-1 py-1">
-            {evidenceList.map((_, idx) => (
+            {evidenceList.map((_: string, idx: number) => (
               <div key={idx} className="flex items-center gap-2 text-sm">
                 <span className="w-4 shrink-0">{idx + 1}.</span>
                 <EditableInput name={`evidenceList.${idx}`} />

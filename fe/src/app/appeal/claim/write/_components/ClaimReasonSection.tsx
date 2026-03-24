@@ -2,7 +2,7 @@
 
 import { useFormContext } from 'react-hook-form';
 import { EditableTextarea } from './FormInputs';
-import { DocumentData } from '../_types/document';
+import { ArgumentItem, DocumentData } from '../_types/document';
 
 export default function ClaimReasonSection() {
   const { watch } = useFormContext<DocumentData>();
@@ -28,7 +28,7 @@ export default function ClaimReasonSection() {
         <div className="pl-2">
           <h4 className="font-bold text-base mb-4">나. 이 사건 처분의 위법·부당성</h4>
           <div className="flex flex-col gap-6 pl-4">
-            {args.map((arg, idx) => (
+            {args.map((arg: ArgumentItem, idx: number) => (
               <div key={idx}>
                 <p className="font-bold text-sm mb-2">
                   {idx + 1}. {arg.title}
