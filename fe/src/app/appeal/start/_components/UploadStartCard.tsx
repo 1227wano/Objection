@@ -230,7 +230,7 @@ export default function UploadStartCard() {
         <NoticeDocumentConfirmModal
           fileName={selectedFile.name}
           onClose={() => setIsConfirmModalOpen(false)}
-          onConfirm={() => router.push('/appeal/analysis')}
+          onConfirm={() => router.push('/appeal/claim/survey?source=upload')}
         />
       ) : null}
     </div>
