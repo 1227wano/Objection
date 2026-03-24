@@ -11,20 +11,20 @@ export default function EligibilityCard({ eligibility }: EligibilityCardProps) {
       case 'pass':
         return {
           badgeText: '가능',
-          badgeClass: 'bg-[#dcfce7] text-[#16a34a]',
-          dotClass: 'bg-[#16a34a]',
+          badgeClass: 'bg-green-100 text-green-600',
+          dotClass: 'bg-green-600',
         };
       case 'warning':
         return {
           badgeText: '주의',
-          badgeClass: 'bg-[#fffbeb] text-[#d97706]',
+          badgeClass: 'bg-amber-50 text-amber-600',
           dotClass: 'bg-point',
         };
       case 'fail':
         return {
           badgeText: '불가',
-          badgeClass: 'bg-[#fee2e2] text-[#dc2626]',
-          dotClass: 'bg-[#dc2626]',
+          badgeClass: 'bg-red-100 text-red-600',
+          dotClass: 'bg-red-600',
         };
       default:
         return {
@@ -45,11 +45,11 @@ export default function EligibilityCard({ eligibility }: EligibilityCardProps) {
       </h2>
 
       <div
-        className={`border rounded-2xl shadow-sm overflow-hidden ${hasPass ? 'border-[#bbf7d0] bg-[#f8faf7]' : 'border-[#fecaca] bg-[#fffaf9]'}`}
+        className={`border rounded-2xl shadow-sm overflow-hidden ${hasPass ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}
       >
         <div className="px-6 py-6 md:px-8 flex items-start gap-4">
           <div
-            className={`mt-0.5 flex items-center justify-center w-7 h-7 rounded-full shadow-sm text-white ${hasPass ? 'bg-[#16a34a]' : 'bg-[#dc2626]'}`}
+            className={`mt-0.5 flex items-center justify-center w-7 h-7 rounded-full shadow-sm text-white ${hasPass ? 'bg-green-600' : 'bg-red-600'}`}
           >
             {hasPass ? (
               <Check className="w-4 h-4" strokeWidth={3} />
@@ -59,7 +59,7 @@ export default function EligibilityCard({ eligibility }: EligibilityCardProps) {
           </div>
           <div>
             <h3
-              className={`text-[19px] font-extrabold tracking-tight ${hasPass ? 'text-[#16a34a]' : 'text-[#dc2626]'}`}
+              className={`text-[19px] font-extrabold tracking-tight ${hasPass ? 'text-green-600' : 'text-red-600'}`}
             >
               {hasPass ? '행정 심판 진행 가능' : '행정 심판 진행 불가'}
             </h3>

@@ -29,7 +29,7 @@ function SelectedFileSummary({
 }: SelectedFileSummaryProps) {
   return (
     <div className="mt-2 flex w-full justify-center">
-      <div className="w-full max-w-[360px] rounded-[20px] border border-first/15 bg-white px-5 py-4 text-left shadow-[0_8px_18px_rgba(15,15,112,0.04)]">
+      <div className="w-full max-w-[360px] rounded-2xl border border-first/15 bg-white px-5 py-4 text-left shadow-sm">
         <div className="flex items-start gap-3">
           <div className="mt-0.5 text-first">
             <FileText className="h-5 w-5" />
@@ -60,7 +60,7 @@ export default function UploadStartCard() {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const isCompleted = !!selectedFile;
 
-  const cardClassName = `flex h-[460px] flex-col rounded-[28px] px-10 ${
+  const cardClassName = `flex h-[460px] flex-col rounded-3xl px-10 ${
     isCompleted ? 'py-12' : 'py-16'
   } text-center shadow-[0_10px_28px_rgba(15,15,112,0.06)] transition-colors ${
     isDragging
@@ -72,7 +72,7 @@ export default function UploadStartCard() {
   const contentClassName = `flex h-full flex-1 flex-col items-center text-center ${
     isCompleted ? 'justify-center pt-4 pb-1' : ''
   }`;
-  const iconWrapperClassName = `mx-auto flex h-16 w-16 shrink-0 items-center justify-center rounded-[20px] ${
+  const iconWrapperClassName = `mx-auto flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl ${
     isCompleted ? 'bg-first/8 text-first' : 'bg-first text-white'
   }`;
   const titleClassName = `${isCompleted ? 'mt-3' : 'mt-5'} min-h-[44px] text-[30px] font-extrabold tracking-[-0.04em] text-slate-900`;

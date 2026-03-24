@@ -27,7 +27,7 @@ export default function NoticeEntryCard({
     : 'mt-4 min-h-[48px] max-w-[460px] break-keep text-[16px] leading-8 text-slate-500';
   const topHelperTextClassName = 'mt-0 min-h-[24px] text-[14px] font-medium text-slate-400';
   const bottomHelperTextClassName = 'mt-4 min-h-[28px] text-sm font-medium text-first/70';
-  const cardClassName = `group flex h-[460px] flex-col rounded-[28px] border px-10 py-16 shadow-[0_10px_28px_rgba(15,15,112,0.06)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_16px_32px_rgba(15,15,112,0.10)] ${
+  const cardClassName = `group flex h-[460px] flex-col rounded-3xl border px-10 py-16 shadow-[0_10px_28px_rgba(15,15,112,0.06)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_16px_32px_rgba(15,15,112,0.10)] ${
     isUpload
       ? 'border-dashed border-first/25 bg-white'
       : 'border-first/12 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)]'

@@ -50,7 +50,7 @@ export default function SuggestPage() {
 
           {/* NavigationAction (우측 정렬로 수정: justify-end) */}
           <div className="flex justify-end pt-4">
-            <Button onClick={handleNextClick}>다음 단계로 이동하기</Button>
+            <Button onClick={handleNextClick}>다음 단계로</Button>
           </div>
         </div>
       </div>

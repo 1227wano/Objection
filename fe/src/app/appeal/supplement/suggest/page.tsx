@@ -33,7 +33,7 @@ export default function SupplementSuggestPage() {
           <ChecklistGroup items={evidenceData} onChange={setSelectedChecklists} hideHeader />
 
           <div className="flex justify-end pt-4">
-            <Button onClick={handleNextClick}>다음 단계로 이동하기</Button>
+            <Button onClick={handleNextClick}>다음 단계로</Button>
           </div>
         </div>
       </div>

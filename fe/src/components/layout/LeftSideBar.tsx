@@ -92,7 +92,7 @@ export default function Sidebar() {
                     className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all duration-300
                       ${
                         isCurrent
-                          ? 'bg-[#1B1965] text-white shadow-md'
+                          ? 'bg-first text-white shadow-md'
                           : 'bg-[#D1D5DB] text-white group-hover:bg-gray-400'
                       }
                     `}
@@ -101,7 +101,7 @@ export default function Sidebar() {
                   </div>
                   <span
                     className={`font-bold text-[15px] transition-colors
-                      ${isCurrent ? 'text-[#1B1965]' : 'text-gray-400 group-hover:text-gray-600'}
+                      ${isCurrent ? 'text-first' : 'text-gray-400 group-hover:text-gray-600'}
                     `}
                   >
                     {step.title}
@@ -125,12 +125,12 @@ export default function Sidebar() {
                               href={sub.path}
                               key={sub.path}
                               className={`relative pl-3 text-[14px] font-semibold transition-colors
-                                ${isSubActive ? 'text-[#1B1965]' : 'text-gray-400 hover:text-gray-700'}
+                                ${isSubActive ? 'text-first' : 'text-gray-400 hover:text-gray-700'}
                               `}
                             >
                               {/* 활성화된 하위 메뉴 좌측의 파란색 바 */}
                               {isSubActive && (
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-[#1B1965] rounded-full" />
+                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-first rounded-full" />
                               )}
                               {sub.title}
                             </Link>

@@ -11,7 +11,7 @@ const rd = MOCK_REBUTTAL_DATA.data;
 
 export default function RebuttalAnalysisPage() {
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col p-4 py-12 md:py-16 animate-in fade-in duration-500">
+    <div className="mx-auto flex w-full max-w-3xl flex-col p-4 py-12 md:py-16 animate-in fade-in duration-500">
       <div className="w-full flex flex-col gap-8">
         {/* 헤더 */}
         <SectionHeader title="답변서 분석 결과" badge={{ text: 'AI 분석 완료' }} />
@@ -30,9 +30,9 @@ export default function RebuttalAnalysisPage() {
 
         {/* 하단 CTA */}
         <div className="flex items-center justify-end pt-8">
-          <Link href="/appeal/supplement/case">
-            <Button>다음 단계로 이동하기</Button>
-          </Link>
+          <Button asChild>
+            <Link href="/appeal/supplement/case">다음 단계로</Link>
+          </Button>
         </div>
       </div>
     </div>
