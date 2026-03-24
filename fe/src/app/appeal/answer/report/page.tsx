@@ -14,7 +14,7 @@ export default function RebuttalAnalysisPage() {
     <div className="mx-auto flex w-full max-w-4xl flex-col p-4 py-12 md:py-16 animate-in fade-in duration-500">
       <div className="w-full flex flex-col gap-8">
         {/* 헤더 */}
-        <SectionHeader title="답변서 분석 결과 보고서" badge={{ text: 'AI 분석 완료' }} />
+        <SectionHeader title="답변서 분석 결과" badge={{ text: 'AI 분석 완료' }} />
 
         {/* 섹션 1: 답변서 요약 (회색 왼쪽보더 - 피청구인 주장) */}
         <RespondentSummary summary={rd.respondentSummary} />
@@ -23,10 +23,7 @@ export default function RebuttalAnalysisPage() {
 
         {/* 섹션 2: 보충서면 대응 전략 (콜아웃 카드 - AI 분석) */}
         <div className="flex flex-col gap-6">
-          <AiJudgment
-            label="보충서면 대응 전략"
-            summation={rd.strategySummary}
-          />
+          <AiJudgment label="보충서면 대응 전략" summation={rd.strategySummary} />
           <MainPointCard points={rd.mainPoints} />
         </div>
 

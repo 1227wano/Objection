@@ -14,7 +14,7 @@ interface SectionHeaderProps {
 export default function SectionHeader({ title, description, descriptionColor = 'text-second', badge }: SectionHeaderProps) {
   return (
     <div className="mb-8 w-full text-left">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
         <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
           {title}
         </h1>
