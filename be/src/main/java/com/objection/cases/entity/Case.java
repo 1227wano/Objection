@@ -31,7 +31,7 @@ public class Case {
     private String title;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 19)
+    @Column(nullable = false, length = 30)
     private CaseStatus status;
 
     @Enumerated(EnumType.STRING)
