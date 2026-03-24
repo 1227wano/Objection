@@ -88,4 +88,8 @@ public class Case {
         this.awareDate = awareDate;
         this.agencyName = agencyName;
     }
+
+    public void updateStatus(CaseStatus status) {
+        this.status = status;
+    }
 }
