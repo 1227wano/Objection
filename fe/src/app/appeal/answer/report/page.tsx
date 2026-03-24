@@ -26,7 +26,6 @@ export default function RebuttalAnalysisPage() {
           <AiJudgment
             label="보충서면 대응 전략"
             summation={rd.strategySummary}
-            variant="callout"
           />
           <MainPointCard points={rd.mainPoints} />
         </div>
