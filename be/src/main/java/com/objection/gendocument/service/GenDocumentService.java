@@ -31,6 +31,7 @@ public class GenDocumentService {
     private final GovDocumentRepository govDocumentRepository;
     private final CaseRepository caseRepository;
     private final ObjectMapper objectMapper;
+    private final PdfService pdfService;
 
     // 문서 생성
     @Transactional
@@ -87,20 +88,6 @@ public class GenDocumentService {
 
         return toResponse(doc);
 
-    }
-
-    // PDF 다운로드용 contentJson 조회
-    public String getContentJsonForPdf(Integer analysisNo, Integer userNo, String documentType) {
-        validateDocumentType(documentType);
-
-        Case foundCase = getCaseByAnalysisNoOrThrow(analysisNo);
-        validateOwner(foundCase, userNo);
-
-        GenDocument doc = genDocumentRepository
-                .findByAnalysisNoAndDocumentType(analysisNo, documentType)
-                .orElseThrow(() -> new BusinessException(ErrorCode.DOCUMENT_NOT_FOUND));
-
-        return doc.getContentJson();
     }
 
     private void validateDocumentType(String documentType) {
@@ -172,5 +159,24 @@ public class GenDocumentService {
                 .createdAt(doc.getCreatedAt())
                 .updatedAt(doc.getUpdatedAt())
                 .build();
+    }
+    // PDF 생성
+    public byte[] generatePdf(Integer analysisNo, Integer userNo, String documentType) {
+        validateDocumentType(documentType);
+
+        Case foundCase = getCaseByAnalysisNoOrThrow(analysisNo);
+        validateOwner(foundCase, userNo);
+
+        GenDocument doc = genDocumentRepository
+                .findByAnalysisNoAndDocumentType(analysisNo, documentType)
+                .orElseThrow(() -> new BusinessException(ErrorCode.DOCUMENT_NOT_FOUND));
+
+        try {
+            Map<String, Object> contentJsonMap = objectMapper.readValue(doc.getContentJson(),
+                    objectMapper.getTypeFactory().constructMapType(Map.class, String.class, Object.class));
+            return pdfService.generatePdf(documentType, contentJsonMap, foundCase);
+        } catch (JsonProcessingException e) {
+            throw new BusinessException(ErrorCode.PDF_CONVERT_FAILED);
+        }
     }
 }
