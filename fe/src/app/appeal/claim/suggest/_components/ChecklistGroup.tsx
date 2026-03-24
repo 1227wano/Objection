@@ -7,9 +7,10 @@ import { EvidenceItem } from '../../report/types';
 interface ChecklistGroupProps {
   items: EvidenceItem[];
   onChange?: (selectedIds: number[]) => void; // 추가된 속성
+  hideHeader?: boolean;
 }
 
-export default function ChecklistGroup({ items, onChange }: ChecklistGroupProps) {
+export default function ChecklistGroup({ items, onChange, hideHeader = false }: ChecklistGroupProps) {
   const [checkedIds, setCheckedIds] = useState<Set<number>>(() => {
     const initialChecked = new Set<number>();
     items.forEach((item) => {
@@ -39,14 +40,16 @@ export default function ChecklistGroup({ items, onChange }: ChecklistGroupProps)
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col gap-1.5 mb-2">
-        <h2 className="text-lg font-bold text-gray-900">준비해야 할 입증 서류 체크리스트</h2>
-        <p className="text-sm text-gray-500">
-          원활한 심판 진행을 위해 아래 서류들을 확인해 주세요.
-          <br />
-          준비 완료된 서류를 체크해 주세요.
-        </p>
-      </div>
+      {!hideHeader && (
+        <div className="flex flex-col gap-1.5 mb-2">
+          <h2 className="text-lg font-bold text-gray-900">준비해야 할 입증 서류 체크리스트</h2>
+          <p className="text-sm text-gray-500">
+            원활한 심판 진행을 위해 아래 서류들을 확인해 주세요.
+            <br />
+            준비 완료된 서류를 체크해 주세요.
+          </p>
+        </div>
+      )}
       <div className="flex flex-col gap-3">
         {items.map((item) => (
           <ChecklistItem

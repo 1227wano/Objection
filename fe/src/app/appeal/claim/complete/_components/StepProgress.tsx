@@ -1,15 +1,22 @@
 'use client';
 
-const steps = [
+const DEFAULT_STEPS = [
   { label: '상담 및 진단' },
   { label: '청구서 작성' },
   { label: '답변서 수령' },
   { label: '위원회 심리' },
 ];
 
-const COMPLETED_STEPS = 2;
+interface StepProgressProps {
+  steps?: { label: string }[];
+  completedSteps?: number;
+}
 
-export default function StepProgress() {
+export default function StepProgress({
+  steps = DEFAULT_STEPS,
+  completedSteps = 2,
+}: StepProgressProps) {
+  const COMPLETED_STEPS = completedSteps;
   return (
     <div className="flex items-center justify-center w-full mb-10">
       <div className="flex items-center w-full max-w-2xl">
