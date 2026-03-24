@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, type ChangeEvent, type DragEvent } from 'react';
+import { useRef, useState, type ChangeEvent, type DragEvent, type MouseEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, FileText, FileUp, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,42 @@ function formatFileSize(size: number) {
   }
 
   return `${Math.max(1, Math.round(size / 1024))}KB`;
+}
+
+interface SelectedFileSummaryProps {
+  fileName: string;
+  fileSizeLabel: string;
+  onClear: (event: MouseEvent<HTMLButtonElement>) => void;
+}
+
+function SelectedFileSummary({
+  fileName,
+  fileSizeLabel,
+  onClear,
+}: SelectedFileSummaryProps) {
+  return (
+    <div className="mt-2 flex w-full justify-center">
+      <div className="w-full max-w-[360px] rounded-[20px] border border-first/15 bg-white px-5 py-4 text-left shadow-[0_8px_18px_rgba(15,15,112,0.04)]">
+        <div className="flex items-start gap-3">
+          <div className="mt-0.5 text-first">
+            <FileText className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-[15px] font-semibold text-slate-900">{fileName}</p>
+            <p className="mt-1 text-sm text-slate-400">{fileSizeLabel}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClear}
+            className="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+            aria-label="업로드 파일 제거"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function UploadStartCard() {
@@ -129,37 +165,19 @@ export default function UploadStartCard() {
 
         <p className={descriptionClassName}>
           {isCompleted
-            ? '업로드한 파일을 확인한 뒤 바로 다음 단계로 진행할 수 있어요.'
-            : '파일을 끌어다 놓거나 버튼을 눌러 처분서를 올려주세요.'}
+            ? '업로드한 파일을 확인하고 바로 다음 단계로 진행할 수 있어요.'
+            : '파일을 드래그하거나 버튼을 눌러 처분서를 올려주세요.'}
         </p>
 
-        {isCompleted ? (
-          <div className="mt-2 flex w-full justify-center">
-            <div className="w-full max-w-[360px] rounded-[20px] border border-first/15 bg-white px-5 py-4 text-left shadow-[0_8px_18px_rgba(15,15,112,0.04)]">
-              <div className="flex items-start gap-3">
-                <div className="mt-0.5 text-first">
-                  <FileText className="h-5 w-5" />
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-[15px] font-semibold text-slate-900">
-                    {selectedFile.name}
-                  </p>
-                  <p className="mt-1 text-sm text-slate-400">{formatFileSize(selectedFile.size)}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleClearFile();
-                  }}
-                  className="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-                  aria-label="업로드 파일 삭제"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
+        {isCompleted && selectedFile ? (
+          <SelectedFileSummary
+            fileName={selectedFile.name}
+            fileSizeLabel={formatFileSize(selectedFile.size)}
+            onClear={(event) => {
+              event.stopPropagation();
+              handleClearFile();
+            }}
+          />
         ) : (
           <p className="mt-0 min-h-[24px] text-[14px] font-medium text-slate-400">
             PDF, JPEG, PNG (최대 20MB)
