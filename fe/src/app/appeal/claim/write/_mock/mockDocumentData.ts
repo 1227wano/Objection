@@ -1,4 +1,5 @@
-import { DocumentData, LegalIssue } from '../_types/document';
+import { DocumentData } from '../_types/document';
+import type { LegalIssue } from '../../_types/shared';
 
 export const MOCK_DOCUMENT_DATA: DocumentData = {
   caseNo: '2026-12345',

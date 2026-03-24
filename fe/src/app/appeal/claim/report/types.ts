@@ -1,12 +1,10 @@
-export type { RiskLevel, IssueType, LegalIssue } from '../_types/shared';
-export { RISK_LEVEL_MAP } from '../_types/shared';
+import type { LegalIssue } from '../_types/shared';
 
 export type AppealType = 'CANCEL' | 'INVALID' | 'ORDER';
 export type PossibilityType = 'h' | 'm' | 'l' | 'z';
 export type ClaimType = 'CANCEL' | 'INVALID' | 'ORDER';
 export type AppealPossibility = 'HIGH' | 'MEDIUM' | 'LOW';
 
-import type { LegalIssue } from '../_types/shared';
 // ── 기존 UI 전용 타입 ──────────────────────────────────
 
 export interface Reason {

@@ -1,4 +1,4 @@
-import { LegalIssue } from '../_types/document';
+import { LegalIssue } from '../../_types/shared';
 
 interface Props {
   issue: LegalIssue;
