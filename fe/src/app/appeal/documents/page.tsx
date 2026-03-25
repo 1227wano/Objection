@@ -39,7 +39,7 @@ const PAGE_CONFIG: Record<
     stageLabel: '처음부터 시작하기',
     title: '이미 진행 중인 행정심판이신가요?',
     submitLabel: '청구서 작성 계속하기',
-    nextHref: '/appeal/claim/incident',
+    nextHref: '/appeal/analysis',
     requiredDocuments: [],
   },
   answer: {
