@@ -26,90 +26,81 @@ interface StartStagePreview {
 
 const START_STAGE_PREVIEWS: StartStagePreview[] = [
   {
-    title: '처분서 단계',
-    description: '처음 단계부터 차근차근 진행할 수 있어요.',
+    title: '처분서부터 시작하기',
+    description: '처분서 내용을 먼저 확인하고\n기본 설문을 차근차근 이어갈 수 있어요.',
     requiredDocuments: ['처분서'],
-    footerText: '설문부터 차근차근 진행할 수 있어요',
+    footerText: '설문부터 차근차근 진행할 수 있어요.',
   },
   {
-    title: '답변서 단계',
-    description: '답변서를 받은 단계부터 이어서 \n시작할 수 있어요.',
+    title: '답변서 등록부터 시작하기',
+    description: '답변서를 이미 받은 경우라면\n필요 서류를 올리고 바로 이어갈 수 있어요.',
     requiredDocuments: ['처분서', '행정심판 청구서', '답변서'],
-    footerText: '청구서와 답변서를 올리면 분석을 시작해요',
+    footerText: '청구서와 답변서를 올리면 바로 분석을 시작해요.',
   },
   {
-    title: '재결서 단계',
-    description: '재결서를 받은 경우 결과 확인 단계부터\n 바로 시작할 수 있어요.',
+    title: '재결서 등록부터 시작하기',
+    description: '재결서까지 받은 사건이라면\n결과 검토 단계부터 바로 이어갈 수 있어요.',
     requiredDocuments: ['재결서'],
-    footerText: '재결서를 올리면 결과 확인 단계로 이어집니다',
+    footerText: '재결서를 올리면 결과 확인 단계로 이어집니다.',
   },
 ] as const;
 
-function formatDate(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-
-  return `${year}.${month}.${day}`;
-}
-
-const TODAY = formatDate(new Date());
-
 const MOCK_CASES: MockCase[] = [
+  /*
   {
     id: 1,
-    title: '마포구 세무서 용도변경 허가 거부 취소',
-    majorStage: '행정심판청구서 작성',
-    detailStep: '사건 경위 작성',
-    updatedAt: TODAY,
+    title: '식품위생법 영업정지 처분 취소 청구',
+    majorStage: PROGRESS_STAGES[1],
+    detailStep: STAGE_CONFIG[PROGRESS_STAGES[1]].detailSteps[0] ?? '',
+    updatedAt: '2026.03.25',
   },
   {
     id: 2,
-    title: '건축물 사용승인 반려 처분 취소',
-    majorStage: '답변서 분석',
-    detailStep: 'AI 분석 결과',
-    updatedAt: TODAY,
+    title: '영업허가 취소 처분 답변서 분석',
+    majorStage: PROGRESS_STAGES[2],
+    detailStep: STAGE_CONFIG[PROGRESS_STAGES[2]].detailSteps[1] ?? '',
+    updatedAt: '2026.03.25',
   },
   {
     id: 3,
-    title: '영업정지 처분 취소 청구',
-    majorStage: '보충서면 작성',
-    detailStep: '문서 작성',
-    updatedAt: TODAY,
+    title: '과징금 부과 처분 사건 청구',
+    majorStage: PROGRESS_STAGES[3],
+    detailStep: STAGE_CONFIG[PROGRESS_STAGES[3]].detailSteps[0] ?? '',
+    updatedAt: '2026.03.25',
   },
   {
     id: 4,
-    title: '옥외영업 불허 처분 취소 청구',
-    majorStage: '재결서 분석',
-    detailStep: '재결서 분석',
-    updatedAt: TODAY,
+    title: '도시계획 처분 재결서 검토',
+    majorStage: PROGRESS_STAGES[4],
+    detailStep: STAGE_CONFIG[PROGRESS_STAGES[4]].detailSteps[1] ?? '',
+    updatedAt: '2026.03.25',
   },
-] as const;
+  */
+];
 
-const STAGE_ACCENT_STYLES: Record<StageName, { line: string; marker: string }> = {
-  '처분서 분석': {
+const EMPTY_CASE_DESCRIPTION =
+  '새 케이스를 시작하면 진행 단계와 최근 업데이트가 이곳에 쌓입니다.\n처음 사건을 등록해 두면 이후 흐름을 한눈에 이어서 확인할 수 있어요.';
+
+const STAGE_ACCENT_STYLES: Partial<Record<StageName, { line: string; marker: string }>> = {
+  [PROGRESS_STAGES[0]]: {
     line: 'bg-slate-500',
     marker: 'text-slate-500',
   },
-  '행정심판청구서 작성': {
+  [PROGRESS_STAGES[1]]: {
     line: 'bg-blue-600',
     marker: 'text-blue-600',
   },
-  '답변서 분석': {
+  [PROGRESS_STAGES[2]]: {
     line: 'bg-violet-500',
     marker: 'text-violet-500',
   },
-  '보충서면 작성': {
+  [PROGRESS_STAGES[3]]: {
     line: 'bg-emerald-500',
     marker: 'text-emerald-500',
   },
-  '재결서 분석': {
+  [PROGRESS_STAGES[4]]: {
     line: 'bg-amber-500',
     marker: 'text-amber-500',
-  },
-  '행정심판 완료': {
-    line: 'bg-gray-500',
-    marker: 'text-gray-500',
   },
 };
 
@@ -121,11 +112,11 @@ export default function DashboardHome() {
           <div className="flex h-full flex-col gap-6">
             <div className="flex flex-col gap-3">
               <p className="text-[30px] font-extrabold tracking-[-0.03em] text-gray-900">
-                어느 단계에서든 시작할 수 있어요
+                어떤 단계에서든 바로 시작할 수 있어요
               </p>
               <p className="max-w-3xl whitespace-pre-line text-[16px] leading-7 text-slate-500">
-                처음부터 진행하셔도 되고, 이미 받은 서류가 있다면 현재 단계에 맞춰 바로 이어서
-                시작할 수도 있어요.
+                준비된 서류와 현재 진행 단계를 기준으로, 내 상황에 맞는 흐름에서 바로 이어서
+                시작할 수 있어요.
               </p>
             </div>
 
@@ -148,7 +139,7 @@ export default function DashboardHome() {
                         </p>
 
                         <div className="mt-auto pt-4 text-[13px] font-semibold text-first/75">
-                          마우스를 올려 자세히 보기
+                          뒤집어서 필요한 서류를 확인해 보세요
                         </div>
                       </div>
                     </div>
@@ -198,7 +189,7 @@ export default function DashboardHome() {
           </p>
 
           <p className="mt-2 text-[15px] leading-7 text-white/80">
-            처음이라도 괜찮아요. 안내에 따라 차근차근 진행하시면 됩니다.
+            처음 진행하는 사건이라면 여기서 시작하세요. 필요한 흐름을 차근차근 안내해 드립니다.
           </p>
 
           <div className="mt-6 rounded-full bg-white px-6 py-3 text-lg font-bold text-first shadow-[0_8px_20px_rgba(0,0,0,0.12)] transition-transform duration-200 group-hover:scale-105">
@@ -211,61 +202,84 @@ export default function DashboardHome() {
         <h2 className="text-[30px] font-extrabold tracking-[-0.03em] text-gray-900">
           최근 진행 중인 케이스
         </h2>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {MOCK_CASES.map((item) => {
-            const isValid = isValidDetailStep(item.majorStage, item.detailStep);
-            const filledSegments = getProgressSegments(item.majorStage);
-            const accent = STAGE_ACCENT_STYLES[item.majorStage];
 
-            return (
-              <Link
-                key={item.id}
-                href={`/appeal/${item.id}`}
-                className="relative flex flex-col gap-6 rounded-2xl border border-[#eef2f9] bg-white p-8 pl-10 shadow-[0_10px_28px_rgba(15,15,112,0.08)] transition-all duration-200 hover:-translate-y-1 hover:border-blue-100 hover:shadow-[0_18px_36px_rgba(15,15,112,0.10)]"
-              >
-                <div
-                  className={`absolute bottom-0 left-0 top-0 w-1 rounded-l-2xl ${accent.line}`}
-                />
+        {MOCK_CASES.length > 0 ? (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {MOCK_CASES.map((item) => {
+              const isValid = isValidDetailStep(item.majorStage, item.detailStep);
+              const filledSegments = getProgressSegments(item.majorStage);
+              const accent = STAGE_ACCENT_STYLES[item.majorStage] ?? {
+                line: 'bg-gray-500',
+                marker: 'text-gray-500',
+              };
 
-                <p className="line-clamp-2 text-[24px] font-bold leading-tight tracking-[-0.02em] text-gray-900">
-                  {item.title}
-                </p>
-
-                <span
-                  className={`inline-block self-start rounded-full px-3 py-1.5 text-sm font-semibold ${STAGE_CONFIG[item.majorStage].badgeClassName}`}
+              return (
+                <Link
+                  key={item.id}
+                  href={`/appeal/${item.id}`}
+                  className="relative flex flex-col gap-6 rounded-2xl border border-[#eef2f9] bg-white p-8 pl-10 shadow-[0_10px_28px_rgba(15,15,112,0.08)] transition-all duration-200 hover:-translate-y-1 hover:border-blue-100 hover:shadow-[0_18px_36px_rgba(15,15,112,0.10)]"
                 >
-                  {item.majorStage}
-                </span>
+                  <div
+                    className={`absolute bottom-0 left-0 top-0 w-1 rounded-l-2xl ${accent.line}`}
+                  />
 
-                <div className="flex flex-col gap-3">
-                  <p className="text-sm text-gray-700">
-                    <span
-                      className={`mr-2 inline-block h-3 w-3 rounded-full align-middle ${accent.line}`}
-                    />
-                    <span className="font-semibold">현재 단계:</span>{' '}
-                    {isValid ? item.detailStep || '-' : '정의되지 않은 단계'}
+                  <p className="line-clamp-2 text-[24px] font-bold leading-tight tracking-[-0.02em] text-gray-900">
+                    {item.title}
                   </p>
 
-                  <div className="flex items-center gap-2">
-                    {PROGRESS_STAGES.map((stage, index) => (
-                      <div
-                        key={`${item.id}-${stage}`}
-                        className={`h-2.5 flex-1 rounded-full transition-colors ${
-                          index < filledSegments ? 'bg-first' : 'bg-gray-100'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
+                  <span
+                    className={`inline-block self-start rounded-full px-3 py-1.5 text-sm font-semibold ${STAGE_CONFIG[item.majorStage].badgeClassName}`}
+                  >
+                    {item.majorStage}
+                  </span>
 
-                <div className="mt-2 flex items-center justify-between border-t border-gray-100 pt-2">
-                  <span className="text-sm text-gray-400">최근 업데이트: {item.updatedAt}</span>
-                  <span className="text-sm font-semibold text-first">상세보기 &gt;</span>
-                </div>
+                  <div className="flex flex-col gap-3">
+                    <p className="text-sm text-gray-700">
+                      <span
+                        className={`mr-2 inline-block h-3 w-3 rounded-full align-middle ${accent.line}`}
+                      />
+                      <span className="font-semibold">현재 단계:</span>{' '}
+                      {isValid ? item.detailStep || '-' : '상세 단계 정보 없음'}
+                    </p>
+
+                    <div className="flex items-center gap-2">
+                      {PROGRESS_STAGES.map((stage, index) => (
+                        <div
+                          key={`${item.id}-${stage}`}
+                          className={`h-2.5 flex-1 rounded-full transition-colors ${
+                            index < filledSegments ? 'bg-first' : 'bg-gray-100'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mt-2 flex items-center justify-between border-t border-gray-100 pt-2">
+                    <span className="text-sm text-gray-400">최근 업데이트: {item.updatedAt}</span>
+                    <span className="text-sm font-semibold text-first">계속 확인하기 &gt;</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="rounded-[28px] border border-dashed border-first/18 bg-[linear-gradient(180deg,#fbfcff_0%,#f6f8ff_100%)] px-8 py-16 text-center shadow-[0_10px_24px_rgba(15,15,112,0.04)]">
+            <div className="mx-auto flex max-w-[560px] flex-col items-center">
+              <p className="text-[32px] font-extrabold tracking-[-0.03em] text-gray-900 md:text-[36px]">
+                아직 진행 중인 케이스가 없어요
+              </p>
+              <p className="mt-3 max-w-2xl whitespace-pre-line break-keep text-[16px] leading-7 text-slate-500">
+                {EMPTY_CASE_DESCRIPTION}
+              </p>
+              <Link
+                href="/appeal/start"
+                className="mt-8 inline-flex h-12 items-center justify-center rounded-full border border-first/10 bg-first px-6 text-[15px] font-semibold text-white shadow-[0_10px_22px_rgba(15,15,112,0.10)] transition hover:bg-first/92"
+              >
+                새 케이스 시작하기
               </Link>
-            );
-          })}
-        </div>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
