@@ -29,6 +29,7 @@ public enum ErrorCode {
     GOV_DOC_NOT_FOUND(HttpStatus.NOT_FOUND, "처분서가 업로드되지 않았습니다."),
     ANALYSIS_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 분석입니다."),
     DOCUMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "생성된 문서가 없습니다."),
+    EVIDENCE_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 증거 항목입니다."),
 
     // 409 - 중복
     USER_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 아이디입니다."),
