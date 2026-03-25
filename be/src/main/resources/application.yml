@@ -32,11 +32,34 @@ spring:
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
 
+  servlet:
+    multipart:
+      max-file-size: 50MB # 업로드 파일 용량 제한
+      max-request-size: 50MB
+
 
 jwt:
   secret: ${JWT_SECRET}
   access-expiration: 86400000
   refresh-expiration: 604800000
 
+
+cloud:
+  aws:
+    s3:
+      bucket: ssafy-objection-ai-bucket
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ap-southeast-2
+      auto: false
+    stack:
+      auto: false
+
 server:
   port: 8080
+
+ai-server:
+  url: https://j14a102a.p.ssafy.io
+#   빌드해서 우분투 서버(172.26.0.41)에 직접 배포때는 내부 IP 172.26.6.90을 쓰는 게 속도도 빠르고 더 좋다
