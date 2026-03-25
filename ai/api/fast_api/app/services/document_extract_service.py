@@ -81,7 +81,7 @@ def extractDocument(request: DocumentExtractRequest) -> DocumentExtractResponse:
 
     return DocumentExtractResponse(
         caseNo=request.caseNo,
-        govDocNo=request.govDocNo,
+        # govDocNo=request.govDocNo,
         status=Status.SUCCESS,
         message="document extracted successfully",
         result=extractionResult,
