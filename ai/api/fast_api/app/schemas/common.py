@@ -58,7 +58,7 @@ class NoticeParsedFields(BaseModel):
     disposalDate: str | None = None
     agencyName: str | None = None
     sanctionType: str | None = None          # 영업정지 / 과징금 / 영업허가취소 / 영업폐쇄명령
-    sanctionValue: str | None = Field(default=None, gt=0)  # 영업정지/영업폐쇄명령 → 일수, 과징금 → 금액(원), 영업허가취소 → null
+    sanctionValue: str | None = None  # 영업정지/영업폐쇄명령 → 일수, 과징금 → 금액(원), 영업허가취소 → null
     businessName: str | None = None
     businessAddress: str | None = None
     title: str | None = None                 # AI 생성 사건 제목
@@ -201,7 +201,7 @@ class CaseInfo(BaseSchema):
     businessName: str
     businessAddress: str
     sanctionType: str
-    sanctionValue: str | None = Field(default=None, gt=0)  # 영업정지/영업폐쇄명령 → 일수, 과징금 → 금액(원), 영업허가취소 → nul
+    sanctionValue: str  # 영업정지/영업폐쇄명령 → 일수, 과징금 → 금액(원), 영업허가취소 → nul
     claimType: str
 
 

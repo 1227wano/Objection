@@ -20,50 +20,50 @@ from app.schemas.enums import InputDocumentType, Status
 logger = logging.getLogger(__name__)
 
 # -----------------------------------------------
-# ?ㅼ젙
+# 설정
 # -----------------------------------------------
 
 GMS_CHAT_URL = "https://gms.ssafy.io/gmsapi/api.openai.com/v1/chat/completions"
 GMS_API_KEY_ENV = "GMS_KEY"
 FILE_DOWNLOAD_TIMEOUT_SECONDS = 30.0
 
-# Step 1: OCR ???대?吏?먯꽌 ?띿뒪?몃쭔 異붿텧 (Vision, gpt-4o-mini)
+# Step 1: OCR — 이미지에서 텍스트만 추출 (Vision, gpt-4o-mini)
 OCR_MODEL = "gpt-4o"
-# Step 2: ?꾨뱶 留ㅽ븨 ???띿뒪?몄뿉??援ъ“?붾맂 JSON 異붿텧 (Text, gpt-4.1-mini)
+# Step 2: 필드 매핑 — 텍스트에서 구조화된 JSON 추출 (Text, gpt-4.1-mini)
 MAPPING_MODEL = "gpt-4.1-mini"
 
 MAX_IMAGE_SIZE = (1000, 1000)
 JPEG_QUALITY = 70
 
 # -----------------------------------------------
-# Step 1 ?꾨＼?꾪듃 ??OCR ?꾩슜
+# Step 1 프롬프트 — OCR 전용
 # -----------------------------------------------
 
 OCR_SYSTEM_PROMPT = """\
-?뱀떊? ?쒓뎅??臾몄꽌 OCR ?꾨Ц媛?낅땲??
-二쇱뼱吏?臾몄꽌 ?대?吏???띿뒪?몃? 鍮좎쭚?놁씠 ?뺥솗?섍쾶 異붿텧?섏꽭??
+당신은 한국어 문서 OCR 전문가입니다.
+주어진 문서 이미지의 텍스트를 빠짐없이 정확하게 추출하세요.
 
-洹쒖튃:
-1. ???뚯씠釉? 援ъ“??媛????[??ぉ紐?: [?댁슜] ?뺤떇?쇰줈 蹂?섑븯?몄슂.
-2. 以꾨컮轅덇낵 臾몃떒 援щ텇???좎??섏꽭??
-3. 留덉뒪??媛由?泥섎━??遺遺꾩? [留덉뒪?? ?쇰줈 ?쒓린?섏꽭??
-4. ?꾩옣/吏곸씤? 臾댁떆?섏꽭??
-5. 異붿텧???띿뒪?몃쭔 異쒕젰?섏꽭?? ?ㅻ챸?대굹 二쇱꽍??異붽??섏? 留덉꽭??"""
+규칙:
+1. 표(테이블) 구조는 각 셀을 [항목명]: [내용] 형식으로 변환하세요.
+2. 줄바꿈과 문단 구분을 유지하세요.
+3. 마스킹/가림 처리된 부분은 [마스킹] 으로 표기하세요.
+4. 도장/직인은 무시하세요.
+5. 추출한 텍스트만 출력하세요. 설명이나 주석을 추가하지 마세요."""
 
-OCR_USER_PROMPT = "??臾몄꽌??紐⑤뱺 ?띿뒪?몃? ?뺥솗?섍쾶 異붿텧?섏꽭??"
+OCR_USER_PROMPT = "이 문서의 모든 텍스트를 정확하게 추출하세요."
 
 # -----------------------------------------------
-# Step 2 ?꾨＼?꾪듃 ???꾨뱶 留ㅽ븨 ?꾩슜
+# Step 2 프롬프트 — 필드 매핑 전용
 # -----------------------------------------------
 
 MAPPING_SYSTEM_PROMPT = """\
-?뱀떊? ?쒓뎅 ?됱젙泥섎텇 臾몄꽌 遺꾩꽍 ?꾨Ц媛?낅땲??
-二쇱뼱吏?臾몄꽌 ?띿뒪?몃? 遺꾩꽍?섏뿬 諛섎뱶??JSON ?뺤떇?쇰줈留??묐떟?섏꽭??
-JSON ???ㅻⅨ ?띿뒪?? ?ㅻ챸, 留덊겕?ㅼ슫 肄붾뱶釉붾줉? ?덈? ?ы븿?섏? 留덉꽭??"""
+당신은 한국 행정처분 문서 분석 전문가입니다.
+주어진 문서 텍스트를 분석하여 반드시 JSON 형식으로만 응답하세요.
+JSON 외 다른 텍스트, 설명, 마크다운 코드블록은 절대 포함하지 마세요."""
 
 
 # -----------------------------------------------
-# 硫붿씤 濡쒖쭅
+# 메인 로직
 # -----------------------------------------------
 
 def extractDocument(request: DocumentExtractRequest) -> DocumentExtractResponse:
@@ -72,14 +72,14 @@ def extractDocument(request: DocumentExtractRequest) -> DocumentExtractResponse:
     fileBytes, mimeType = _loadFile(request.fileUrl)
 
     if mimeType == "application/pdf":
-        # PDF ???띿뒪??吏곸젒 異붿텧 (OCR ?ㅽ궢)
+        # PDF → 텍스트 직접 추출 (OCR 스킵)
         rawText = _extractTextFromPdf(fileBytes)
     else:
-        # ?대?吏 ??OCR : ?대?吏 ??rawText (gpt-4o)
+        # 이미지 → OCR : 이미지 → rawText (gpt-4o)
         rawText = _step1Ocr(fileBytes, mimeType, apiKey)
         logger.info("Step 1 OCR completed: %d chars extracted", len(rawText))
 
-    # Step 2: ?꾨뱶 留ㅽ븨 ??rawText ??援ъ“?붾맂 寃곌낵 (gpt-4.1-mini)
+    # Step 2: 필드 매핑 — rawText → 구조화된 결과 (gpt-4.1-mini)
     extractionResult = _step2Mapping(rawText, documentType, apiKey)
     logger.info("Step 2 Mapping completed: type=%s, valid=%s",
                 extractionResult.sourceDocumentType, extractionResult.isValidForStage)
@@ -98,7 +98,7 @@ def extractDocument(request: DocumentExtractRequest) -> DocumentExtractResponse:
 # Step 1: OCR (gpt-4o-mini, chat/completions, role=developer)
 # -----------------------------------------------
 def _extractTextFromPdf(fileBytes: bytes) -> str:
-    """PDF?먯꽌 ?띿뒪?몃? 吏곸젒 異붿텧?쒕떎."""
+    """PDF에서 텍스트를 직접 추출한다."""
     with pdfplumber.open(io.BytesIO(fileBytes)) as pdf:
         pages = []
         for page in pdf.pages:
@@ -106,11 +106,11 @@ def _extractTextFromPdf(fileBytes: bytes) -> str:
             if text:
                 pages.append(text)
     if not pages:
-        raise ServiceException("PDF?먯꽌 ?띿뒪?몃? 異붿텧?????놁뒿?덈떎")
+        raise ServiceException("PDF에서 텍스트를 추출할 수 없습니다")
     return "\n\n".join(pages)
 
 def _step1Ocr(fileBytes: bytes, mimeType: str, apiKey: str) -> str:
-    """?대?吏?먯꽌 rawText留?異붿텧?쒕떎."""
+    """이미지에서 rawText만 추출한다."""
     base64File = base64.b64encode(fileBytes).decode("utf-8")
 
     payload = {
@@ -143,7 +143,7 @@ def _step1Ocr(fileBytes: bytes, mimeType: str, apiKey: str) -> str:
 
 
 # -----------------------------------------------
-# Step 2: ?꾨뱶 留ㅽ븨 (gpt-4.1-mini, chat/completions, role=system)
+# Step 2: 필드 매핑 (gpt-4.1-mini, chat/completions, role=system)
 # -----------------------------------------------
 
 def _step2Mapping(
@@ -151,7 +151,7 @@ def _step2Mapping(
         documentType: InputDocumentType,
         apiKey: str,
 ) -> DocumentExtractResult:
-    """rawText?먯꽌 援ъ“?붾맂 ?꾨뱶瑜?異붿텧?쒕떎."""
+    """rawText에서 구조화된 필드를 추출한다."""
     userPrompt = _buildMappingPrompt(rawText, documentType)
 
     payload = {
@@ -177,54 +177,54 @@ def _step2Mapping(
 
 
 def _buildMappingPrompt(rawText: str, documentType: InputDocumentType) -> str:
-    """臾몄꽌 醫낅쪟蹂?留ㅽ븨 ?꾨＼?꾪듃瑜??앹꽦?쒕떎."""
+    """문서 종류별 매핑 프롬프트를 생성한다."""
 
     if documentType == InputDocumentType.NOTICE:
         fieldsSpec = """\
-    "disposalDate": "YYYY-MM-DD ?뺤떇. 泥섎텇?쇱옄/?됱젙泥섎텇??泥섎텇 ?쒖옉?? ?놁쑝硫?null",
-    "agencyName": "泥섎텇 湲곌?紐?(?? ?쒖슱?밸퀎??媛뺣궓援ъ껌). 臾몄꽌 ?섎떒 諛쒖떊??李멸퀬. ?놁쑝硫?null",
-    "sanctionType": "?곸뾽?뺤? / 怨쇱쭠湲?/ ?곸뾽?덇?痍⑥냼 / ?곸뾽?먯뇙紐낅졊 以??뺥솗???섎굹. ?놁쑝硫?null",
-    "sanctionValue": "?곸뾽?뺤?쨌?먯뇙紐낅졊?대㈃ ?쇱닔(?レ옄), 怨쇱쭠湲덉씠硫?湲덉븸(?? ?レ옄), ?덇?痍⑥냼硫?null",
-    "businessName": "?낆냼紐??곹샇. ?놁쑝硫?null",
-    "businessAddress": "?낆냼 ?뚯옱吏 二쇱냼. ?놁쑝硫?null",
-    "title": "???ш굔????以꾨줈 ?붿빟???쒕ぉ (AI ?앹꽦)",
-    "Inform": "遺덈났?덉감 ?덈궡/怨좎? ?댁슜???덉쑝硫?true, ?놁쑝硫?false",
-    "InformContent": "遺덈났?덉감 怨좎? ?댁슜 ?꾨Ц. ?놁쑝硫?null",
-    "legalBasis": ["洹쇨굅 踰뺤“??諛곗뿴. ?? '?앺뭹?꾩깮踰???4議?, '?뚯븙?곗뾽吏꾪씎?먭??쒕쾿瑜???2議?"],
-    "etc": {"臾몄꽌?먯꽌 異붿텧??湲고? 二쇱슂 ?뺣낫": "臾몄옄??媛믩쭔 媛?? 由ъ뒪??諛곗뿴/媛앹껜 ?덈? 湲덉?. ?щ윭 ??ぉ? ?쇳몴濡?援щ텇???섎굹??臾몄옄?대줈 ?묒꽦"}"""
+    "disposalDate": "YYYY-MM-DD 형식. 처분일자/행정처분일/처분 시작일. 없으면 null",
+    "agencyName": "처분 기관명 (예: 서울특별시 강남구청). 문서 하단 발신자 참고. 없으면 null",
+    "sanctionType": "영업정지 / 과징금 / 영업허가취소 / 영업폐쇄명령 중 정확히 하나. 없으면 null",
+    "sanctionValue": "영업정지·폐쇄명령이면 일수(숫자), 과징금이면 금액(원, 숫자), 허가취소면 null",
+    "businessName": "업소명/상호. 없으면 null",
+    "businessAddress": "업소 소재지 주소. 없으면 null",
+    "title": "이 사건을 한 줄로 요약한 제목 (AI 생성)",
+    "Inform": "불복절차 안내/고지 내용이 있으면 true, 없으면 false",
+    "InformContent": "불복절차 고지 내용 전문. 없으면 null",
+    "legalBasis": ["근거 법조항 배열. 예: '식품위생법 제44조', '음악산업진흥에관한법률 제22조'"],
+    "etc": {"문서에서 추출한 기타 주요 정보": "문자열 값만 가능. 리스트/배열/객체 절대 금지. 여러 항목은 쉼표로 구분한 하나의 문자열로 작성"}"""
 
     elif documentType == InputDocumentType.ANSWER:
         fieldsSpec = """\
-    "caseNum": "?ш굔踰덊샇 (?? 2026-01234). ?놁쑝硫?null",
-    "caseName": "?ш굔紐? ?놁쑝硫?null",
-    "legalBasis": ["洹쇨굅 踰뺤“??諛곗뿴"],
-    "etc": {"湲고? 二쇱슂 ?뺣낫": "媛?}"""
+    "caseNum": "사건번호 (예: 2026-01234). 없으면 null",
+    "caseName": "사건명. 없으면 null",
+    "legalBasis": ["근거 법조항 배열"],
+    "etc": {"기타 주요 정보": "값"}"""
 
     elif documentType == InputDocumentType.DECISION:
         fieldsSpec = """\
-    "etc": {"二쇰Ц ?댁슜, 泥?뎄 痍⑥?, 洹쇨굅 踰뺤“ ??二쇱슂 ?뺣낫": "媛?}"""
+    "etc": {"주문 내용, 청구 취지, 근거 법조 등 주요 정보": "값"}"""
 
     else:
         fieldsSpec = '"etc": {}'
 
     return f"""\
-?ㅼ쓬? ?쒓뎅 ?됱젙泥섎텇 愿??臾몄꽌({documentType.value})??OCR 異붿텧 ?띿뒪?몄엯?덈떎.
+다음은 한국 행정처분 관련 문서({documentType.value})의 OCR 추출 텍스트입니다.
 
 <document>
 {rawText}
 </document>
 
-???띿뒪?몃? 遺꾩꽍?섏뿬 ?꾨옒 JSON ?뺤떇?쇰줈 ?뺣낫瑜?異붿텧?섏꽭??
+위 텍스트를 분석하여 아래 JSON 형식으로 정보를 추출하세요.
 
-?먮떒 湲곗?:
-- "?ъ쟾?듭???, "?섍껄?쒖텧", "泥섎텇?섍퀬???섎뒗 ?댁슜" ?깆쓽 ?쒗쁽???덉쑝硫??ъ쟾?듭??쒖엯?덈떎 ??isValidForStage: false
-- "泥섎텇?듭???, "泥섎텇紐낅졊??, "?됱젙泥섎텇紐낅졊?? ?깆? ?뺤떇 泥섎텇 臾몄꽌?낅땲????isValidForStage: true
+판단 기준:
+- "사전통지서", "의견제출", "처분하고자 하는 내용" 등의 표현이 있으면 사전통지서입니다 → isValidForStage: false
+- "처분통지서", "처분명령서", "행정처분명령서" 등은 정식 처분 문서입니다 → isValidForStage: true
 
-?묐떟 JSON:
+응답 JSON:
 {{
   "isValidForStage": true/false,
-  "invalidReason": null ?먮뒗 "?ъ쟾?듭??쒕줈 ?먮떒?? ???ъ쑀,
-  "summary": "臾몄꽌瑜?1~2以꾨줈 ?붿빟",
+  "invalidReason": null 또는 "사전통지서로 판단됨" 등 사유,
+  "summary": "문서를 1~2줄로 요약",
   "parsedFields": {{
 {fieldsSpec}
   }}
@@ -232,11 +232,11 @@ def _buildMappingPrompt(rawText: str, documentType: InputDocumentType) -> str:
 
 
 # -----------------------------------------------
-# GMS API 怨듯넻 ?몄텧 (chat/completions)
+# GMS API 공통 호출 (chat/completions)
 # -----------------------------------------------
 
 def _callGms(payload: dict, apiKey: str, stepName: str) -> dict:
-    """GMS Chat Completions API瑜??몄텧?섍퀬 ?묐떟 body瑜?諛섑솚?쒕떎."""
+    """GMS Chat Completions API를 호출하고 응답 body를 반환한다."""
     try:
         with httpx.Client(timeout=httpx.Timeout(120.0, connect=10.0)) as client:
             response = client.post(
@@ -258,7 +258,7 @@ def _callGms(payload: dict, apiKey: str, stepName: str) -> dict:
 
 
 def _extractTextFromChatResponse(responseBody: dict, stepName: str) -> str:
-    """chat/completions ?묐떟?먯꽌 ?띿뒪?몃? 異붿텧?쒕떎. (choices[0].message.content)"""
+    """chat/completions 응답에서 텍스트를 추출한다. (choices[0].message.content)"""
     try:
         return responseBody["choices"][0]["message"]["content"]
     except (KeyError, IndexError) as exc:
@@ -268,7 +268,7 @@ def _extractTextFromChatResponse(responseBody: dict, stepName: str) -> str:
 
 
 # -----------------------------------------------
-# ?뚯씪 濡쒕뵫
+# 파일 로딩
 # -----------------------------------------------
 
 def _loadFile(fileUrl: str) -> tuple[bytes, str]:
@@ -285,13 +285,12 @@ def _loadFile(fileUrl: str) -> tuple[bytes, str]:
         raise ServiceException("failed to download file") from exc
 
     fileBytes = response.content
-    contentType = response.headers.get("Content-Type")
-    mimeType = _detectMimeType(fileUrl, contentType)
+    mimeType = _detectMimeType(fileUrl, response.headers.get("Content-Type"))
 
     if mimeType == "application/pdf":
         return fileBytes, "application/pdf"
 
-    if mimeType in (".jpg", ".jpeg", ".png", "image/jpeg", "image/png"):
+    if mimeType in ("image/jpeg", "image/png", ".jpg", ".jpeg", ".png"):
         try:
             from PIL import Image
         except ImportError:
@@ -341,7 +340,7 @@ def _getApiKey() -> str:
 
 
 # -----------------------------------------------
-# Step 2 ?묐떟 ?뚯떛
+# Step 2 응답 파싱
 # -----------------------------------------------
 
 def _parseMappingResult(
@@ -349,9 +348,9 @@ def _parseMappingResult(
         rawText: str,
         documentType: InputDocumentType,
 ) -> DocumentExtractResult:
-    """Step 2 留ㅽ븨 寃곌낵 JSON???뚯떛?섏뿬 DocumentExtractResult濡?蹂?섑븳??"""
+    """Step 2 매핑 결과 JSON을 파싱하여 DocumentExtractResult로 변환한다."""
 
-    # JSON ?뚯떛 (肄붾뱶釉붾줉 媛먯떥湲????
+    # JSON 파싱 (코드블록 감싸기 대응)
     cleanText = jsonText.strip()
     if cleanText.startswith("```"):
         cleanText = cleanText.split("\n", 1)[-1]
@@ -369,7 +368,7 @@ def _parseMappingResult(
     isValid = data.get("isValidForStage", True)
     rawParsedFields = data.get("parsedFields", {})
 
-    # rawParsedFields 媛?몄삩 吏곹썑??
+    # rawParsedFields 가져온 직후에
     etc = rawParsedFields.get("etc", {})
     if isinstance(etc, str):
         rawParsedFields["etc"] = {"info": etc}
