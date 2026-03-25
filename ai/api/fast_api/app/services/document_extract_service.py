@@ -27,7 +27,7 @@ GMS_API_KEY_ENV = "GMS_KEY"
 FILE_BASE_PATH = os.getenv("FILE_BASE_PATH", "/app/files")
 
 # Step 1: OCR — 이미지에서 텍스트만 추출 (Vision, gpt-4o-mini)
-OCR_MODEL = "gpt-4o-mini"
+OCR_MODEL = "gpt-4o"
 # Step 2: 필드 매핑 — 텍스트에서 구조화된 JSON 추출 (Text, gpt-4.1-mini)
 MAPPING_MODEL = "gpt-4.1-mini"
 
