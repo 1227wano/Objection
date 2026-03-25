@@ -31,7 +31,7 @@ public class Case {
     private String title;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 19)
+    @Column(nullable = false, length = 30)
     private CaseStatus status;
 
     @Enumerated(EnumType.STRING)
@@ -87,5 +87,9 @@ public class Case {
         this.disposalDate = disposalDate;
         this.awareDate = awareDate;
         this.agencyName = agencyName;
+    }
+
+    public void updateStatus(CaseStatus status) {
+        this.status = status;
     }
 }
