@@ -9,11 +9,62 @@ import {
   type StageName,
 } from '@/lib/appeal-progress';
 
+interface CaseStatusInfo {
+  label: string;
+  href: string;
+  majorStage: StageName;
+  detailStep: string;
+}
+
+export const CASE_STATUS_MAP = {
+  // 처분서 단계
+  STARTED: { label: '사건 생성 직후', href: '/appeal/start', majorStage: '처분서 분석', detailStep: '처분서 첨부' },
+  DOC_UPLOADED: { label: '파일 입력 완료', href: '/appeal/start', majorStage: '처분서 분석', detailStep: '처분서 분석 대기' },
+  ANALYZING: { label: '처분서 분석 중', href: '/appeal/loading', majorStage: '처분서 분석', detailStep: '처분서 분석 중' },
+  ANALYSIS_DONE: { label: '처분서 분석 완료', href: '/appeal/analysis', majorStage: '처분서 분석', detailStep: '분석 결과 검토' },
+  ANALYSIS_FAILED: { label: '처분서 분석 실패', href: '/appeal/error', majorStage: '처분서 분석', detailStep: '분석 실패' },
+  
+  // 청구서 작성 단계
+  NARRATIVE_WRITING: { label: '청구서 경위 작성', href: '/appeal/claim/incident', majorStage: '행정심판청구서 작성', detailStep: '사건 경위 작성' },
+  STRATEGY_GENERATING: { label: '청구서 전략 도출 중', href: '/appeal/loading', majorStage: '행정심판청구서 작성', detailStep: '전략 도출 중' },
+  STRATEGY_DONE: { label: '청구서 전략 도출 완료', href: '/appeal/claim/report', majorStage: '행정심판청구서 작성', detailStep: 'AI 분석 결과' },
+  STRATEGY_FAILED: { label: '청구서 전략 도출 실패', href: '/appeal/error', majorStage: '행정심판청구서 작성', detailStep: '전략 도출 실패' },
+  CHECKLIST_WRITING: { label: '체크리스트 작성', href: '/appeal/claim/suggest', majorStage: '행정심판청구서 작성', detailStep: 'AI 제안' },
+  DOC_GENERATING: { label: '청구서 작성 중', href: '/appeal/loading', majorStage: '행정심판청구서 작성', detailStep: '문서작성' },
+  DOC_GENERATED: { label: '청구서 작성 완료', href: '/appeal/claim/write', majorStage: '행정심판청구서 작성', detailStep: '문서작성' },
+  DOC_FAILED: { label: '청구서 작성 실패', href: '/appeal/error', majorStage: '행정심판청구서 작성', detailStep: '작성 실패' },
+  APPEAL_SUBMITTED: { label: '청구서 단계 종료', href: '/appeal/claim/complete', majorStage: '행정심판청구서 작성', detailStep: '완료' },
+  
+  // 답변서 단계
+  ANSWER_RECEIVED: { label: '답변서 제출', href: '/appeal/answer/upload', majorStage: '답변서 분석', detailStep: '답변서 첨부' },
+  ANSWER_ANALYZING: { label: '답변서 분석 중', href: '/appeal/loading', majorStage: '답변서 분석', detailStep: '답변서 분석 중' },
+  ANSWER_DONE: { label: '답변서 분석 완료', href: '/appeal/answer/report', majorStage: '답변서 분석', detailStep: 'AI 분석 결과' },
+  ANSWER_FAILED: { label: '답변서 분석 실패', href: '/appeal/error', majorStage: '답변서 분석', detailStep: '분석 실패' },
+  
+  // 보충서면 단계
+  SUPPLEMENT_NARRATIVE: { label: '보충서면 경위 작성', href: '/appeal/supplement/case', majorStage: '보충서면 작성', detailStep: '보충 경위서 작성' },
+  SUPPLEMENT_GENERATING: { label: '보충서면 전략 도출 중', href: '/appeal/loading', majorStage: '보충서면 작성', detailStep: '전략 도출 중' },
+  SUPPLEMENT_STRATEGY_DONE: { label: '보충서면 전략 도출 완료', href: '/appeal/supplement/suggest', majorStage: '보충서면 작성', detailStep: 'AI 제안' },
+  SUPPLEMENT_STRATEGY_FAILED: { label: '보충서면 전략 도출 실패', href: '/appeal/error', majorStage: '보충서면 작성', detailStep: '전략 도출 실패' },
+  SUPPLEMENT_DOC_GENERATING: { label: '보충서면 작성 중', href: '/appeal/loading', majorStage: '보충서면 작성', detailStep: '문서작성' },
+  SUPPLEMENT_DONE: { label: '보충서면 작성 완료', href: '/appeal/supplement/write', majorStage: '보충서면 작성', detailStep: '문서작성' },
+  SUPPLEMENT_FAILED: { label: '보충서면 작성 실패', href: '/appeal/error', majorStage: '보충서면 작성', detailStep: '작성 실패' },
+  SUPPLEMENT_SUBMITTED: { label: '보충서면 단계 종료', href: '/appeal/supplement/complete', majorStage: '보충서면 작성', detailStep: '완료' },
+  
+  // 재결서 단계
+  DECISION_RECEIVED: { label: '재결서 제출', href: '/appeal/ruling/upload', majorStage: '재결서 분석', detailStep: '재결서 첨부' },
+  DECISION_ANALYZING: { label: '재결서 분석 중', href: '/appeal/loading', majorStage: '재결서 분석', detailStep: '재결서 분석 중' },
+  DECISION_DONE: { label: '재결서 분석 완료', href: '/appeal/ruling/analysis', majorStage: '재결서 분석', detailStep: '재결서 분석' },
+  DECISION_FAILED: { label: '재결서 분석 실패', href: '/appeal/error', majorStage: '재결서 분석', detailStep: '분석 실패' },
+  COMPLETED: { label: '사건 종결', href: '/appeal/ruling/analysis', majorStage: '행정심판 완료', detailStep: '' },
+} satisfies Record<string, CaseStatusInfo>;
+
+export type CaseStatus = keyof typeof CASE_STATUS_MAP;
+
 interface MockCase {
   id: number;
   title: string;
-  majorStage: StageName;
-  detailStep: string;
+  status: CaseStatus;
   updatedAt: string;
 }
 
@@ -59,32 +110,28 @@ const MOCK_CASES: MockCase[] = [
   {
     id: 1,
     title: '마포구 세무서 용도변경 허가 거부 취소',
-    majorStage: '행정심판청구서 작성',
-    detailStep: '사건 경위 작성',
+    status: 'NARRATIVE_WRITING',
     updatedAt: TODAY,
   },
   {
     id: 2,
     title: '건축물 사용승인 반려 처분 취소',
-    majorStage: '답변서 분석',
-    detailStep: 'AI 분석 결과',
+    status: 'ANSWER_DONE',
     updatedAt: TODAY,
   },
   {
     id: 3,
     title: '영업정지 처분 취소 청구',
-    majorStage: '보충서면 작성',
-    detailStep: '문서 작성',
+    status: 'SUPPLEMENT_DONE',
     updatedAt: TODAY,
   },
   {
     id: 4,
     title: '옥외영업 불허 처분 취소 청구',
-    majorStage: '재결서 분석',
-    detailStep: '재결서 분석',
+    status: 'DECISION_DONE',
     updatedAt: TODAY,
   },
-] as const;
+];
 
 const STAGE_ACCENT_STYLES: Record<StageName, { line: string; marker: string }> = {
   '처분서 분석': {
@@ -213,14 +260,15 @@ export default function DashboardHome() {
         </h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {MOCK_CASES.map((item) => {
-            const isValid = isValidDetailStep(item.majorStage, item.detailStep);
-            const filledSegments = getProgressSegments(item.majorStage);
-            const accent = STAGE_ACCENT_STYLES[item.majorStage];
+            const statusInfo = CASE_STATUS_MAP[item.status];
+            const isValid = isValidDetailStep(statusInfo.majorStage, statusInfo.detailStep);
+            const filledSegments = getProgressSegments(statusInfo.majorStage);
+            const accent = STAGE_ACCENT_STYLES[statusInfo.majorStage];
 
             return (
               <Link
                 key={item.id}
-                href={`/appeal/${item.id}`}
+                href={statusInfo.href}
                 className="relative flex flex-col gap-6 rounded-2xl border border-[#eef2f9] bg-white p-8 pl-10 shadow-[0_10px_28px_rgba(15,15,112,0.08)] transition-all duration-200 hover:-translate-y-1 hover:border-blue-100 hover:shadow-[0_18px_36px_rgba(15,15,112,0.10)]"
               >
                 <div
@@ -231,11 +279,16 @@ export default function DashboardHome() {
                   {item.title}
                 </p>
 
-                <span
-                  className={`inline-block self-start rounded-full px-3 py-1.5 text-sm font-semibold ${STAGE_CONFIG[item.majorStage].badgeClassName}`}
-                >
-                  {item.majorStage}
-                </span>
+                <div className="flex gap-2 self-start">
+                  <span
+                    className={`inline-block rounded-full px-3 py-1.5 text-sm font-semibold ${STAGE_CONFIG[statusInfo.majorStage].badgeClassName}`}
+                  >
+                    {statusInfo.majorStage}
+                  </span>
+                  <span className="inline-block rounded-full px-3 py-1.5 text-sm font-semibold bg-gray-100 text-gray-600">
+                    {statusInfo.label}
+                  </span>
+                </div>
 
                 <div className="flex flex-col gap-3">
                   <p className="text-sm text-gray-700">
@@ -243,7 +296,7 @@ export default function DashboardHome() {
                       className={`mr-2 inline-block h-3 w-3 rounded-full align-middle ${accent.line}`}
                     />
                     <span className="font-semibold">현재 단계:</span>{' '}
-                    {isValid ? item.detailStep || '-' : '정의되지 않은 단계'}
+                    {isValid ? statusInfo.detailStep || '-' : '정의되지 않은 단계'}
                   </p>
 
                   <div className="flex items-center gap-2">
