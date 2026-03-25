@@ -324,6 +324,17 @@ def _parseMappingResult(
     isValid = data.get("isValidForStage", True)
     rawParsedFields = data.get("parsedFields", {})
 
+    # rawParsedFields 가져온 직후에
+    etc = rawParsedFields.get("etc", {})
+    if isinstance(etc, str):
+        rawParsedFields["etc"] = {"info": etc}
+    elif isinstance(etc, list):
+        rawParsedFields["etc"] = {f"item_{i}": str(v) for i, v in enumerate(etc)}
+    elif isinstance(etc, dict):
+        rawParsedFields["etc"] = {k: str(v) if not isinstance(v, str) else v for k, v in etc.items()}
+    else:
+        rawParsedFields["etc"] = {}
+
     if isValid:
         if documentType == InputDocumentType.NOTICE:
             parsedFields = NoticeParsedFields(**rawParsedFields)
