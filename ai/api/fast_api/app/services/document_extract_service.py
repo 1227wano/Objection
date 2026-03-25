@@ -4,6 +4,7 @@ import json
 import io
 import logging
 import httpx
+import pdfplumber
 from pathlib import Path
 
 from app.core.exceptions import ServiceException
@@ -70,9 +71,13 @@ def extractDocument(request: DocumentExtractRequest) -> DocumentExtractResponse:
     apiKey = _getApiKey()
     fileBytes, mimeType = _loadFile(request.fileKey)
 
-    # Step 1: OCR — 이미지 → rawText (gpt-4o-mini)
-    rawText = _step1Ocr(fileBytes, mimeType, apiKey)
-    logger.info("Step 1 OCR completed: %d chars extracted", len(rawText))
+    if mimeType == "application/pdf":
+        # PDF → 텍스트 직접 추출 (OCR 스킵)
+        rawText = _extractTextFromPdf(fileBytes)
+    else:
+        # 이미지 → OCR : 이미지 → rawText (gpt-4o)
+        rawText = _step1Ocr(fileBytes, mimeType, apiKey)
+        logger.info("Step 1 OCR completed: %d chars extracted", len(rawText))
 
     # Step 2: 필드 매핑 — rawText → 구조화된 결과 (gpt-4.1-mini)
     extractionResult = _step2Mapping(rawText, documentType, apiKey)
@@ -92,6 +97,17 @@ def extractDocument(request: DocumentExtractRequest) -> DocumentExtractResponse:
 # -----------------------------------------------
 # Step 1: OCR (gpt-4o-mini, chat/completions, role=developer)
 # -----------------------------------------------
+def _extractTextFromPdf(fileBytes: bytes) -> str:
+    """PDF에서 텍스트를 직접 추출한다."""
+    with pdfplumber.open(io.BytesIO(fileBytes)) as pdf:
+        pages = []
+        for page in pdf.pages:
+            text = page.extract_text()
+            if text:
+                pages.append(text)
+    if not pages:
+        raise ServiceException("PDF에서 텍스트를 추출할 수 없습니다")
+    return "\n\n".join(pages)
 
 def _step1Ocr(fileBytes: bytes, mimeType: str, apiKey: str) -> str:
     """이미지에서 rawText만 추출한다."""
