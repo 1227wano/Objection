@@ -48,7 +48,8 @@ export default function ClaimCompletePage() {
                     서면 제출 및 첨부파일용 (다운로드)
                   </h2>
                   <p className="text-base text-gray-500">
-                    온라인 제출 시 첨부파일로 활용하거나, 인쇄하여 등기 우편으로 제출하실 수 있습니다.
+                    온라인 제출 시 첨부파일로 활용하거나, 인쇄하여 등기 우편으로 제출하실 수
+                    있습니다.
                   </p>
                 </div>
                 <FileDownloadTab />
@@ -56,7 +57,7 @@ export default function ClaimCompletePage() {
             </div>
 
             {/* 집행정지 긴급 배너 */}
-            <ExecutionStopBanner />
+            {/* <ExecutionStopBanner /> */}
 
             {/* 하단 네비게이션 */}
             <div className="flex justify-end pb-10">
