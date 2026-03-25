@@ -15,7 +15,14 @@ export default function proxy(request: NextRequest) {
 
   // 1. 공용 API 및 경로 정의
   const publicRoutes = ['/login', '/regist', '/'];
-  const publicApiRoutes = ['/api/auth/login', '/api/auth/regist', '/api/auth/logout'];
+  const publicApiRoutes = [
+    '/api/auth/login',
+    '/api/auth/signup',
+    '/api/auth/email/send',
+    '/api/auth/email/verify',
+    '/api/auth/refresh',
+    '/api/auth/logout',
+  ];
   
   const isPublicRoute = publicRoutes.includes(pathname);
   const isPublicApiRoute = publicApiRoutes.includes(pathname);
@@ -32,7 +39,15 @@ export default function proxy(request: NextRequest) {
     }
 
     // 그 외(Next.js API Route에서 처리하는 경로 제외) 백엔드 프록시 (Rewrite)
-    const nextApiRoutes = ['/api/auth/login', '/api/auth/logout'];
+    const nextApiRoutes = [
+      '/api/auth/login',
+      '/api/auth/signup',
+      '/api/auth/email/send',
+      '/api/auth/email/verify',
+      '/api/auth/refresh',
+      '/api/auth/logout',
+      '/api/user/me',
+    ];
     if (!nextApiRoutes.includes(pathname)) {
       const baseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://j14a102.p.ssafy.io:8080').replace(/\/$/, '');
       const backendUrl = new URL(request.nextUrl.pathname, `${baseUrl}/`);

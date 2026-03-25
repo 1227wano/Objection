@@ -1,285 +1,376 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useRef, useState, type KeyboardEvent } from 'react';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { apiClient } from '@/lib/api-client';
+
+interface ApiResult {
+  status: 'SUCCESS' | 'FAIL' | 'ERROR';
+  message: string;
+  data: null;
+}
+
+type FormDataState = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
+
+type ErrorState = FormDataState;
+
+const INITIAL_FORM_DATA: FormDataState = {
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+};
+
+const INITIAL_ERRORS: ErrorState = {
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+};
 
 export default function RegistForm() {
   const router = useRouter();
-
-  // 폼 진행 단계 (1: 정보 입력, 2: 이메일 인증)
-  const [step, setStep] = useState(1);
-
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-  });
-
-  const [errors, setErrors] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-  });
-
-  // 6자리 인증 코드 상태
-  const [authCode, setAuthCode] = useState(['', '', '', '', '', '']);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name as keyof typeof errors]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
+  const [step, setStep] = useState<1 | 2>(1);
+  const [formData, setFormData] = useState<FormDataState>(INITIAL_FORM_DATA);
+  const [errors, setErrors] = useState<ErrorState>(INITIAL_ERRORS);
+  const [authCode, setAuthCode] = useState(['', '', '', '', '', '']);
+  const [submitError, setSubmitError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
+
+  function clearFieldError(field: keyof ErrorState) {
+    if (!errors[field]) {
+      return;
     }
-  };
 
-  const handleNextStep = () => {
-    // 에러 상태 초기화
-    setErrors({ name: '', email: '', password: '', confirmPassword: '' });
+    setErrors((current) => ({ ...current, [field]: '' }));
+  }
 
-    // 1. 이름 빈칸 확인
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const { name, value } = event.target;
+    const field = name as keyof FormDataState;
+
+    setFormData((current) => ({ ...current, [field]: value }));
+    clearFieldError(field);
+
+    if (submitError) {
+      setSubmitError('');
+    }
+  }
+
+  function validateStepOne() {
+    const nextErrors: ErrorState = { ...INITIAL_ERRORS };
+
     if (!formData.name.trim()) {
-      setErrors((prev) => ({ ...prev, name: '이름이 비어 있습니다. 이름을 입력해 주세요.' }));
-      return;
+      nextErrors.name = '이름을 입력해 주세요.';
     }
 
-    // 2. 이메일 빈칸 및 형식 확인
     if (!formData.email.trim()) {
-      setErrors((prev) => ({ ...prev, email: '이메일(아이디)이 비어 있습니다.' }));
-      return;
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setErrors((prev) => ({ ...prev, email: '올바른 이메일 양식이 아닙니다.' }));
-      return;
+      nextErrors.email = '이메일을 입력해 주세요.';
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        nextErrors.email = '올바른 이메일 형식으로 입력해 주세요.';
+      }
     }
 
-    // 3. 패스워드 빈칸 및 길이 확인
     if (!formData.password) {
-      setErrors((prev) => ({ ...prev, password: '패스워드가 비어 있습니다.' }));
-      return;
-    }
-    if (formData.password.length < 8) {
-      setErrors((prev) => ({ ...prev, password: '패스워드는 8글자 이상이어야 합니다.' }));
-      return;
+      nextErrors.password = '비밀번호를 입력해 주세요.';
+    } else if (formData.password.length < 8) {
+      nextErrors.password = '비밀번호는 8자 이상이어야 합니다.';
     }
 
-    // 4. 패스워드 확인 빈칸 및 일치 여부 확인
     if (!formData.confirmPassword) {
-      setErrors((prev) => ({ ...prev, confirmPassword: '패스워드 확인칸이 비어 있습니다.' }));
-      return;
-    }
-    if (formData.password !== formData.confirmPassword) {
-      setErrors((prev) => ({ ...prev, confirmPassword: '패스워드가 서로 일치하지 않습니다.' }));
-      return;
+      nextErrors.confirmPassword = '비밀번호 확인을 입력해 주세요.';
+    } else if (formData.password !== formData.confirmPassword) {
+      nextErrors.confirmPassword = '비밀번호가 서로 일치하지 않습니다.';
     }
 
-    // 검증 통과 시 인증 번호 발송 API 호출 (실제 구현 시)
-    // alert('해당 이메일로 인증 코드가 발송되었습니다!');
+    setErrors(nextErrors);
 
-    // 단계 넘어가기
-    setStep(2);
-  };
+    return !Object.values(nextErrors).some(Boolean);
+  }
 
-  const handleFinalRegist = () => {
-    const codeString = authCode.join('');
-    if (codeString.length !== 6) {
-      alert('6자리 인증 코드를 모두 입력해 주세요.');
+  async function handleNextStep() {
+    setSubmitError('');
+
+    if (!validateStepOne()) {
       return;
     }
 
-    // 실제 회원가입 API 연동 위치
-    alert('이메일 인증 성공! 회원가입이 완료되었습니다.');
-    router.push('/login'); // 완료 후 로그인 페이지로 이동
-  };
+    setIsSendingCode(true);
 
-  const handleCodeChange = (index: number, value: string) => {
-    // 숫자만 입력 허용
-    if (!/^[0-9]*$/.test(value)) return;
+    try {
+      const response = await apiClient.post<ApiResult>('/auth/email/send', {
+        email: formData.email.trim(),
+        purpose: 'SIGNUP',
+      });
 
-    const newCode = [...authCode];
-    newCode[index] = value;
-    setAuthCode(newCode);
+      if (response.status === 'SUCCESS') {
+        setStep(2);
+        return;
+      }
 
-    // 다음 칸으로 자동 포커스 이동
-    if (value && index < 5) {
+      setSubmitError(response.message || '인증 코드를 보내지 못했습니다.');
+    } catch (error) {
+      if (error instanceof Error) {
+        setSubmitError(error.message || '인증 코드를 보내지 못했습니다.');
+      } else {
+        setSubmitError('인증 코드를 보내지 못했습니다.');
+      }
+    } finally {
+      setIsSendingCode(false);
+    }
+  }
+
+  function handleCodeChange(index: number, value: string) {
+    if (!/^[0-9]*$/.test(value)) {
+      return;
+    }
+
+    const nextCode = [...authCode];
+    nextCode[index] = value;
+    setAuthCode(nextCode);
+
+    if (submitError) {
+      setSubmitError('');
+    }
+
+    if (value && index < authCode.length - 1) {
       inputRefs.current[index + 1]?.focus();
     }
-  };
+  }
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    // 백스페이스 키를 눌렀을 때, 현재 칸이 비어있으면 이전 칸으로 포커스 이동
-    if (e.key === 'Backspace' && !authCode[index] && index > 0) {
+  function handleCodeKeyDown(index: number, event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'Backspace' && !authCode[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
-  };
+  }
 
-  // Helper 함수: 에러 여부에 따라 input 테두리/포커스 색상 반환
-  const getInputClassName = (errorMsg: string) => {
-    const baseClass =
-      'w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-colors text-sm';
-    if (errorMsg) {
-      return `${baseClass} border-red-500 focus:ring-red-500`; // 에러 스타일
+  async function handleFinalRegist() {
+    const codeString = authCode.join('');
+
+    if (codeString.length !== 6) {
+      setSubmitError('인증번호 6자리를 모두 입력해 주세요.');
+      return;
     }
-    return `${baseClass} border-gray-300 focus:ring-first`; // 정상 스타일
-  };
+
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    try {
+      const verifyResponse = await apiClient.post<ApiResult>('/auth/email/verify', {
+        email: formData.email.trim(),
+        code: codeString,
+        purpose: 'SIGNUP',
+      });
+
+      if (verifyResponse.status !== 'SUCCESS') {
+        setSubmitError(verifyResponse.message || '이메일 인증 확인에 실패했습니다.');
+        return;
+      }
+
+      const signupResponse = await apiClient.post<ApiResult>('/auth/signup', {
+        userId: formData.email.trim(),
+        userPw: formData.password,
+        userName: formData.name.trim(),
+      });
+
+      if (signupResponse.status === 'SUCCESS') {
+        window.alert(signupResponse.message || '회원가입이 완료되었습니다. 로그인해 주세요.');
+        router.push('/login');
+        return;
+      }
+
+      setSubmitError(signupResponse.message || '회원가입에 실패했습니다.');
+    } catch (error) {
+      if (error instanceof Error) {
+        setSubmitError(error.message || '이메일 인증 확인 또는 회원가입 중 오류가 발생했습니다.');
+      } else {
+        setSubmitError('이메일 인증 확인 또는 회원가입 중 오류가 발생했습니다.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  function getInputClassName(errorMessage: string) {
+    const baseClass =
+      'w-full rounded-lg border px-4 py-3 text-sm transition-colors focus:border-transparent focus:outline-none focus:ring-2';
+
+    return errorMessage
+      ? `${baseClass} border-red-500 focus:ring-red-500`
+      : `${baseClass} border-gray-300 focus:ring-first`;
+  }
 
   return (
     <div className="flex flex-col items-center pt-2 pb-4">
-      {/* 상단 로고 이미지 (공통) */}
       <div className="mb-4">
         <Image
           src="/logo.svg"
-          alt="이의있음! 로고"
+          alt="행정심판 비서 로고"
           width={80}
           height={80}
           className="object-contain"
         />
       </div>
 
-      <h2 className="text-xl font-bold text-gray-900 mb-2">회원가입</h2>
-      <p className="text-sm text-gray-500 mb-6">회원가입 후 서비스를 이용해 주세요</p>
+      <h2 className="mb-2 text-xl font-bold text-gray-900">회원가입</h2>
+      <p className="mb-6 text-sm text-gray-500">가입에 필요한 정보를 입력해 주세요.</p>
 
-      {/* 단계별 렌더링 */}
-      {step === 1 && (
+      {step === 1 ? (
         <>
-          <div className="w-full grid grid-cols-1 [@media_screen_and_(max-height:850px)]:sm:grid-cols-2 gap-x-4 gap-y-5">
-            {/* 이름 */}
-            <div className="space-y-2 text-left w-full">
+          <div className="grid w-full grid-cols-1 gap-x-4 gap-y-5 [@media_screen_and_(max-height:850px)]:sm:grid-cols-2">
+            <div className="space-y-2 text-left">
               <label className="block text-sm font-semibold text-gray-700">
-                이름<span className="text-red-500 ml-0.5">*</span>
+                이름<span className="ml-0.5 text-red-500">*</span>
               </label>
-              <div className="flex flex-col h-full">
+              <div className="flex flex-col">
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="실명으로 가입해주세요"
+                  placeholder="실명을 입력해 주세요."
                   className={getInputClassName(errors.name)}
                 />
-                {errors.name && <p className="text-xs text-red-500 mt-2 ml-1">{errors.name}</p>}
+                {errors.name ? <p className="mt-2 ml-1 text-xs text-red-500">{errors.name}</p> : null}
               </div>
             </div>
 
-            {/* 아이디 (이메일) */}
-            <div className="space-y-2 text-left w-full">
+            <div className="space-y-2 text-left">
               <label className="block text-sm font-semibold text-gray-700">
-                아이디 (이메일)<span className="text-red-500 ml-0.5">*</span>
+                이메일(아이디)<span className="ml-0.5 text-red-500">*</span>
               </label>
-              <div className="flex flex-col h-full">
+              <div className="flex flex-col">
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="이메일을 입력하세요"
+                  placeholder="이메일을 입력해 주세요."
                   className={getInputClassName(errors.email)}
                 />
-                {errors.email && <p className="text-xs text-red-500 mt-2 ml-1">{errors.email}</p>}
+                {errors.email ? (
+                  <p className="mt-2 ml-1 text-xs text-red-500">{errors.email}</p>
+                ) : null}
               </div>
             </div>
 
-            {/* 패스워드 */}
-            <div className="space-y-2 text-left w-full">
+            <div className="space-y-2 text-left">
               <label className="block text-sm font-semibold text-gray-700">
-                패스워드<span className="text-red-500 ml-0.5">*</span>
+                비밀번호<span className="ml-0.5 text-red-500">*</span>
               </label>
-              <div className="flex flex-col h-full">
+              <div className="flex flex-col">
                 <input
                   type="password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="패스워드는 8자 이상으로 해주세요"
+                  placeholder="비밀번호는 8자 이상이어야 합니다."
                   className={getInputClassName(errors.password)}
                 />
-                {errors.password && (
-                  <p className="text-xs text-red-500 mt-2 ml-1">{errors.password}</p>
-                )}
+                {errors.password ? (
+                  <p className="mt-2 ml-1 text-xs text-red-500">{errors.password}</p>
+                ) : null}
               </div>
             </div>
 
-            {/* 패스워드 확인 */}
-            <div className="space-y-2 text-left w-full">
+            <div className="space-y-2 text-left">
               <label className="block text-sm font-semibold text-gray-700">
-                패스워드 확인<span className="text-red-500 ml-0.5">*</span>
+                비밀번호 확인<span className="ml-0.5 text-red-500">*</span>
               </label>
-              <div className="flex flex-col h-full">
+              <div className="flex flex-col">
                 <input
                   type="password"
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  placeholder="패스워드를 한번 더 입력해 주세요"
+                  placeholder="비밀번호를 한 번 더 입력해 주세요."
                   className={getInputClassName(errors.confirmPassword)}
                 />
-                {errors.confirmPassword && (
-                  <p className="text-xs text-red-500 mt-2 ml-1">{errors.confirmPassword}</p>
-                )}
+                {errors.confirmPassword ? (
+                  <p className="mt-2 ml-1 text-xs text-red-500">{errors.confirmPassword}</p>
+                ) : null}
               </div>
             </div>
           </div>
 
-          <div className="w-full flex flex-col mt-8 space-y-3">
+          <div className="mt-8 flex w-full flex-col space-y-3">
+            {submitError ? <p className="text-sm text-red-500">{submitError}</p> : null}
             <Button
-              className="w-full h-12 text-base font-semibold bg-first hover:bg-first/80"
+              type="button"
+              className="h-12 w-full bg-first text-base font-semibold hover:bg-first/80"
               onClick={handleNextStep}
+              disabled={isSendingCode}
             >
-              다음 (이메일 인증)
+              {isSendingCode ? '인증번호 전송 중...' : '다음(이메일 인증)'}
             </Button>
             <Button
+              type="button"
               variant="outline"
-              className="w-full h-12 text-base font-semibold bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+              className="h-12 w-full border border-gray-300 bg-white text-base font-semibold text-gray-700 hover:bg-gray-50"
               onClick={() => router.back()}
+              disabled={isSendingCode}
             >
-              취소
+              이전
             </Button>
           </div>
         </>
-      )}
-
-      {step === 2 && (
-        <div className="w-full flex-col flex items-center">
-          <div className="w-full space-y-2 text-center mb-8">
-            <label className="block text-sm font-semibold text-gray-700 mb-4 mt-2 text-left">
-              인증 코드<span className="text-red-500 ml-0.5">*</span>
+      ) : (
+        <div className="flex w-full flex-col items-center">
+          <div className="mb-8 w-full space-y-2 text-center">
+            <label className="mb-4 mt-2 block text-left text-sm font-semibold text-gray-700">
+              인증번호<span className="ml-0.5 text-red-500">*</span>
             </label>
-            <div className="flex gap-2 justify-center w-full">
-              {authCode.map((code, idx) => (
+            <div className="flex w-full justify-center gap-2">
+              {authCode.map((code, index) => (
                 <input
-                  key={idx}
+                  key={index}
                   type="text"
                   maxLength={1}
                   value={code}
-                  ref={(el) => {
-                    inputRefs.current[idx] = el;
+                  ref={(element) => {
+                    inputRefs.current[index] = element;
                   }}
-                  onChange={(e) => handleCodeChange(idx, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(idx, e)}
-                  className="w-12 h-14 md:w-14 md:h-16 text-center text-xl md:text-2xl font-bold text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-first focus:border-transparent transition-all bg-white shadow-sm"
+                  onChange={(event) => handleCodeChange(index, event.target.value)}
+                  onKeyDown={(event) => handleCodeKeyDown(index, event)}
+                  className="h-14 w-12 rounded-lg border border-gray-300 bg-white text-center text-xl font-bold text-gray-900 shadow-sm transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-first md:h-16 md:w-14 md:text-2xl"
                 />
               ))}
             </div>
+            <p className="mt-3 text-left text-xs leading-5 text-slate-500">
+              입력하신 이메일로 인증 코드를 보냈어요. 받은 인증번호 6자리를 입력해 주세요.
+            </p>
+            {submitError ? <p className="mt-3 text-left text-sm text-red-500">{submitError}</p> : null}
           </div>
 
-          <div className="w-full flex flex-col mt-4 space-y-3">
+          <div className="mt-4 flex w-full flex-col space-y-3">
             <Button
-              className="w-full h-12 text-base font-semibold bg-first hover:bg-first/80"
+              type="button"
+              className="h-12 w-full bg-first text-base font-semibold hover:bg-first/80"
               onClick={handleFinalRegist}
+              disabled={isSubmitting}
             >
-              회원가입
+              {isSubmitting ? '회원가입 중...' : '회원가입'}
             </Button>
             <Button
+              type="button"
               variant="outline"
-              className="w-full h-12 text-base font-semibold bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+              className="h-12 w-full border border-gray-300 bg-white text-base font-semibold text-gray-700 hover:bg-gray-50"
               onClick={() => setStep(1)}
+              disabled={isSubmitting}
             >
-              취소 (이전으로)
+              이전(정보 수정)
             </Button>
           </div>
         </div>

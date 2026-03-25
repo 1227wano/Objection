@@ -9,14 +9,7 @@ import { apiClient } from '@/lib/api-client';
 interface LoginResponse {
   status: 'SUCCESS' | 'FAIL' | 'ERROR';
   message: string;
-  data: {
-    accessToken: string;
-    refreshToken: string;
-    tokenType: string;
-    expiresIn: number;
-    userId: string;
-    userName: string;
-  } | null;
+  data: null;
 }
 
 export default function LoginForm() {
@@ -26,16 +19,9 @@ export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  /**
-   * [!] Next.js 16의 proxy.ts(미들웨어)에서
-   * 이미 쿠키 존재 여부에 따른 페이지 리다이렉트를 처리하고 있습니다.
-   * 클라이언트 사이드에서 추가적인 유저 정보를 가져오고 싶을 때만
-   * 별도의 API(예: /api/auth/me) 호출이 필요합니다.
-   */
-
   const handleLogin = async () => {
-    if (!userId || !userPw) {
-      setError('아이디와 패스워드를 모두 입력해 주세요.');
+    if (!userId.trim() || !userPw.trim()) {
+      setError('아이디와 비밀번호를 모두 입력해 주세요.');
       return;
     }
 
@@ -43,22 +29,27 @@ export default function LoginForm() {
     setError(null);
 
     try {
-      const response = await apiClient.post<LoginResponse>('/auth/login', {
-        userId,
-        userPw,
-        isAutoLogin,
-      });
+      const response = await apiClient.post<LoginResponse>(
+        '/auth/login',
+        {
+          userId: userId.trim(),
+          userPw,
+          isAutoLogin,
+        },
+        { skipRefresh: true },
+      );
 
       if (response.status === 'SUCCESS') {
         window.location.href = '/';
-      } else {
-        setError(response.message || '로그인에 실패했습니다.');
+        return;
       }
+
+      setError(response.message || '아이디 또는 비밀번호를 다시 확인해 주세요.');
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message || '아이디 또는 비밀번호가 일치하지 않습니다.');
+        setError(err.message || '로그인 중 문제가 발생했습니다. 다시 시도해 주세요.');
       } else {
-        setError('로그인 중 서버 오류가 발생했습니다.');
+        setError('로그인 중 문제가 발생했습니다. 다시 시도해 주세요.');
       }
     } finally {
       setIsLoading(false);
@@ -66,71 +57,61 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="flex flex-col items-center pt-2 pb-4">
-      {/* 상단 로고 이미지 */}
+    <div className="flex flex-col items-center pb-4 pt-2">
       <div className="mb-4">
-        <Image
-          src="/logo.svg"
-          alt="이의있음! 로고"
-          width={80}
-          height={80}
-          className="object-contain"
-        />
+        <Image src="/logo.svg" alt="이의있음! 로고" width={80} height={80} className="object-contain" />
       </div>
 
-      <h2 className="text-xl font-bold text-gray-900 mb-8">로그인</h2>
+      <h2 className="mb-8 text-xl font-bold text-gray-900">로그인</h2>
 
       <form
         className="w-full space-y-5"
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleLogin();
+        onSubmit={(event) => {
+          event.preventDefault();
+          void handleLogin();
         }}
       >
-        <div className="space-y-2 text-left w-full">
+        <div className="w-full space-y-2 text-left">
           <label className="block text-sm font-semibold text-gray-700">아이디</label>
           <input
             type="text"
             value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-            placeholder="아이디를 입력해 주세요"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-first focus:border-transparent transition-colors text-sm"
+            onChange={(event) => setUserId(event.target.value)}
+            placeholder="아이디를 입력해 주세요."
+            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm transition-colors focus:border-transparent focus:outline-none focus:ring-2 focus:ring-first"
           />
         </div>
 
-        <div className="space-y-2 text-left w-full">
-          <label className="block text-sm font-semibold text-gray-700">패스워드</label>
+        <div className="w-full space-y-2 text-left">
+          <label className="block text-sm font-semibold text-gray-700">비밀번호</label>
           <input
             type="password"
             value={userPw}
-            onChange={(e) => setUserPw(e.target.value)}
-            placeholder="패스워드를 입력해 주세요"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-first focus:border-transparent transition-colors text-sm"
+            onChange={(event) => setUserPw(event.target.value)}
+            placeholder="비밀번호를 입력해 주세요."
+            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm transition-colors focus:border-transparent focus:outline-none focus:ring-2 focus:ring-first"
           />
         </div>
 
-        {error && <div className="text-red-500 text-sm font-medium mt-1">{error}</div>}
+        {error && <div className="mt-1 text-sm font-medium text-red-500">{error}</div>}
 
         <div className="flex items-center pt-1">
           <input
             type="checkbox"
             id="auto-login"
             checked={isAutoLogin}
-            onChange={(e) => setIsAutoLogin(e.target.checked)}
-            className="w-4 h-4 text-first border-gray-300 rounded focus:ring-first"
+            onChange={(event) => setIsAutoLogin(event.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-first focus:ring-first"
           />
-          <label
-            htmlFor="auto-login"
-            className="ml-2 text-sm text-gray-700 font-medium cursor-pointer"
-          >
+          <label htmlFor="auto-login" className="ml-2 cursor-pointer text-sm font-medium text-gray-700">
             자동 로그인
           </label>
         </div>
 
-        <div className="w-full flex flex-col mt-8 space-y-3">
+        <div className="mt-8 flex w-full flex-col space-y-3">
           <Button
             type="submit"
-            className="w-full h-12 text-base font-semibold bg-first hover:bg-first/80"
+            className="h-12 w-full bg-first text-base font-semibold hover:bg-first/80"
             disabled={isLoading}
           >
             {isLoading ? '로그인 중...' : '로그인'}
@@ -138,15 +119,15 @@ export default function LoginForm() {
           <Button
             type="button"
             variant="outline"
-            className="w-full h-12 text-base font-semibold bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+            className="h-12 w-full border border-gray-300 bg-white text-base font-semibold text-gray-700 hover:bg-gray-50"
             onClick={() => window.history.back()}
           >
-            취소
+            뒤로가기
           </Button>
         </div>
       </form>
 
-      <div className="mt-6 text-sm text-gray-600 flex justify-center gap-2">
+      <div className="mt-6 flex justify-center gap-2 text-sm text-gray-600">
         <span>아직 계정이 없으신가요?</span>
         <Link href="/regist" className="font-semibold text-first hover:underline" replace>
           회원가입
