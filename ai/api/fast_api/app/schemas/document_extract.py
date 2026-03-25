@@ -11,5 +11,5 @@ class DocumentExtractRequest(BaseSchema):
     fileKey: str
 
 
-class DocumentExtractResponse(CaseGovResponse[DocumentExtractResult]):
+class DocumentExtractResponse(CaseResponse[DocumentExtractResult]):
     pass
