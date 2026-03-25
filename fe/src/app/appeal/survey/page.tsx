@@ -245,15 +245,19 @@ export default function AppealSurveyPage() {
                 </h2>
 
                 <div ref={helpLayerRef} className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                  <label className="block space-y-3">
-                    <span className="flex items-center gap-2 text-[15px] font-semibold text-slate-700">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-[15px] font-semibold text-slate-700">
                       <CalendarDays className="h-4 w-4 text-first" />
                       처분을 알게 된 날
-                      <span className="relative inline-flex">
+                      <span className="relative flex h-5 w-5 shrink-0 items-center justify-center">
                         <button
                           type="button"
-                          onClick={() => toggleHelp('recognizedDate')}
-                          className="inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-300 transition hover:text-first"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            toggleHelp('recognizedDate');
+                          }}
+                          className="flex h-5 w-5 items-center justify-center rounded-full text-slate-300 transition hover:text-first"
                           aria-label="처분을 알게 된 날 설명 보기"
                           aria-expanded={openHelp === 'recognizedDate'}
                         >
@@ -285,8 +289,9 @@ export default function AppealSurveyPage() {
                           </div>
                         ) : null}
                       </span>
-                    </span>
+                    </div>
                     <input
+                      id="recognized-date"
                       type="date"
                       value={recognizedDate}
                       min="1900-01-01"
@@ -295,17 +300,21 @@ export default function AppealSurveyPage() {
                       className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-slate-900 outline-none transition focus:border-first/45 focus:bg-[#f7f8ff]"
                       required
                     />
-                  </label>
+                  </div>
 
-                  <label className="block space-y-3">
-                    <span className="flex items-center gap-2 text-[15px] font-semibold text-slate-700">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-[15px] font-semibold text-slate-700">
                       <CalendarDays className="h-4 w-4 text-first" />
                       처분이 있었던 날
-                      <span className="relative inline-flex">
+                      <span className="relative flex h-5 w-5 shrink-0 items-center justify-center">
                         <button
                           type="button"
-                          onClick={() => toggleHelp('actionDate')}
-                          className="inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-300 transition hover:text-first"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            toggleHelp('actionDate');
+                          }}
+                          className="flex h-5 w-5 items-center justify-center rounded-full text-slate-300 transition hover:text-first"
                           aria-label="처분이 있었던 날 설명 보기"
                           aria-expanded={openHelp === 'actionDate'}
                         >
@@ -337,8 +346,9 @@ export default function AppealSurveyPage() {
                           </div>
                         ) : null}
                       </span>
-                    </span>
+                    </div>
                     <input
+                      id="action-date"
                       type="date"
                       value={actionDate}
                       min="1900-01-01"
@@ -347,7 +357,7 @@ export default function AppealSurveyPage() {
                       className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-slate-900 outline-none transition focus:border-first/45 focus:bg-[#f7f8ff]"
                       required
                     />
-                  </label>
+                  </div>
 
                   <label className="block space-y-3">
                     <span className="flex items-center gap-2 text-[15px] font-semibold text-slate-700">
