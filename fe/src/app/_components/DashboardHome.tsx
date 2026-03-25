@@ -6,51 +6,18 @@ import {
   isValidDetailStep,
   PROGRESS_STAGES,
   STAGE_CONFIG,
-  type StageName,
 } from '@/lib/appeal-progress';
+import { CASE_STATUS_MAP, type CaseStatus } from '@/lib/constants/caseStatus';
+import { START_STAGE_PREVIEWS, STAGE_ACCENT_STYLES } from '@/lib/constants/dashboard';
+import { formatDate } from '@/lib/utils';
+
+
 
 interface MockCase {
   id: number;
   title: string;
-  majorStage: StageName;
-  detailStep: string;
+  status: CaseStatus;
   updatedAt: string;
-}
-
-interface StartStagePreview {
-  title: string;
-  description: string;
-  requiredDocuments: string[];
-  footerText: string;
-}
-
-const START_STAGE_PREVIEWS: StartStagePreview[] = [
-  {
-    title: '처분서 단계',
-    description: '처음 단계부터 차근차근 진행할 수 있어요.',
-    requiredDocuments: ['처분서'],
-    footerText: '설문부터 차근차근 진행할 수 있어요',
-  },
-  {
-    title: '답변서 단계',
-    description: '답변서를 받은 단계부터 이어서 \n시작할 수 있어요.',
-    requiredDocuments: ['처분서', '행정심판 청구서', '답변서'],
-    footerText: '청구서와 답변서를 올리면 분석을 시작해요',
-  },
-  {
-    title: '재결서 단계',
-    description: '재결서를 받은 경우 결과 확인 단계부터\n 바로 시작할 수 있어요.',
-    requiredDocuments: ['재결서'],
-    footerText: '재결서를 올리면 결과 확인 단계로 이어집니다',
-  },
-] as const;
-
-function formatDate(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-
-  return `${year}.${month}.${day}`;
 }
 
 const TODAY = formatDate(new Date());
@@ -59,59 +26,30 @@ const MOCK_CASES: MockCase[] = [
   {
     id: 1,
     title: '마포구 세무서 용도변경 허가 거부 취소',
-    majorStage: '행정심판청구서 작성',
-    detailStep: '사건 경위 작성',
+    status: 'NARRATIVE_WRITING',
     updatedAt: TODAY,
   },
   {
     id: 2,
     title: '건축물 사용승인 반려 처분 취소',
-    majorStage: '답변서 분석',
-    detailStep: 'AI 분석 결과',
+    status: 'ANSWER_DONE',
     updatedAt: TODAY,
   },
   {
     id: 3,
     title: '영업정지 처분 취소 청구',
-    majorStage: '보충서면 작성',
-    detailStep: '문서 작성',
+    status: 'SUPPLEMENT_DONE',
     updatedAt: TODAY,
   },
   {
     id: 4,
     title: '옥외영업 불허 처분 취소 청구',
-    majorStage: '재결서 분석',
-    detailStep: '재결서 분석',
+    status: 'DECISION_DONE',
     updatedAt: TODAY,
   },
-] as const;
+];
 
-const STAGE_ACCENT_STYLES: Record<StageName, { line: string; marker: string }> = {
-  '처분서 분석': {
-    line: 'bg-slate-500',
-    marker: 'text-slate-500',
-  },
-  '행정심판청구서 작성': {
-    line: 'bg-blue-600',
-    marker: 'text-blue-600',
-  },
-  '답변서 분석': {
-    line: 'bg-violet-500',
-    marker: 'text-violet-500',
-  },
-  '보충서면 작성': {
-    line: 'bg-emerald-500',
-    marker: 'text-emerald-500',
-  },
-  '재결서 분석': {
-    line: 'bg-amber-500',
-    marker: 'text-amber-500',
-  },
-  '행정심판 완료': {
-    line: 'bg-gray-500',
-    marker: 'text-gray-500',
-  },
-};
+
 
 export default function DashboardHome() {
   return (
@@ -213,14 +151,15 @@ export default function DashboardHome() {
         </h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {MOCK_CASES.map((item) => {
-            const isValid = isValidDetailStep(item.majorStage, item.detailStep);
-            const filledSegments = getProgressSegments(item.majorStage);
-            const accent = STAGE_ACCENT_STYLES[item.majorStage];
+            const statusInfo = CASE_STATUS_MAP[item.status];
+            const isValid = isValidDetailStep(statusInfo.majorStage, statusInfo.detailStep);
+            const filledSegments = getProgressSegments(statusInfo.majorStage);
+            const accent = STAGE_ACCENT_STYLES[statusInfo.majorStage];
 
             return (
               <Link
                 key={item.id}
-                href={`/appeal/${item.id}`}
+                href={statusInfo.href}
                 className="relative flex flex-col gap-6 rounded-2xl border border-[#eef2f9] bg-white p-8 pl-10 shadow-[0_10px_28px_rgba(15,15,112,0.08)] transition-all duration-200 hover:-translate-y-1 hover:border-blue-100 hover:shadow-[0_18px_36px_rgba(15,15,112,0.10)]"
               >
                 <div
@@ -231,11 +170,16 @@ export default function DashboardHome() {
                   {item.title}
                 </p>
 
-                <span
-                  className={`inline-block self-start rounded-full px-3 py-1.5 text-sm font-semibold ${STAGE_CONFIG[item.majorStage].badgeClassName}`}
-                >
-                  {item.majorStage}
-                </span>
+                <div className="flex gap-2 self-start">
+                  <span
+                    className={`inline-block rounded-full px-3 py-1.5 text-sm font-semibold ${STAGE_CONFIG[statusInfo.majorStage].badgeClassName}`}
+                  >
+                    {statusInfo.majorStage}
+                  </span>
+                  <span className="inline-block rounded-full px-3 py-1.5 text-sm font-semibold bg-gray-100 text-gray-600">
+                    {statusInfo.label}
+                  </span>
+                </div>
 
                 <div className="flex flex-col gap-3">
                   <p className="text-sm text-gray-700">
@@ -243,7 +187,7 @@ export default function DashboardHome() {
                       className={`mr-2 inline-block h-3 w-3 rounded-full align-middle ${accent.line}`}
                     />
                     <span className="font-semibold">현재 단계:</span>{' '}
-                    {isValid ? item.detailStep || '-' : '정의되지 않은 단계'}
+                    {isValid ? statusInfo.detailStep || '-' : '정의되지 않은 단계'}
                   </p>
 
                   <div className="flex items-center gap-2">

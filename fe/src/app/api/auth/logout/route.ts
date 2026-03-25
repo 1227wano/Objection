@@ -9,7 +9,10 @@ export async function POST(request: NextRequest) {
   try {
     const token = request.cookies.get('accessToken')?.value;
 
-    const baseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://j14a102.p.ssafy.io:8080').replace(/\/$/, '');
+    const baseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080').replace(
+      /\/$/,
+      '',
+    );
     const backendUrl = `${baseUrl}/api/auth/logout`;
 
     // 백엔드 로그아웃 요청
@@ -40,7 +43,7 @@ export async function POST(request: NextRequest) {
     // 에러가 나더라도 쿠키는 삭제
     const res = NextResponse.json(
       { status: 'ERROR', message: '로그아웃 중 오류가 발생했습니다.' },
-      { status: 500 }
+      { status: 500 },
     );
     res.cookies.delete('accessToken');
     res.cookies.delete('refreshToken');
