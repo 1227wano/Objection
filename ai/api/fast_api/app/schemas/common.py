@@ -33,7 +33,7 @@ class ApiResponse(BaseSchema, Generic[ResultType]):
 
 class CaseGovResponse(BaseSchema, Generic[ResultType]):
     caseNo: int
-    govDocNo: int
+    # govDocNo: int
     status: Status
     message: str
     result: ResultType
