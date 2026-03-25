@@ -12,7 +12,10 @@ export async function POST(request: NextRequest) {
     const { userId, userPw, isAutoLogin } = body;
 
     // URL 조립 시 발생할 수 있는 슬래시 중복 문제 해결
-    const baseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://j14a102.p.ssafy.io:8080').replace(/\/$/, '');
+    const baseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080').replace(
+      /\/$/,
+      '',
+    );
     const backendUrl = `${baseUrl}/api/auth/login`;
 
     // 1. 실제 백엔드 서버로 로그인 요청
@@ -30,13 +33,13 @@ export async function POST(request: NextRequest) {
     if (!response.ok || data.status !== 'SUCCESS') {
       return NextResponse.json(
         { status: 'FAIL', message: data.message || '로그인에 실패했습니다.' },
-        { status: response.status }
+        { status: response.status },
       );
     }
 
     // 3. 로그인 성공 시 httpOnly 쿠키 설정
     const { accessToken, refreshToken, expiresIn, userName } = data.data;
-    
+
     const res = NextResponse.json({
       status: 'SUCCESS',
       message: data.message,
@@ -72,7 +75,7 @@ export async function POST(request: NextRequest) {
     console.error('Login Proxy Error:', error);
     return NextResponse.json(
       { status: 'ERROR', message: '서버 연결 중 오류가 발생했습니다.' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
