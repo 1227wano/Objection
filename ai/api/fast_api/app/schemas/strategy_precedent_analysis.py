@@ -1,9 +1,9 @@
 from enum import Enum
 from typing import Any
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 
-from app.schemas.common import BaseSchema, CaseGovResponse
+from app.schemas.common import AppealClaimContent, BaseSchema, CaseGovResponse
 from app.schemas.enums import InputDocumentType
 
 
@@ -109,6 +109,18 @@ class StrategyPrecedentAnalysisRequest(BaseSchema):
     caseContext: CaseContext
     legalIssueAnalysisResult: LegalIssueAnalysisResult
     precedentRetrievals: list[PrecedentRetrieval] | None = None
+    appealClaimContent: AppealClaimContent | None = None
+
+    @model_validator(mode="after")
+    def validateAppealClaimContent(self) -> "StrategyPrecedentAnalysisRequest":
+        if (
+            self.sourceDocumentType == InputDocumentType.ANSWER
+            and self.appealClaimContent is None
+        ):
+            raise ValueError(
+                "appealClaimContent is required when sourceDocumentType is ANSWER"
+            )
+        return self
 
 
 class StrategyPrecedentAnalysisResponse(

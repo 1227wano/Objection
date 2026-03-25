@@ -1,7 +1,8 @@
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from app.schemas.common import (
     AnswerParsedFields,
+    AppealClaimContent,
     BaseSchema,
     CaseContext,
     CaseGovResponse,
@@ -29,6 +30,18 @@ class LegalIssueAnalysisRequest(BaseSchema):
     caseInfo: A1CaseInfo
     caseContext: CaseContext
     lawRetrievals: list[LawRetrieval] = Field(min_length=1)
+    appealClaimContent: AppealClaimContent | None = None
+
+    @model_validator(mode="after")
+    def validateAppealClaimContent(self) -> "LegalIssueAnalysisRequest":
+        if (
+            self.sourceDocumentType == InputDocumentType.ANSWER
+            and self.appealClaimContent is None
+        ):
+            raise ValueError(
+                "appealClaimContent is required when sourceDocumentType is ANSWER"
+            )
+        return self
 
 
 class LegalIssueAnalysisResponse(CaseGovResponse[LegalIssueAnalysisResult]):
