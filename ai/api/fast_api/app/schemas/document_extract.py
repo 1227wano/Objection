@@ -8,7 +8,7 @@ class DocumentExtractRequest(BaseSchema):
     caseNo: int = Field(gt=0)
     # govDocNo: int = Field(gt=0)
     sourceDocumentType: InputDocumentType
-    fileKey: str
+    fileUrl: str
 
 
 class DocumentExtractResponse(CaseResponse[DocumentExtractResult]):
