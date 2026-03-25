@@ -11,8 +11,6 @@ import { CASE_STATUS_MAP, type CaseStatus } from '@/lib/constants/caseStatus';
 import { START_STAGE_PREVIEWS, STAGE_ACCENT_STYLES } from '@/lib/constants/dashboard';
 import { formatDate } from '@/lib/utils';
 
-
-
 interface MockCase {
   id: number;
   title: string;
@@ -20,92 +18,36 @@ interface MockCase {
   updatedAt: string;
 }
 
-interface StartStagePreview {
-  title: string;
-  description: string;
-  requiredDocuments: string[];
-  footerText: string;
-}
-
-const START_STAGE_PREVIEWS: StartStagePreview[] = [
-  {
-    title: '처분서부터 시작하기',
-    description: '처분서 내용을 먼저 확인하고\n기본 설문을 차근차근 이어갈 수 있어요.',
-    requiredDocuments: ['처분서'],
-    footerText: '설문부터 차근차근 진행할 수 있어요.',
-  },
-  {
-    title: '답변서 등록부터 시작하기',
-    description: '답변서를 이미 받은 경우라면\n필요 서류를 올리고 바로 이어갈 수 있어요.',
-    requiredDocuments: ['처분서', '행정심판 청구서', '답변서'],
-    footerText: '청구서와 답변서를 올리면 바로 분석을 시작해요.',
-  },
-  {
-    title: '재결서 등록부터 시작하기',
-    description: '재결서까지 받은 사건이라면\n결과 검토 단계부터 바로 이어갈 수 있어요.',
-    requiredDocuments: ['재결서'],
-    footerText: '재결서를 올리면 결과 확인 단계로 이어집니다.',
-  },
-] as const;
-
 const MOCK_CASES: MockCase[] = [
   /*
   {
     id: 1,
     title: '식품위생법 영업정지 처분 취소 청구',
-    majorStage: PROGRESS_STAGES[1],
-    detailStep: STAGE_CONFIG[PROGRESS_STAGES[1]].detailSteps[0] ?? '',
+    status: 'NARRATIVE_WRITING',
     updatedAt: '2026.03.25',
   },
   {
     id: 2,
     title: '영업허가 취소 처분 답변서 분석',
-    majorStage: PROGRESS_STAGES[2],
-    detailStep: STAGE_CONFIG[PROGRESS_STAGES[2]].detailSteps[1] ?? '',
+    status: 'ANSWER_DONE',
     updatedAt: '2026.03.25',
   },
   {
     id: 3,
     title: '과징금 부과 처분 사건 청구',
-    majorStage: PROGRESS_STAGES[3],
-    detailStep: STAGE_CONFIG[PROGRESS_STAGES[3]].detailSteps[0] ?? '',
+    status: 'SUPPLEMENT_NARRATIVE',
     updatedAt: '2026.03.25',
   },
   {
     id: 4,
     title: '도시계획 처분 재결서 검토',
-    majorStage: PROGRESS_STAGES[4],
-    detailStep: STAGE_CONFIG[PROGRESS_STAGES[4]].detailSteps[1] ?? '',
+    status: 'DECISION_DONE',
     updatedAt: '2026.03.25',
-  },
-  */
+  },*/
 ];
 
 const EMPTY_CASE_DESCRIPTION =
   '새 케이스를 시작하면 진행 단계와 최근 업데이트가 이곳에 쌓입니다.\n처음 사건을 등록해 두면 이후 흐름을 한눈에 이어서 확인할 수 있어요.';
-
-const STAGE_ACCENT_STYLES: Partial<Record<StageName, { line: string; marker: string }>> = {
-  [PROGRESS_STAGES[0]]: {
-    line: 'bg-slate-500',
-    marker: 'text-slate-500',
-  },
-  [PROGRESS_STAGES[1]]: {
-    line: 'bg-blue-600',
-    marker: 'text-blue-600',
-  },
-  [PROGRESS_STAGES[2]]: {
-    line: 'bg-violet-500',
-    marker: 'text-violet-500',
-  },
-  [PROGRESS_STAGES[3]]: {
-    line: 'bg-emerald-500',
-    marker: 'text-emerald-500',
-  },
-  [PROGRESS_STAGES[4]]: {
-    line: 'bg-amber-500',
-    marker: 'text-amber-500',
-  },
-};
 
 export default function DashboardHome() {
   return (
@@ -118,8 +60,8 @@ export default function DashboardHome() {
                 어떤 단계에서든 바로 시작할 수 있어요
               </p>
               <p className="max-w-3xl whitespace-pre-line text-[16px] leading-7 text-slate-500">
-                준비된 서류와 현재 진행 단계를 기준으로, 내 상황에 맞는 흐름에서 바로 이어서
-                시작할 수 있어요.
+                준비된 서류와 현재 진행 단계를 기준으로, 내 상황에 맞는 흐름에서 바로 이어서 시작할
+                수 있어요.
               </p>
             </div>
 
@@ -209,9 +151,10 @@ export default function DashboardHome() {
         {MOCK_CASES.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {MOCK_CASES.map((item) => {
-              const isValid = isValidDetailStep(item.majorStage, item.detailStep);
-              const filledSegments = getProgressSegments(item.majorStage);
-              const accent = STAGE_ACCENT_STYLES[item.majorStage] ?? {
+              const statusInfo = CASE_STATUS_MAP[item.status];
+              const isValid = isValidDetailStep(statusInfo.majorStage, statusInfo.detailStep);
+              const filledSegments = getProgressSegments(statusInfo.majorStage);
+              const accent = STAGE_ACCENT_STYLES[statusInfo.majorStage] ?? {
                 line: 'bg-gray-500',
                 marker: 'text-gray-500',
               };
@@ -219,7 +162,7 @@ export default function DashboardHome() {
               return (
                 <Link
                   key={item.id}
-                  href={`/appeal/${item.id}`}
+                  href={statusInfo.href}
                   className="relative flex flex-col gap-6 rounded-2xl border border-[#eef2f9] bg-white p-8 pl-10 shadow-[0_10px_28px_rgba(15,15,112,0.08)] transition-all duration-200 hover:-translate-y-1 hover:border-blue-100 hover:shadow-[0_18px_36px_rgba(15,15,112,0.10)]"
                 >
                   <div
@@ -230,11 +173,16 @@ export default function DashboardHome() {
                     {item.title}
                   </p>
 
-                  <span
-                    className={`inline-block self-start rounded-full px-3 py-1.5 text-sm font-semibold ${STAGE_CONFIG[item.majorStage].badgeClassName}`}
-                  >
-                    {item.majorStage}
-                  </span>
+                  <div className="flex gap-2 self-start">
+                    <span
+                      className={`inline-block rounded-full px-3 py-1.5 text-sm font-semibold ${STAGE_CONFIG[statusInfo.majorStage].badgeClassName}`}
+                    >
+                      {statusInfo.majorStage}
+                    </span>
+                    <span className="inline-block rounded-full px-3 py-1.5 text-sm font-semibold bg-gray-100 text-gray-600">
+                      {statusInfo.label}
+                    </span>
+                  </div>
 
                   <div className="flex flex-col gap-3">
                     <p className="text-sm text-gray-700">
@@ -242,7 +190,7 @@ export default function DashboardHome() {
                         className={`mr-2 inline-block h-3 w-3 rounded-full align-middle ${accent.line}`}
                       />
                       <span className="font-semibold">현재 단계:</span>{' '}
-                      {isValid ? item.detailStep || '-' : '상세 단계 정보 없음'}
+                      {isValid ? statusInfo.detailStep || '-' : '상세 단계 정보 없음'}
                     </p>
 
                     <div className="flex items-center gap-2">
