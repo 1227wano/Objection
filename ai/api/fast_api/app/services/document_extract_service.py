@@ -175,7 +175,7 @@ def _buildMappingPrompt(rawText: str, documentType: InputDocumentType) -> str:
     "Inform": "불복절차 안내/고지 내용이 있으면 true, 없으면 false",
     "InformContent": "불복절차 고지 내용 전문. 없으면 null",
     "legalBasis": ["근거 법조항 배열. 예: '식품위생법 제44조', '음악산업진흥에관한법률 제22조'"],
-    "etc": {"문서에서 추출한 기타 주요 정보": "값"}"""
+    "etc": {"문서에서 추출한 기타 주요 정보": "문자열 값만 가능. 리스트/배열/객체 절대 금지. 여러 항목은 쉼표로 구분한 하나의 문자열로 작성"}"""
 
     elif documentType == InputDocumentType.ANSWER:
         fieldsSpec = """\
