@@ -7,14 +7,18 @@ import SupplementEditor from './_components/SupplementEditor';
 import RightSidebar from './_components/RightSidebar';
 import { MOCK_SUPPLEMENT_DOC } from './_mock/mockDocumentData';
 import { SupplementDocumentData } from './_types/document';
+import { useRouter } from 'next/navigation';
 
 export default function SupplementWritePage() {
   const methods = useForm<SupplementDocumentData>({
     defaultValues: MOCK_SUPPLEMENT_DOC,
   });
 
+  const router = useRouter();
+
   const onSubmit = (data: SupplementDocumentData) => {
     console.log('보충서면 제출 데이터:', data);
+    router.push('/appeal/supplement/complete');
   };
 
   return (

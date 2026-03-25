@@ -7,15 +7,20 @@ import DocumentEditor from './_components/DocumentEditor';
 import RightSidebar from './_components/RightSidebar';
 import { MOCK_DOCUMENT_DATA, MOCK_LEGAL_ISSUES } from './_mock/mockDocumentData';
 import { DocumentData } from './_types/document';
+import { useRouter } from 'next/navigation';
 
 export default function WritePage() {
   const methods = useForm<DocumentData>({
     defaultValues: MOCK_DOCUMENT_DATA,
   });
 
+  const router = useRouter();
+
   const onSubmit = (data: DocumentData) => {
     console.log('폼 제출 데이터:', data);
+    router.push('/appeal/claim/complete');
   };
+
   return (
     <FormProvider {...methods}>
       <form
