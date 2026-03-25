@@ -1,5 +1,7 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+
 import { useFormContext } from 'react-hook-form';
 import { EditableInput, EditableTextarea } from '@/app/appeal/_components/FormInputs';
 import { DocumentData } from '../_types/document';
@@ -9,6 +11,27 @@ export default function CaseDetailsSection() {
   const appealCommitteeType = watch('appealCommitteeType');
   const appealCommittee = watch('appealCommittee');
   const grievanceNotified = watch('grievanceNotified');
+
+  const [selectedCommitteeType, setSelectedCommitteeType] = useState<'중앙' | '시도' | '기타' | null>(appealCommitteeType ?? null);
+  const [selectedGrievance, setSelectedGrievance] = useState<boolean | null>(grievanceNotified ?? null);
+
+  useEffect(() => {
+    setSelectedCommitteeType(appealCommitteeType ?? null);
+  }, [appealCommitteeType]);
+
+  useEffect(() => {
+    setSelectedGrievance(grievanceNotified ?? null);
+  }, [grievanceNotified]);
+
+  const handleCommitteeTypeSelect = (type: '중앙' | '시도' | '기타') => {
+    setSelectedCommitteeType(type);
+    setValue('appealCommitteeType', type, { shouldDirty: true, shouldValidate: true });
+  };
+
+  const handleGrievanceSelect = (val: boolean) => {
+    setSelectedGrievance(val);
+    setValue('grievanceNotified', val, { shouldDirty: true, shouldValidate: true });
+  };
 
   return (
     <>
@@ -30,18 +53,15 @@ export default function CaseDetailsSection() {
         <td colSpan={3} className="border border-black p-2 px-3">
           <div className="flex flex-wrap gap-x-6 gap-y-2 items-center w-full">
             {(['중앙', '시도', '기타'] as const).map((type) => (
-              <label key={type} className="flex items-center gap-1 cursor-pointer whitespace-nowrap">
-                <span>[{appealCommitteeType === type ? 'V' : ' '}]</span>{' '}
+              <button
+                key={type}
+                type="button"
+                onClick={() => handleCommitteeTypeSelect(type)}
+                className="flex items-center gap-1 cursor-pointer text-left hover:bg-gray-50 rounded px-0.5 -mx-0.5 transition-colors whitespace-nowrap"
+              >
+                <span className="w-5 text-center">[{selectedCommitteeType === type ? 'V' : ' '}]</span>{' '}
                 {type === '중앙' ? '중앙행정심판위원회' : type === '시도' ? 'OO시·도행정심판위원회' : '기타'}
-                <input 
-                  type="radio" 
-                  name="appealCommitteeType"
-                  value={type}
-                  checked={appealCommitteeType === type}
-                  onChange={() => setValue('appealCommitteeType', type)}
-                  className="hidden"
-                />
-              </label>
+              </button>
             ))}
           </div>
           {appealCommitteeType !== '중앙' && (
@@ -90,14 +110,20 @@ export default function CaseDetailsSection() {
         </td>
         <td colSpan={3} className="border border-black p-2 px-3">
           <div className="flex gap-8">
-            <label className="flex items-center gap-1 cursor-pointer">
-              <span>[{grievanceNotified === true ? 'V' : ' '}]</span> 유
-              <input type="radio" checked={grievanceNotified === true} onChange={() => setValue('grievanceNotified', true)} className="hidden" />
-            </label>
-            <label className="flex items-center gap-1 cursor-pointer">
-              <span>[{grievanceNotified === false ? 'V' : ' '}]</span> 무
-              <input type="radio" checked={grievanceNotified === false} onChange={() => setValue('grievanceNotified', false)} className="hidden" />
-            </label>
+            <button
+              type="button"
+              onClick={() => handleGrievanceSelect(true)}
+              className="flex items-center gap-1 cursor-pointer text-left hover:bg-gray-50 rounded px-0.5 -mx-0.5 transition-colors"
+            >
+              <span className="w-5 text-center">[{selectedGrievance === true ? 'V' : ' '}]</span> 유
+            </button>
+            <button
+              type="button"
+              onClick={() => handleGrievanceSelect(false)}
+              className="flex items-center gap-1 cursor-pointer text-left hover:bg-gray-50 rounded px-0.5 -mx-0.5 transition-colors"
+            >
+              <span className="w-5 text-center">[{selectedGrievance === false ? 'V' : ' '}]</span> 무
+            </button>
           </div>
         </td>
       </tr>
