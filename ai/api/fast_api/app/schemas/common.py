@@ -201,7 +201,7 @@ class CaseInfo(BaseSchema):
     businessName: str
     businessAddress: str
     sanctionType: str
-    sanctionValue: str  # 영업정지/영업폐쇄명령 → 일수, 과징금 → 금액(원), 영업허가취소 → nul
+    sanctionValue: str | None = None # 영업정지/영업폐쇄명령 → 일수, 과징금 → 금액(원), 영업허가취소 → nul
     claimType: str
 
 
