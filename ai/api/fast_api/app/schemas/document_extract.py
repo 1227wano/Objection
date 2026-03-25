@@ -1,15 +1,15 @@
 from pydantic import Field
 
-from app.schemas.common import BaseSchema, CaseGovResponse, DocumentExtractResult
-from app.schemas.enums import Stage
+from app.schemas.common import BaseSchema, CaseResponse, DocumentExtractResult
+from app.schemas.enums import InputDocumentType
 
 
 class DocumentExtractRequest(BaseSchema):
     caseNo: int = Field(gt=0)
-    govDocNo: int = Field(gt=0)
-    stage: Stage
-    fileKey: str
+    # govDocNo: int = Field(gt=0)
+    sourceDocumentType: InputDocumentType
+    fileUrl: str
 
 
-class DocumentExtractResponse(CaseGovResponse[DocumentExtractResult]):
+class DocumentExtractResponse(CaseResponse[DocumentExtractResult]):
     pass

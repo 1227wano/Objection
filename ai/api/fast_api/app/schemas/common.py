@@ -31,6 +31,14 @@ class ApiResponse(BaseSchema, Generic[ResultType]):
     warnings: list[str] = Field(default_factory=list)
 
 
+class CaseResponse(BaseSchema, Generic[ResultType]):
+    caseNo: int
+    status: Status
+    message: str
+    result: ResultType
+    warnings: list[str] = Field(default_factory=list)
+
+
 class CaseGovResponse(BaseSchema, Generic[ResultType]):
     caseNo: int
     govDocNo: int
@@ -233,6 +241,7 @@ class ReviewError(BaseSchema):
 class DocumentReviewResult(BaseSchema):
     analysisNo: int
     documentType: OutputDocumentType
+    verification: str
     needsRewrite: bool
     errors: list[ReviewError]
     draftDocument: DraftDocument
