@@ -69,7 +69,7 @@ JSON 외 다른 텍스트, 설명, 마크다운 코드블록은 절대 포함하
 def extractDocument(request: DocumentExtractRequest) -> DocumentExtractResponse:
     documentType = request.sourceDocumentType
     apiKey = _getApiKey()
-    fileBytes, mimeType = _loadFile(request.fileKey)
+    fileBytes, mimeType = _loadFile(request.fileUrl)
 
     if mimeType == "application/pdf":
         # PDF → 텍스트 직접 추출 (OCR 스킵)
@@ -271,10 +271,10 @@ def _extractTextFromChatResponse(responseBody: dict, stepName: str) -> str:
 # 파일 로딩
 # -----------------------------------------------
 
-def _loadFile(fileKey: str) -> tuple[bytes, str]:
-    filePath = Path(FILE_BASE_PATH) / fileKey
+def _loadFile(fileUrl: str) -> tuple[bytes, str]:
+    filePath = Path(FILE_BASE_PATH) / fileUrl
     if not filePath.exists():
-        raise ServiceException(f"file not found: {fileKey}")
+        raise ServiceException(f"file not found: {fileUrl}")
 
     suffix = filePath.suffix.lower()
 
