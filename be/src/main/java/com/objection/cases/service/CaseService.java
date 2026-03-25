@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,15 +27,27 @@ public class CaseService {
 
     @Transactional
     public CaseCreateResponse createCase(Integer userNo) {
+
+        // ONBOARDING 중인 사건이 있으면 기존 사건 재사용
+        Optional<Case> existing = caseRepository.findByUserNoAndStatus(userNo, CaseStatus.ONBOARDING);
+        if (existing.isPresent()) {
+            Case e = existing.get();
+            return new CaseCreateResponse(
+                    e.getCaseNo(),
+                    e.getTitle(),
+                    e.getStatus().name(),
+                    e.getCreatedAt()
+            );
+        }
+
         Case newCase = Case.builder()
                 .userNo(userNo)
-                .title("행정처분 사건 #0")
-                .status(CaseStatus.STARTED)
+                .title("새 행정심판 사건")
+                .status(CaseStatus.ONBOARDING)
                 .stayStatus(StayStatus.NONE)
                 .build();
 
         Case saved = caseRepository.saveAndFlush(newCase);
-        saved.updateTitle("행정처분 사건 #" + saved.getCaseNo());
 
         return new CaseCreateResponse(
                 saved.getCaseNo(),
@@ -99,6 +112,8 @@ public class CaseService {
                 request.getAwareDate() != null ? LocalDate.parse(request.getAwareDate()) : null,
                 request.getAgencyName()
         );
+
+        found.updateStatus(CaseStatus.STARTED);
 
         return new SurveySaveResponse(found.getCaseNo(), found.getUpdatedAt());
     }
