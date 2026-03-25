@@ -36,12 +36,12 @@ public class GenDocumentService {
     // 문서 생성
     @Transactional
     public DocumentResponse createDocument(Integer analysisNo, Integer userNo, DocumentCreateRequest request) {
-
         validateDocumentType(request.getDocumentType());
 
         Case foundCase = getCaseByAnalysisNoOrThrow(analysisNo);
         validateOwner(foundCase, userNo);
 
+        // TODO: AI 서버(A-3) 호출 → contentJson 받아오기
         String contentJson = buildEmptyContentJson(request.getDocumentType());
 
         GenDocument doc = GenDocument.builder()
@@ -57,14 +57,11 @@ public class GenDocumentService {
     }
 
     // 생성 문서 조회
-    public DocumentResponse getDocument(Integer analysisNo, Integer userNo, String documentType) {
-        validateDocumentType(documentType);
-
+    public DocumentResponse getDocument(Integer analysisNo, Integer userNo) {
         Case foundCase = getCaseByAnalysisNoOrThrow(analysisNo);
         validateOwner(foundCase, userNo);
 
-        GenDocument doc = genDocumentRepository
-                .findByAnalysisNoAndDocumentType(analysisNo, documentType)
+        GenDocument doc = genDocumentRepository.findById(analysisNo)
                 .orElseThrow(() -> new BusinessException(ErrorCode.DOCUMENT_NOT_FOUND));
 
         return toResponse(doc);
@@ -72,34 +69,47 @@ public class GenDocumentService {
 
     // 문서 수정 (PATCH)
     @Transactional
-    public DocumentResponse patchDocument(Integer analysisNo, Integer userNo, String documentType, Map<String, Object> contentJsonPath) {
-
-        validateDocumentType(documentType);
-
+    public DocumentResponse patchDocument(Integer analysisNo, Integer userNo, Map<String, Object> contentJsonPatch) {
         Case foundCase = getCaseByAnalysisNoOrThrow(analysisNo);
         validateOwner(foundCase, userNo);
 
-        GenDocument doc = genDocumentRepository
-                .findByAnalysisNoAndDocumentType(analysisNo, documentType)
+        GenDocument doc = genDocumentRepository.findById(analysisNo)
                 .orElseThrow(() -> new BusinessException(ErrorCode.DOCUMENT_NOT_FOUND));
 
-        String mergeJson = mergeContentJson(doc.getContentJson(), contentJsonPath);
-        doc.updateContentJson(mergeJson);
+        String mergedJson = mergeContentJson(doc.getContentJson(), contentJsonPatch);
+        doc.updateContentJson(mergedJson);
 
         return toResponse(doc);
-
     }
 
+    // PDF 생성
+    public byte[] generatePdf(Integer analysisNo, Integer userNo) {
+        Case foundCase = getCaseByAnalysisNoOrThrow(analysisNo);
+        validateOwner(foundCase, userNo);
+
+        GenDocument doc = genDocumentRepository.findById(analysisNo)
+                .orElseThrow(() -> new BusinessException(ErrorCode.DOCUMENT_NOT_FOUND));
+
+        try {
+            Map<String, Object> contentJsonMap = objectMapper.readValue(doc.getContentJson(),
+                    objectMapper.getTypeFactory().constructMapType(Map.class, String.class, Object.class));
+            return pdfService.generatePdf(doc.getDocumentType(), contentJsonMap, foundCase);
+        } catch (JsonProcessingException e) {
+            throw new BusinessException(ErrorCode.PDF_CONVERT_FAILED);
+        }
+    }
+
+    // ───── private helpers ─────
+
     private void validateDocumentType(String documentType) {
-        if(!"APPEAL_CLAIM".equals(documentType) && !"SUPPLEMENT_STATEMENT".equals(documentType)) {
+        if (!"APPEAL_CLAIM".equals(documentType) && !"SUPPLEMENT_STATEMENT".equals(documentType)) {
             throw new BusinessException(ErrorCode.INVALID_INPUT);
         }
     }
 
     private Case getCaseByAnalysisNoOrThrow(Integer analysisNo) {
-
-        CaseAnalysis analysis = caseAnalysisRepository.findById(analysisNo).
-                orElseThrow(() -> new BusinessException(ErrorCode.ANALYSIS_NOT_FOUND));
+        CaseAnalysis analysis = caseAnalysisRepository.findById(analysisNo)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ANALYSIS_NOT_FOUND));
 
         GovDocument govDoc = govDocumentRepository.findById(analysis.getGovDocNo())
                 .orElseThrow(() -> new BusinessException(ErrorCode.GOV_DOC_NOT_FOUND));
@@ -109,14 +119,14 @@ public class GenDocumentService {
     }
 
     private void validateOwner(Case foundCase, Integer userNo) {
-        if(!foundCase.getUserNo().equals(userNo)) {
+        if (!foundCase.getUserNo().equals(userNo)) {
             throw new BusinessException(ErrorCode.DOCUMENT_ACCESS_DENIED);
         }
     }
 
     private String buildEmptyContentJson(String documentType) {
-        try{
-            if("APPEAL_CLAIM".equals(documentType)) {
+        try {
+            if ("APPEAL_CLAIM".equals(documentType)) {
                 return objectMapper.writeValueAsString(Map.of(
                         "committeeType", "",
                         "dispositionContent", "",
@@ -128,7 +138,7 @@ public class GenDocumentService {
                         "submissionContent", ""
                 ));
             }
-        } catch (JsonProcessingException e){
+        } catch (JsonProcessingException e) {
             throw new BusinessException(ErrorCode.DOCUMENT_GENERATION_FAILED);
         }
     }
@@ -159,24 +169,5 @@ public class GenDocumentService {
                 .createdAt(doc.getCreatedAt())
                 .updatedAt(doc.getUpdatedAt())
                 .build();
-    }
-    // PDF 생성
-    public byte[] generatePdf(Integer analysisNo, Integer userNo, String documentType) {
-        validateDocumentType(documentType);
-
-        Case foundCase = getCaseByAnalysisNoOrThrow(analysisNo);
-        validateOwner(foundCase, userNo);
-
-        GenDocument doc = genDocumentRepository
-                .findByAnalysisNoAndDocumentType(analysisNo, documentType)
-                .orElseThrow(() -> new BusinessException(ErrorCode.DOCUMENT_NOT_FOUND));
-
-        try {
-            Map<String, Object> contentJsonMap = objectMapper.readValue(doc.getContentJson(),
-                    objectMapper.getTypeFactory().constructMapType(Map.class, String.class, Object.class));
-            return pdfService.generatePdf(documentType, contentJsonMap, foundCase);
-        } catch (JsonProcessingException e) {
-            throw new BusinessException(ErrorCode.PDF_CONVERT_FAILED);
-        }
     }
 }
