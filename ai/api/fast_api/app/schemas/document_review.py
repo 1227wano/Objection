@@ -1,4 +1,4 @@
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from app.schemas.common import (
     ApiResponse,
@@ -19,6 +19,7 @@ class DocumentReviewRequest(BaseSchema):
     caseInfo: CaseInfo
     legalIssueAnalysisResult: LegalIssueAnalysisResult
     strategyPrecedentAnalysisResult: StrategyPrecedentAnalysisResult
+    preparedEvidenceList: list[str] = Field(default_factory=list)
 
 
 class DocumentReviewResponse(ApiResponse[DocumentReviewResult]):

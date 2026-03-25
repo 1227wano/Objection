@@ -229,6 +229,7 @@ class ReviewError(BaseSchema):
 class DocumentReviewResult(BaseSchema):
     analysisNo: int
     documentType: OutputDocumentType
+    verification: str
     needsRewrite: bool
     errors: list[ReviewError]
     draftDocument: DraftDocument
