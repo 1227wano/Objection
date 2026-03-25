@@ -24,13 +24,6 @@ export default function RightSidebar({ legalIssues }: Props) {
           ))}
         </div>
       </SidebarCard>
-
-      {/* 사건 경위서 보기 */}
-      <SidebarCard>
-        <Button asChild variant="outline" className="w-full text-sm">
-          <Link href="/appeal/claim/incident">내가 작성한 사건 경위서 보기</Link>
-        </Button>
-      </SidebarCard>
     </RightSidebarFrame>
   );
 }
