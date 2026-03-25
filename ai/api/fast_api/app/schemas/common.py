@@ -125,6 +125,18 @@ class CaseContext(BaseSchema):
     opinion: str
 
 
+class AppealClaimContent(BaseSchema):
+    committeeType: str | None = None
+    dispositionContent: str | None = None
+    claimPurpose: str | None = None
+    claimReason: str | None = None
+    inform: bool | None = None
+    informContent: str | None = None
+    awareDate: str | None = None
+    agencyName: str | None = None
+    preparedEvidenceList: list[str] | None = None
+
+
 class LawRetrieval(BaseSchema):
     lawName: str
     articleNo: str

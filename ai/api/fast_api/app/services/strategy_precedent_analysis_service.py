@@ -4,7 +4,7 @@ import os
 import httpx
 
 from app.core.exceptions import ServiceException
-from app.schemas.enums import Status
+from app.schemas.enums import InputDocumentType, Status
 from app.schemas.strategy_precedent_analysis import (
     AppealPossibility,
     ClaimType,
@@ -22,13 +22,13 @@ GEMINI_API_URL = (
 STRATEGY_MODEL = os.getenv("STRATEGY_MODEL", "gemini-2.5-pro")
 GMS_API_KEY_ENV = "GMS_KEY"
 
-SYSTEM_PROMPT = """당신은 행정심판 전략/판례 활용 분석 전문가다.
-입력으로 주어진 사건 정보, 법적 쟁점, 유사 판례만 바탕으로 전략을 정리한다.
-반드시 JSON만 반환하고, 마크다운이나 설명 문장은 포함하지 않는다.
+SYSTEM_PROMPT = """당신은 행정심판 전략 및 판례 활용 분석 전문가다.
+입력으로 주어진 사건 정보, 법적 쟁점, 유사 판례를 바탕으로 가장 적절한 전략을 정리한다.
+반드시 JSON만 반환하고, 설명 문장이나 마크다운은 포함하지 않는다.
 claimType은 CANCEL, INVALID, ORDER 중 하나만 사용한다.
-appealPossibility는 H, M, L, Z 중 하나만 사용한다. (High, Medium, Low, Zero)
+appealPossibility는 H, M, L, Z 중 하나만 사용한다.
 mainPoints는 최대 3개까지만 작성한다.
-precedentInfos는 입력된 precedentRetrievals 범위 안에서만 작성한다."""
+precedentInfos는 반드시 입력된 precedentRetrievals 범위 안에서만 작성한다."""
 
 
 def analyzeStrategyPrecedent(
@@ -97,15 +97,23 @@ def _buildPrompt(request: StrategyPrecedentAnalysisRequest) -> str:
         indent=2,
     )
 
-    return f"""다음 입력을 바탕으로 전략/판례 활용 분석 결과를 JSON으로 반환해라.
+    return f"""다음 입력을 바탕으로 전략 및 판례 활용 분석 결과를 JSON으로 반환하라.
 
 입력 필드 설명:
 - sourceDocumentType: 입력 문서 종류
 - caseInfo: 사건 기본 정보와 parsedFields/rawText
 - caseContext.fact: 사용자가 주장하는 사실관계
-- caseContext.opinion: 사용자가 느끼는 부당함 또는 의견
+- caseContext.opinion: 사용자의 의견 또는 불복 취지
 - legalIssueAnalysisResult: 법적 쟁점 분석 결과
 - precedentRetrievals: 유사 판례 검색 결과
+- appealClaimContent: sourceDocumentType이 ANSWER일 때만 주어지는 기존 청구서 참고 정보
+
+전략 판단 지침:
+- sourceDocumentType이 ANSWER이고 appealClaimContent가 주어졌다면, 기존 청구서의 주장 방향과 준비된 증거를 참고해 전략의 정합성을 함께 판단하라.
+- 이때 보충서면 방향이 답변서 주장에 대한 반박 중심인지, 새로운 주장 보강 중심인지, 또는 혼합형인지 내부적으로 판단하라.
+- 위 내부 판단 결과는 별도 필드로 출력하지 말고 strategySummary와 mainPoints에 자연스럽게 반영하라.
+- 다만 기존 청구서 내용은 참고 정보일 뿐이며, 법적 쟁점 분석 결과와 판례에 비추어 더 적절한 전략이 있다면 그에 따라 판단하라.
+- 기존 청구서 내용을 단순 반복하거나 방어하는 데 그치지 말고, 현재 입력 기준으로 가장 적절한 전략을 제시하라.
 
 반환 JSON 형식:
 {{
@@ -114,9 +122,9 @@ def _buildPrompt(request: StrategyPrecedentAnalysisRequest) -> str:
   "strategySummary": "전략 요약 또는 null",
   "mainPoints": [
     {{
-      "point": "주장 포인트(1~3개 단어의 짧은 문장)",
+      "point": "주장 포인트(1~3 단어로 표현)",
       "reason": "이유 또는 null",
-      "sourceText": "근거 문장(caseContext/precedentRetrievals[].summary/rawText 에서 추출) 또는 null"
+      "sourceText": "근거 문장(caseContext, precedentRetrievals[].summary, rawText, appealClaimContent 중에서 추출) 또는 null"
     }}
   ],
   "stayRecommended": true,
