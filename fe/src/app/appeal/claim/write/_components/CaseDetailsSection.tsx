@@ -1,7 +1,7 @@
 'use client';
 
 import { useFormContext } from 'react-hook-form';
-import { EditableInput, EditableTextarea } from './FormInputs';
+import { EditableInput, EditableTextarea } from '@/app/appeal/_components/FormInputs';
 import { DocumentData } from '../_types/document';
 
 export default function CaseDetailsSection() {

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import ChecklistItem from './ChecklistItem';
-import { EvidenceItem } from '../../report/types';
+import { EvidenceItem } from '@/app/appeal/claim/report/types';
 
 interface ChecklistGroupProps {
   items: EvidenceItem[];

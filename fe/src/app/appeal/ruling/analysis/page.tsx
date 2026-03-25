@@ -1,5 +1,5 @@
 import SectionHeader from '../../_components/SectionHeader';
-import AiJudgment from '../../claim/report/_components/AiJudgment';
+import AiJudgment from '../../_components/AiJudgment';
 import NextStepCards from './_components/NextStepCards';
 import { MOCK_DECISION_DATA } from './_mock/mockdata';
 

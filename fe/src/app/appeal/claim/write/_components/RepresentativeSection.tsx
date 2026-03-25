@@ -1,7 +1,7 @@
 'use client';
 
 import { useFormContext } from 'react-hook-form';
-import { EditableInput } from './FormInputs';
+import { EditableInput } from '@/app/appeal/_components/FormInputs';
 
 export default function RepresentativeSection() {
   const { watch, setValue } = useFormContext();

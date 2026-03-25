@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import SectionHeader from '../../_components/SectionHeader';
-import ChecklistGroup from '../../claim/suggest/_components/ChecklistGroup';
+import ChecklistGroup from '../../_components/ChecklistGroup';
 import RightSidebar from './_components/RightSidebar';
 import { Button } from '@/components/ui/button';
 import { MOCK_SUPPLEMENT_EVIDENCE } from './_mock/mockdata';

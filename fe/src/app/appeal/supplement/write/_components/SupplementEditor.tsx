@@ -1,7 +1,7 @@
 'use client';
 
 import { useFormContext } from 'react-hook-form';
-import { EditableInput, EditableTextarea } from '@/app/appeal/claim/write/_components/FormInputs';
+import { EditableInput, EditableTextarea } from '@/app/appeal/_components/FormInputs';
 import { SupplementDocumentData } from '../_types/document';
 
 export default function SupplementEditor() {

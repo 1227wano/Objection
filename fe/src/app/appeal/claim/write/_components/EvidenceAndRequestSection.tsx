@@ -1,7 +1,7 @@
 'use client';
 
 import { useFormContext } from 'react-hook-form';
-import { EditableInput } from './FormInputs';
+import { EditableInput } from '@/app/appeal/_components/FormInputs';
 import { DocumentData } from '../_types/document';
 
 export default function EvidenceAndRequestSection() {

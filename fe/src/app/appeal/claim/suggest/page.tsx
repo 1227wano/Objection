@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import SectionHeader from '../../_components/SectionHeader';
 import SelectionGroup from './_components/SelectionGroup';
-import ChecklistGroup from './_components/ChecklistGroup';
+import ChecklistGroup from '../../_components/ChecklistGroup';
 import RightSidebar from './_components/RightSidebar';
 import { Button } from '@/components/ui/button';
 import { MOCK_ANALYSIS_DATA, MOCK_EVIDENCE_DATA } from '../report/_mock/mockdata';
