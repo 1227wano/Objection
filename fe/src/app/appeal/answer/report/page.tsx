@@ -1,6 +1,5 @@
-import React from 'react';
 import SectionHeader from '../../_components/SectionHeader';
-import AiJudgment from '../../claim/report/_components/AiJudgment';
+import AiJudgment from '../../_components/AiJudgment';
 import RespondentSummary from './_components/RespondentSummary';
 import MainPointCard from './_components/MainPointCard';
 import Link from 'next/link';

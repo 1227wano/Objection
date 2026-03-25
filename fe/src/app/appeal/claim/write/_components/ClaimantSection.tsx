@@ -1,6 +1,6 @@
 'use client';
 
-import { EditableInput } from './FormInputs';
+import { EditableInput } from '@/app/appeal/_components/FormInputs';
 
 export default function ClaimantSection() {
   return (

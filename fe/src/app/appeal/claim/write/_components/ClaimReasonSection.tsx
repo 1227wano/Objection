@@ -1,7 +1,7 @@
 'use client';
 
 import { useFormContext } from 'react-hook-form';
-import { EditableTextarea } from './FormInputs';
+import { EditableTextarea } from '@/app/appeal/_components/FormInputs';
 import { ArgumentItem, DocumentData } from '../_types/document';
 
 export default function ClaimReasonSection() {
