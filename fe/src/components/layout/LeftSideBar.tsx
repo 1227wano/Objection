@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, FileEdit, MessageSquareQuote, FilePlus, Gavel, CheckCircle2 } from 'lucide-react';
+import { Search, FileEdit, MessageSquareQuote, FilePlus, Gavel } from 'lucide-react';
 
 const MENU_STEPS = [
   {
@@ -56,12 +56,7 @@ const MENU_STEPS = [
       { path: '/appeal/ruling/analysis', title: '재결서 분석' },
     ],
   },
-  {
-    id: 'complete',
-    title: '행정심판 완료',
-    icon: CheckCircle2,
-    basePath: '/appeal/complete',
-  },
+
 ];
 
 export default function Sidebar() {
@@ -73,16 +68,18 @@ export default function Sidebar() {
         <h2 className="text-lg font-bold text-gray-900 mb-8 ml-2">진행상황</h2>
 
         <nav className="relative flex flex-col gap-8 pb-10">
-          {/* 중앙 수직 선 */}
-          <div className="absolute left-[18px] top-4 bottom-8 w-1 bg-gray-200 z-0 rounded-full" />
-
           {/* 각 단계 렌더링 */}
-          {MENU_STEPS.map((step) => {
+          {MENU_STEPS.map((step, index) => {
             const isCurrent = pathname.startsWith(step.basePath);
+            const isLast = index === MENU_STEPS.length - 1;
             const Icon = step.icon;
 
             return (
               <div key={step.id} className="relative z-10 flex flex-col">
+                {/* 연결선 (마지막 항목 제외) */}
+                {!isLast && (
+                  <div className="absolute left-[18px] top-5 -bottom-[52px] w-1 bg-gray-200 z-[-1] rounded-full" />
+                )}
                 {/* 메인 스텝 (동그라미 + 제목) */}
                 <Link
                   href={step.subMenus ? step.subMenus[0].path : step.basePath}
