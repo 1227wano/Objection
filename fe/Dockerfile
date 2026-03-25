@@ -28,6 +28,10 @@ RUN corepack enable pnpm
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# 환경변수 선언
+ARG NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+
 # 텔레메트리 비활성화 & 빌드 실행
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm build
