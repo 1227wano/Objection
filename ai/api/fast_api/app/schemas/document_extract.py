@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from app.schemas.common import BaseSchema, CaseGovResponse, DocumentExtractResult
+from app.schemas.common import BaseSchema, CaseResponse, DocumentExtractResult
 from app.schemas.enums import InputDocumentType
 
 
