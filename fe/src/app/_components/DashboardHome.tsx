@@ -6,14 +6,17 @@ import {
   isValidDetailStep,
   PROGRESS_STAGES,
   STAGE_CONFIG,
-  type StageName,
 } from '@/lib/appeal-progress';
+import { CASE_STATUS_MAP, type CaseStatus } from '@/lib/constants/caseStatus';
+import { START_STAGE_PREVIEWS, STAGE_ACCENT_STYLES } from '@/lib/constants/dashboard';
+import { formatDate } from '@/lib/utils';
+
+
 
 interface MockCase {
   id: number;
   title: string;
-  majorStage: StageName;
-  detailStep: string;
+  status: CaseStatus;
   updatedAt: string;
 }
 
