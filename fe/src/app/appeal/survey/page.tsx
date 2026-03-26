@@ -139,7 +139,9 @@ function normalizeDateValue(value: string | undefined) {
   return matched ? matched[0] : '';
 }
 
-function parseParsedJson(rawParsedJson: NoticeDocumentDetailResponse['data'] extends { parsedJson?: infer T } ? T : never) {
+function parseParsedJson(
+  rawParsedJson: string | NoticeDocumentParsedJson | null | undefined,
+): NoticeDocumentParsedJson | null {
   if (!rawParsedJson) {
     return null;
   }
@@ -287,7 +289,9 @@ export default function AppealSurveyPage() {
           return;
         }
 
-        const result = (await documentResponse.json().catch(() => null)) as NoticeDocumentDetailResponse | null;
+        const result = (await documentResponse
+          .json()
+          .catch(() => null)) as NoticeDocumentDetailResponse | null;
         if (result?.status !== 'SUCCESS' || result.data?.documentType !== 'NOTICE') {
           return;
         }
@@ -332,7 +336,9 @@ export default function AppealSurveyPage() {
 
         if (normalizedCurrentUserName && normalizedRepresentativeName) {
           setClaimantType(
-            normalizedCurrentUserName === normalizedRepresentativeName ? 'direct' : 'representative',
+            normalizedCurrentUserName === normalizedRepresentativeName
+              ? 'direct'
+              : 'representative',
           );
         }
       } catch {
