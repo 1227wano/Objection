@@ -1,5 +1,6 @@
 package com.objection.govdocument.dto.response;
 
+import io.swagger.v3.core.util.Json;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -16,6 +17,7 @@ public class DocumentDetailResponse {
         private String documentType;
         private String extractedText;
         private String summary;
+        private String parsedJson;
         private String fact;
         private String opinion;
     }
