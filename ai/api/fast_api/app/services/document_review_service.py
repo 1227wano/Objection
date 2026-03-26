@@ -4,13 +4,17 @@ import os
 import httpx
 
 from app.core.exceptions import ServiceException
-from app.schemas.common import (
+from app.schemas.common import ReviewError
+from app.schemas.document_draft import (
+    AppealClaimContentJson,
+    SupplementStatementContentJson,
+)
+from app.schemas.document_review import (
+    DocumentReviewRequest,
+    DocumentReviewResponse,
     DocumentReviewResult,
     DraftDocument,
-    DraftDocumentContent,
-    ReviewError,
 )
-from app.schemas.document_review import DocumentReviewRequest, DocumentReviewResponse
 from app.schemas.enums import OutputDocumentType, Status
 
 GMS_MESSAGES_URL = "https://gms.ssafy.io/gmsapi/api.anthropic.com/v1/messages"
@@ -90,34 +94,100 @@ def _buildPrompt(request: DocumentReviewRequest) -> str:
     legalResult = request.legalIssueAnalysisResult
     strategyResult = request.strategyPrecedentAnalysisResult
 
-    legalIssuesText = "\n".join(
-        f"  - [{issue.issueType}] {issue.description} "
-        f"(근거: {issue.lawBasis}, 위험도: {issue.riskLevel})"
-        for issue in legalResult.legalIssues
-    )
+    # --- 법적 쟁점 ---
+    legalIssuesText = "없음"
+    if legalResult.legalIssues:
+        legalIssuesText = "\n".join(
+            f"  - [{issue.issueType.value}] {issue.description} "
+            f"(근거: {issue.lawBasis}, 위험도: {issue.riskLevel.value})"
+            for issue in legalResult.legalIssues
+        )
 
-    mainPointsText = "\n".join(
-        f"  - 포인트: {mp.point} / 이유: {mp.reason} / 근거: {mp.sourceText}"
-        for mp in strategyResult.mainPoints
-    )
+    # --- 주장 포인트 ---
+    mainPointsText = "없음"
+    if strategyResult.mainPoints:
+        mainPointsText = "\n".join(
+            f"  - 포인트: {mp.point} / 이유: {mp.reason} / 근거: {mp.sourceText}"
+            for mp in strategyResult.mainPoints
+        )
 
-    precedentInfosText = "\n".join(
-        f"  - {pi.precedentNo} ({pi.precedentName}): "
-        f"유사성={pi.matchReason}, 활용={pi.usagePoint}"
-        for pi in strategyResult.precedentInfos
-    )
+    # --- 판례 ---
+    precedentInfosText = "없음"
+    if strategyResult.precedentInfos:
+        precedentInfosText = "\n".join(
+            f"  - {pi.precedentNo} ({pi.precedentName}): "
+            f"유사성={pi.matchReason}, 활용={pi.usagePoint}"
+            for pi in strategyResult.precedentInfos
+        )
 
+    # --- 증거 ---
     evidenceText = (
         ", ".join(request.preparedEvidenceList)
         if request.preparedEvidenceList
         else "없음"
     )
 
-    documentTypeLabel = (
-        "행정심판청구서"
-        if request.documentType == OutputDocumentType.APPEAL_CLAIM
-        else "보충서면"
-    )
+    # --- 문서 종류 ---
+    isAppealClaim = request.documentType == OutputDocumentType.APPEAL_CLAIM
+    documentTypeLabel = "행정심판청구서" if isAppealClaim else "보충서면"
+
+    # --- 처분 기본 정보 (CaseInfo: A-3 호환) ---
+    caseInfoBlock = f"""=== 처분 기본 정보 ===
+- 처분청: {caseInfo.agencyName or "미상"}
+- 처분 종류: {caseInfo.sanctionType or "미상"}
+- 처분 수위: {caseInfo.sanctionValue or "미상"}"""
+
+    if caseInfo.parsedFields:
+        caseInfoBlock += f"\n- 파싱 필드: {json.dumps(caseInfo.parsedFields, ensure_ascii=False)}"
+
+    # --- 초안 내용 (documentType별 분기) ---
+    contentJson = draft.contentJson
+    if isAppealClaim and isinstance(contentJson, AppealClaimContentJson):
+        draftBlock = f"""=== 검토 대상 문서 초안 ===
+- 제목: {draft.title or "없음"}
+- 소관 위원회: {contentJson.committeeType or "미특정"}
+- 처분 내용: {contentJson.dispositionContent}
+- 청구 취지: {contentJson.claimPurpose}
+- 청구 이유: {contentJson.claimReason}"""
+
+        responseShape = """{
+  "verification": "전체 검증 결과 요약 (2~3문장)",
+  "needsRewrite": true 또는 false,
+  "errors": [
+    {
+      "field": "오류가 있는 필드명 (committeeType / dispositionContent / claimPurpose / claimReason)",
+      "reason": "오류 사유",
+      "suggestion": "구체적 수정 제안"
+    }
+  ],
+  "revisedTitle": "수정된 제목 (수정 불필요시 원본 그대로)",
+  "revisedContentJson": {
+    "committeeType": "소관 위원회 또는 null",
+    "dispositionContent": "수정된 처분 내용",
+    "claimPurpose": "수정된 청구 취지",
+    "claimReason": "수정된 청구 이유"
+  }
+}"""
+    else:
+        draftBlock = f"""=== 검토 대상 문서 초안 ===
+- 제목: {draft.title or "없음"}
+- 제출 내용: {contentJson.submissionContent}"""
+
+        responseShape = """{
+  "verification": "전체 검증 결과 요약 (2~3문장)",
+  "needsRewrite": true 또는 false,
+  "errors": [
+    {
+      "field": "오류가 있는 필드명 (submissionContent)",
+      "reason": "오류 사유",
+      "suggestion": "구체적 수정 제안"
+    }
+  ],
+  "revisedTitle": "수정된 제목 (수정 불필요시 원본 그대로)",
+  "revisedContentJson": {
+    "submissionContent": "수정된 제출 내용"
+  }
+}"""
 
     return f"""다음은 AI가 작성한 {documentTypeLabel} 초안과 그 근거가 된 분석 결과입니다.
 초안을 비판적으로 검토하고 오류/누락/논리 불일치를 점검하세요.
@@ -125,64 +195,34 @@ def _buildPrompt(request: DocumentReviewRequest) -> str:
 === 문서 종류 ===
 {request.documentType.value} ({documentTypeLabel})
 
-=== 처분 기본 정보 ===
-- 처분청: {caseInfo.agencyName}
-- 사업장명: {caseInfo.businessName}
-- 사업장 주소: {caseInfo.businessAddress}
-- 처분 종류: {caseInfo.sanctionType}
-- 처분 수위: {caseInfo.sanctionValue or "미상"}
-- 청구 유형: {caseInfo.claimType}
+{caseInfoBlock}
+
+=== 원문 텍스트 ===
+{caseInfo.rawText or "없음"}
 
 === A-1 법적 쟁점 분석 결과 ===
-- 문서 종류: {legalResult.sourceDocumentType.value}
-- 쟁점 요약: {legalResult.legalIssueSummary}
+- 쟁점 요약: {legalResult.legalIssueSummary or "없음"}
 - 법적 약점 발견: {legalResult.legalWeaknessFound}
 - 쟁점 목록:
 {legalIssuesText}
 
 === A-2 전략/판례 분석 결과 ===
-- 청구 유형: {strategyResult.claimType}
-- 인용 가능성: {strategyResult.appealPossibility}
-- 전략 요약: {strategyResult.strategySummary}
+- 청구 유형: {strategyResult.claimType.value}
+- 인용 가능성: {strategyResult.appealPossibility.value}
+- 전략 요약: {strategyResult.strategySummary or "없음"}
 - 주장 포인트:
 {mainPointsText}
 - 활용 판례:
 {precedentInfosText}
-- 집행정지 권고: {strategyResult.stayRecommended}
-- 추천 증거: {", ".join(strategyResult.recommendedEvidence)}
 
 === 제출 예정 증거 ===
 {evidenceText}
 
-=== 검토 대상 문서 초안 ===
-- 제목: {draft.title}
-- 청구 취지: {draft.contentJson.claimPurpose}
-- 청구 이유: {draft.contentJson.claimReason}
-- 사실관계 요약: {draft.contentJson.factSummary}
-- 법적 주장: {json.dumps(draft.contentJson.legalArguments, ensure_ascii=False)}
-- 증거 목록: {json.dumps(draft.contentJson.evidenceList, ensure_ascii=False)}
+{draftBlock}
 
 위 정보를 대조하여 문서를 검증하고 아래 JSON 형식으로 응답하세요.
 
-{{
-  "verification": "전체 검증 결과 요약 (2~3문장)",
-  "needsRewrite": true 또는 false,
-  "errors": [
-    {{
-      "field": "오류가 있는 필드명 (claimPurpose / claimReason / factSummary / legalArguments / evidenceList)",
-      "reason": "오류 사유",
-      "suggestion": "구체적 수정 제안"
-    }}
-  ],
-  "revisedTitle": "수정된 제목 (수정 불필요시 원본 그대로)",
-  "revisedContentJson": {{
-    "claimPurpose": "수정된 청구 취지 (수정 불필요시 원본 그대로)",
-    "claimReason": "수정된 청구 이유 (수정 불필요시 원본 그대로)",
-    "factSummary": "수정된 사실관계 요약 (수정 불필요시 원본 그대로)",
-    "legalArguments": ["수정된 법적 주장 목록"],
-    "evidenceList": ["수정된 증거 목록"]
-  }}
-}}
+{responseShape}
 
 검증 규칙:
 - errors는 실제 오류가 있는 경우에만 포함하세요.
@@ -191,7 +231,9 @@ def _buildPrompt(request: DocumentReviewRequest) -> str:
 - 오류가 없으면 revisedContentJson에 원본 내용을 그대로 넣으세요.
 - 수정 시 행정심판 문서에 적합한 법률 용어와 문체를 유지하세요.
 - A-1의 쟁점이 문서에 반영되지 않았다면 반드시 오류로 지적하세요.
-- A-2의 주장 포인트가 누락되었다면 반드시 오류로 지적하세요."""
+- A-2의 주장 포인트가 누락되었다면 반드시 오류로 지적하세요.
+- committeeType은 확실한 경우에만 실제 기관명을 쓰고, 불확실하면 null로 두세요.
+- placeholder, 예시명, 임의의 기관명은 사용하지 마세요."""
 
 
 def _parseResponse(
@@ -221,24 +263,31 @@ def _parseResponse(
     revisedContent = data.get("revisedContentJson", {})
     originalContent = request.draftDocument.contentJson
 
+    # documentType에 따라 올바른 contentJson 타입 생성
+    isAppealClaim = request.documentType == OutputDocumentType.APPEAL_CLAIM
+
     try:
-        contentJson = DraftDocumentContent(
-            claimPurpose=revisedContent.get(
-                "claimPurpose", originalContent.claimPurpose
-            ),
-            claimReason=revisedContent.get(
-                "claimReason", originalContent.claimReason
-            ),
-            factSummary=revisedContent.get(
-                "factSummary", originalContent.factSummary
-            ),
-            legalArguments=revisedContent.get(
-                "legalArguments", originalContent.legalArguments
-            ),
-            evidenceList=revisedContent.get(
-                "evidenceList", originalContent.evidenceList
-            ),
-        )
+        if isAppealClaim and isinstance(originalContent, AppealClaimContentJson):
+            contentJson = AppealClaimContentJson(
+                committeeType=revisedContent.get(
+                    "committeeType", originalContent.committeeType
+                ),
+                dispositionContent=revisedContent.get(
+                    "dispositionContent", originalContent.dispositionContent
+                ),
+                claimPurpose=revisedContent.get(
+                    "claimPurpose", originalContent.claimPurpose
+                ),
+                claimReason=revisedContent.get(
+                    "claimReason", originalContent.claimReason
+                ),
+            )
+        else:
+            contentJson = SupplementStatementContentJson(
+                submissionContent=revisedContent.get(
+                    "submissionContent", originalContent.submissionContent
+                ),
+            )
     except Exception:
         contentJson = originalContent
 
