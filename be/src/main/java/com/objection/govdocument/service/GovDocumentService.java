@@ -132,6 +132,7 @@ public class GovDocumentService {
                         .documentType(document.getDocumentType())
                         .extractedText(document.getExtractedText())
                         .summary(document.getSummary())
+                        .parsedJson(document.getParsedJson())
                         .fact(document.getFact())
                         .opinion(document.getOpinion())
                         .build())
