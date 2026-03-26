@@ -12,6 +12,8 @@ import com.objection.govdocument.repository.GovDocumentRepository;
 import com.objection.narrative.client.AiAnalysisClient;
 import com.objection.narrative.dto.ai.AiLegalIssueRequest;
 import com.objection.narrative.dto.ai.AiLegalIssueResponse;
+import com.objection.narrative.dto.ai.AiStrategyRequest;
+import com.objection.narrative.dto.ai.AiStrategyResponse;
 import com.objection.narrative.dto.request.NarrativeRequest;
 import com.objection.narrative.dto.response.NarrativeResponse;
 import com.objection.narrative.dto.response.NarrativeSaveResponse;
@@ -49,40 +51,66 @@ public class NarrativeService {
         // 2. STRATEGY_GENERATING 전이
         found.updateStatus(CaseStatus.STRATEGY_GENERATING);
 
-        // 3. A-1 호출
         try {
             Map<String, Object> parsedFields = doc.getParsedJson() != null
                     ? objectMapper.readValue(doc.getParsedJson(), new TypeReference<>() {})
                     : null;
 
-            AiLegalIssueRequest aiRequest = new AiLegalIssueRequest(
+            AiLegalIssueRequest.CaseInfo caseInfo = new AiLegalIssueRequest.CaseInfo(
+                    found.getSanctionType(),
+                    found.getSanctionDays() != null ? found.getSanctionDays().intValue() : null,
+                    doc.getExtractedText(),
+                    parsedFields
+            );
+
+            AiLegalIssueRequest.CaseContext caseContext = new AiLegalIssueRequest.CaseContext(
+                    request.getFact(),
+                    request.getOpinion()
+            );
+
+            // 3. A-1 호출
+            AiLegalIssueRequest a1Request = new AiLegalIssueRequest(
+                    caseNo, doc.getGovDocNo(), "NOTICE", caseInfo, caseContext
+            );
+            AiLegalIssueResponse a1Response = aiAnalysisClient.analyzeLegalIssue(a1Request);
+
+            if (!"SUCCESS".equals(a1Response.getStatus())) {
+                found.updateStatus(CaseStatus.STRATEGY_FAILED);
+                return new NarrativeSaveResponse(caseNo, LocalDateTime.now());
+            }
+
+            // 4. A-2 호출 (A-1 결과 포함)
+            AiStrategyRequest a2Request = new AiStrategyRequest(
                     caseNo,
                     doc.getGovDocNo(),
                     "NOTICE",
-                    new AiLegalIssueRequest.CaseInfo(
+                    new AiStrategyRequest.CaseInfo(
                             found.getSanctionType(),
                             found.getSanctionDays() != null ? found.getSanctionDays().intValue() : null,
                             doc.getExtractedText(),
                             parsedFields
                     ),
-                    new AiLegalIssueRequest.CaseContext(
+                    new AiStrategyRequest.CaseContext(
                             request.getFact(),
                             request.getOpinion()
+                    ),
+                    new AiStrategyRequest.LegalIssueAnalysisResult(
+                            a1Response.getResult().getLegalIssueSummary(),
+                            a1Response.getResult().getLegalWeaknessFound(),
+                            a1Response.getResult().getLegalIssues()
                     )
             );
+            AiStrategyResponse a2Response = aiAnalysisClient.analyzeStrategy(a2Request);
 
-            AiLegalIssueResponse aiResponse = aiAnalysisClient.analyzeLegalIssue(aiRequest);
-
-            if ("SUCCESS".equals(aiResponse.getStatus())) {
-                // 4. 성공 → STRATEGY_DONE
+            if ("SUCCESS".equals(a2Response.getStatus())) {
+                // 5. 성공 → STRATEGY_DONE
                 found.updateStatus(CaseStatus.STRATEGY_DONE);
             } else {
                 found.updateStatus(CaseStatus.STRATEGY_FAILED);
             }
 
         } catch (Exception e) {
-            log.error("A-1 법적 쟁점 분석 호출 실패 caseNo: {}", caseNo, e);
-            // 5. 실패 → STRATEGY_FAILED
+            log.error("AI 분석 호출 실패 caseNo: {}", caseNo, e);
             found.updateStatus(CaseStatus.STRATEGY_FAILED);
         }
 
