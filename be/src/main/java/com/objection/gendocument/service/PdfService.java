@@ -7,7 +7,6 @@ import com.objection.cases.entity.Case;
 import com.objection.common.exception.BusinessException;
 import com.objection.common.exception.ErrorCode;
 import com.objection.govdocument.entity.GovDocument;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -15,11 +14,10 @@ import java.time.LocalDate;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 public class PdfService {
 
     private static final String FONT_PATH = "/fonts/NanumGothic.ttf";
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public byte[] generatePdf(String documentType, Map<String, Object> contentJson,
                               Case foundCase, GovDocument govDoc) {
@@ -46,7 +44,6 @@ public class PdfService {
             Font normalFont = new Font(baseFont, 9, Font.NORMAL);
             Font smallFont = new Font(baseFont, 8, Font.NORMAL);
 
-            // 제목
             Paragraph title = new Paragraph("행 정 심 판  청 구 서", titleFont);
             title.setAlignment(Element.ALIGN_CENTER);
             title.setSpacingAfter(5f);
@@ -56,7 +53,6 @@ public class PdfService {
             rightAlign.setAlignment(Element.ALIGN_RIGHT);
             document.add(rightAlign);
 
-            // 접수번호/접수일
             PdfPTable headerTable = new PdfPTable(new float[]{30f, 50f, 20f});
             headerTable.setWidthPercentage(100);
             addGrayCell(headerTable, "접수번호", boldFont);
@@ -64,51 +60,40 @@ public class PdfService {
             addGrayCell(headerTable, "", boldFont);
             document.add(headerTable);
 
-            // 청구인 섹션
             PdfPTable mainTable = new PdfPTable(new float[]{20f, 20f, 60f});
             mainTable.setWidthPercentage(100);
 
             addMergedLeftCell(mainTable, "청구인", boldFont, 4);
 
-            // 성명
             addLabelCell(mainTable, "성명", normalFont);
             addValueCell(mainTable, foundCase.getClaimant() != null ? foundCase.getClaimant() : "", normalFont);
 
-            // 주소 - content_json에서 읽기
             addLabelCell(mainTable, "주소", normalFont);
             addValueCell(mainTable, getString(contentJson, "claimantAddress"), normalFont);
 
-            // 주민등록번호 - content_json에서 읽기
             addLabelCell(mainTable, "주민등록번호(외국인등록번호)", normalFont);
             addValueCell(mainTable, getString(contentJson, "claimantResidentNo"), normalFont);
 
-            // 전화번호 - content_json에서 읽기
             addLabelCell(mainTable, "전화번호", normalFont);
             addValueCell(mainTable, getString(contentJson, "claimantPhone"), normalFont);
 
-            // 피청구인
             addFullRowCell(mainTable, "피청구인",
                     foundCase.getAgencyName() != null ? foundCase.getAgencyName() : "", boldFont, normalFont);
 
-            // 소관 행정심판위원회
             String committeeType = getString(contentJson, "committeeType");
             String committeeText = buildCommitteeText(committeeType);
             addFullRowCell(mainTable, "소관\n행정심판위원회", committeeText, boldFont, normalFont);
 
-            // 처분 내용
             addFullRowCell(mainTable, "처분 내용 또는\n부작위 내용",
                     getString(contentJson, "dispositionContent"), boldFont, normalFont);
 
-            // 처분이 있음을 안 날
             String awareDate = foundCase.getAwareDate() != null ? foundCase.getAwareDate().toString() : "";
             addFullRowCell(mainTable, "처분이 있음을\n안 날", awareDate, boldFont, normalFont);
 
-            // 청구 취지 및 청구 이유
             String claimContent = "【청구취지】\n" + getString(contentJson, "claimPurpose")
                     + "\n\n【청구이유】\n" + getString(contentJson, "claimReason");
             addFullRowCell(mainTable, "청구 취지 및\n청구 이유", claimContent, boldFont, normalFont);
 
-            // 불복절차 고지 - govDoc.parsedJson에서 읽기
             String informYn = "[ ] 유    [✓] 무";
             String informContent = "";
             if (govDoc != null && govDoc.getParsedJson() != null) {
@@ -128,19 +113,16 @@ public class PdfService {
             addFullRowCell(mainTable, "처분청의\n불복절차 고지 유무", informYn, boldFont, normalFont);
             addFullRowCell(mainTable, "처분청의\n불복절차 고지 내용", informContent, boldFont, normalFont);
 
-            // 국선대리인 - content_json에서 읽기
             Boolean publicDefender = Boolean.TRUE.equals(contentJson.get("publicDefenderRequest"));
             addFullRowCell(mainTable, "국선대리인\n선임 신청 여부",
                     publicDefender ? "[✓] 여    [ ] 부" : "[ ] 여    [✓] 부", boldFont, normalFont);
 
-            // 구술심리 - content_json에서 읽기
             Boolean oralHearing = Boolean.TRUE.equals(contentJson.get("oralHearingRequest"));
             addFullRowCell(mainTable, "구술심리 신청\n여부",
                     oralHearing ? "[✓] 여    [ ] 부" : "[ ] 여    [✓] 부", boldFont, normalFont);
 
             document.add(mainTable);
 
-            // 하단 텍스트
             LocalDate today = LocalDate.now();
             Paragraph footer = new Paragraph(
                     "「행정심판법」 제28조 및 같은 법 시행령 제20조에 따라 위와 같이 행정심판을 청구합니다.\n\n"
@@ -278,6 +260,9 @@ public class PdfService {
     }
 
     private String buildCommitteeText(String committeeType) {
+        if (committeeType == null || committeeType.isEmpty()) {
+            return "[ ] 중앙행정심판위원회  [ ] ○○시·도행정심판위원회  [✓] 기타";
+        }
         return switch (committeeType) {
             case "중앙행정" -> "[✓] 중앙행정심판위원회  [ ] ○○시·도행정심판위원회  [ ] 기타";
             case "시도행정" -> "[ ] 중앙행정심판위원회  [✓] ○○시·도행정심판위원회  [ ] 기타";
