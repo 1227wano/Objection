@@ -81,28 +81,6 @@ public class GenDocumentService {
         return toResponse(doc);
     }
 
-    // PDF 생성
-    public byte[] generatePdf(Integer analysisNo, Integer userNo) {
-        Case foundCase = getCaseByAnalysisNoOrThrow(analysisNo);
-        validateOwner(foundCase, userNo);
-
-        GenDocument doc = genDocumentRepository.findById(analysisNo)
-                .orElseThrow(() -> new BusinessException(ErrorCode.DOCUMENT_NOT_FOUND));
-
-        // govDocument에서 parsedFields 읽어서 전달
-        GovDocument govDoc = govDocumentRepository
-                .findByCaseNoAndDocumentType(foundCase.getCaseNo(), "NOTICE")
-                .orElse(null);
-
-        try {
-            Map<String, Object> contentJsonMap = objectMapper.readValue(doc.getContentJson(),
-                    objectMapper.getTypeFactory().constructMapType(Map.class, String.class, Object.class));
-            return pdfService.generatePdf(doc.getDocumentType(), contentJsonMap, foundCase, govDoc);
-        } catch (JsonProcessingException e) {
-            throw new BusinessException(ErrorCode.PDF_CONVERT_FAILED);
-        }
-    }
-
     // ───── private helpers ─────
 
     private void validateDocumentType(String documentType) {
