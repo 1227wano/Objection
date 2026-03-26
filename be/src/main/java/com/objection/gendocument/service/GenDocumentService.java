@@ -40,8 +40,32 @@ public class GenDocumentService {
         Case foundCase = getCaseByAnalysisNoOrThrow(analysisNo);
         validateOwner(foundCase, userNo);
 
-        // TODO: AI 서버(A-3) 호출 → contentJson 받아오기
         String contentJson = buildEmptyContentJson(request.getDocumentType());
+
+        // APPEAL_CLAIM이면 govDoc parsedJson에서 grievanceNotified, grievanceContent 읽기
+        if ("APPEAL_CLAIM".equals(request.getDocumentType())) {
+            try {
+                GovDocument govDoc = govDocumentRepository
+                        .findByCaseNoAndDocumentType(foundCase.getCaseNo(), "NOTICE")
+                        .orElse(null);
+
+                if (govDoc != null && govDoc.getParsedJson() != null) {
+                    Map<String, Object> existing = objectMapper.readValue(contentJson,
+                            objectMapper.getTypeFactory().constructMapType(Map.class, String.class, Object.class));
+
+                    Map<String, Object> parsedFields = objectMapper.readValue(govDoc.getParsedJson(),
+                            objectMapper.getTypeFactory().constructMapType(Map.class, String.class, Object.class));
+
+                    Object inform = parsedFields.get("Inform");
+                    Object informContent = parsedFields.get("InformContent");
+
+                    if (inform != null) existing.put("grievanceNotified", inform);
+                    if (informContent != null) existing.put("grievanceContent", informContent);
+
+                    contentJson = objectMapper.writeValueAsString(existing);
+                }
+            } catch (Exception ignored) {}
+        }
 
         GenDocument doc = GenDocument.builder()
                 .analysisNo(analysisNo)
@@ -113,7 +137,9 @@ public class GenDocumentService {
                         "committeeType", "",
                         "dispositionContent", "",
                         "claimPurpose", "",
-                        "claimReason", ""
+                        "claimReason", "",
+                        "grievanceNotified", false,
+                        "grievanceContent", ""
                 ));
             } else {
                 return objectMapper.writeValueAsString(Map.of(
