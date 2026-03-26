@@ -26,7 +26,7 @@ export default function RepresentativeSection() {
     });
   };
 
-  const DISABLED_MSG = '본인이 신청했기 때문에 작성할 필요가 없습니다';
+  const DISABLED_MSG = '본인이 신청해서 채우지 않으셔도 됩니다';
 
   return (
     <>
@@ -38,7 +38,6 @@ export default function RepresentativeSection() {
                 key={type}
                 type="button"
                 disabled
-                title={DISABLED_MSG}
                 className="flex items-center gap-1 text-left rounded px-0.5 -mx-0.5 transition-colors opacity-60 cursor-not-allowed"
               >
                 <span className="w-5 text-center">[{selected === type ? 'V' : ' '}]</span> {type}
@@ -51,13 +50,13 @@ export default function RepresentativeSection() {
         </td>
         <td className="border border-black p-2 px-3">성명</td>
         <td colSpan={2} className="border border-black p-1.5 px-3">
-          <EditableInput name="representative.name" disabled disabledMessage={DISABLED_MSG} />
+          <EditableInput name="representative.name" disabled placeholder={DISABLED_MSG} />
         </td>
       </tr>
       <tr>
         <td className="border border-black p-2 px-3">주소</td>
         <td colSpan={2} className="border border-black p-1.5 px-3">
-          <EditableInput name="representative.address" disabled disabledMessage={DISABLED_MSG} />
+          <EditableInput name="representative.address" disabled placeholder={DISABLED_MSG} />
         </td>
       </tr>
       <tr>
@@ -67,13 +66,13 @@ export default function RepresentativeSection() {
           (외국인등록번호)
         </td>
         <td colSpan={2} className="border border-black p-1.5 px-3">
-          <EditableInput name="representative.residentNo" disabled disabledMessage={DISABLED_MSG} />
+          <EditableInput name="representative.residentNo" disabled placeholder={DISABLED_MSG} />
         </td>
       </tr>
       <tr>
         <td className="border border-black p-2 px-3">전화번호</td>
         <td colSpan={2} className="border border-black p-1.5 px-3">
-          <EditableInput name="representative.phone" disabled disabledMessage={DISABLED_MSG} />
+          <EditableInput name="representative.phone" disabled placeholder={DISABLED_MSG} />
         </td>
       </tr>
     </>
