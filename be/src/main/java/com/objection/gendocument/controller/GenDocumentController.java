@@ -7,9 +7,7 @@ import com.objection.gendocument.service.GenDocumentService;
 import com.objection.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -66,29 +64,5 @@ public class GenDocumentController {
 
         return ResponseEntity
                 .ok(ApiResponse.success("문서가 수정되었습니다.", response));
-    }
-
-    // 문서 다운로드 (PDF)
-    @GetMapping("/download")
-    public ResponseEntity<byte[]> downloadDocument(
-            @PathVariable Integer analysisNo,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-
-        DocumentResponse doc = genDocumentService.getDocument(
-                analysisNo, userDetails.getUserNo());
-
-        byte[] pdfBytes = genDocumentService.generatePdf(
-                analysisNo, userDetails.getUserNo());
-
-        String filename = "APPEAL_CLAIM".equals(doc.getDocumentType()) ? "행정심판청구서.pdf" : "보충서면.pdf";
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDispositionFormData("attachment", filename);
-
-        return ResponseEntity
-                .ok()
-                .headers(headers)
-                .body(pdfBytes);
     }
 }

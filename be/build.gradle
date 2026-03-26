@@ -38,8 +38,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
-    // PDF 생성 라이브러리
-    implementation 'com.github.librepdf:openpdf:1.3.30'
 
 
     // AI 서버와의 API 통신을 위해 Spring Cloud OpenFeign
