@@ -13,13 +13,13 @@ export function EditableInput({
   required = false,
   className = '',
   disabled = false,
-  disabledMessage = '',
+  placeholder = '',
 }: {
   name: string;
   required?: boolean;
   className?: string;
   disabled?: boolean;
-  disabledMessage?: string;
+  placeholder?: string;
 }) {
   const {
     register,
@@ -69,7 +69,7 @@ export function EditableInput({
         {...register(name, required ? { required: '필수 입력 항목입니다' } : {})}
         className={[...baseStyle, ...stateStyle, className].join(' ')}
         disabled={disabled}
-        title={disabled ? disabledMessage : undefined}
+        placeholder={placeholder}
       />
       {required && (
         <span className="absolute -top-1.5 -right-1 text-amber-500 text-[10px] font-bold leading-none">
@@ -92,7 +92,7 @@ export function EditableTextarea({
   required = false,
   className = '',
   disabled = false,
-  disabledMessage = '',
+  placeholder = '',
 }: {
   id?: string;
   name: string;
@@ -100,7 +100,7 @@ export function EditableTextarea({
   required?: boolean;
   className?: string;
   disabled?: boolean;
-  disabledMessage?: string;
+  placeholder?: string;
 }) {
   const {
     register,
@@ -150,7 +150,7 @@ export function EditableTextarea({
         rows={rows}
         className={[...baseStyle, ...stateStyle, className].join(' ')}
         disabled={disabled}
-        title={disabled ? disabledMessage : undefined}
+        placeholder={placeholder}
       />
       {required && (
         <span className="absolute -top-1.5 -right-1 text-amber-500 text-[10px] font-bold leading-none">

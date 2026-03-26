@@ -184,53 +184,66 @@ export default function AppealClaimPdf({ data }: AppealClaimPdfProps) {
           </View>
 
           {/* 청구인 */}
-          {[
-            { label: '성명', value: personalInfo?.name ?? '' },
-            { label: '주소', value: personalInfo?.address ?? '' },
-            { label: '주민번호', value: personalInfo?.residentNo ?? '' },
-            { label: '전화번호', value: personalInfo?.phone ?? '' },
-          ].map((field, i, arr) => (
-            <View key={field.label} style={i < arr.length - 1 ? styles.row : styles.row}>
-              {i === 0 && (
-                <View style={[styles.headerCell, { justifyContent: 'center' }]}>
-                  <Text style={styles.headerCellText}>청구인</Text>
-                </View>
-              )}
-              {i > 0 && (
-                <View style={styles.headerCell} />
-              )}
-              <View style={styles.subHeaderCell}>
-                <Text style={styles.subHeaderCellText}>{field.label}</Text>
-              </View>
-              <View style={styles.valueCell}>
-                <Text style={styles.valueCellText}>{field.value}</Text>
-              </View>
+          <View style={styles.row}>
+            <View style={[styles.headerCell, { justifyContent: 'center' }]}>
+              <Text style={styles.headerCellText}>청구인</Text>
             </View>
-          ))}
+            <View style={{ flex: 1 }}>
+              {[
+                { label: '성명', value: personalInfo?.name ?? '' },
+                { label: '주소', value: personalInfo?.address ?? '' },
+                { label: '주민번호', value: personalInfo?.residentNo ?? '' },
+                { label: '전화번호', value: personalInfo?.phone ?? '' },
+              ].map((field, i, arr) => (
+                <View
+                  key={field.label}
+                  style={{
+                    flexDirection: 'row',
+                    borderBottomWidth: i < arr.length - 1 ? 1 : 0,
+                    borderBottomColor: '#111827',
+                  }}
+                >
+                  <View style={styles.subHeaderCell}>
+                    <Text style={styles.subHeaderCellText}>{field.label}</Text>
+                  </View>
+                  <View style={styles.valueCell}>
+                    <Text style={styles.valueCellText}>{field.value}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
 
           {/* 대표자 등 */}
-          {[
-            { label: '성명', value: representative?.name ?? '해당없음' },
-            { label: '주소', value: representative?.address ?? '' },
-            { label: '주민번호', value: representative?.residentNo ?? '' },
-            { label: '전화번호', value: representative?.phone ?? '' },
-          ].map((field, i) => (
-            <View key={`rep-${field.label}`} style={styles.row}>
-              {i === 0 ? (
-                <View style={styles.headerCell}>
-                  <Text style={styles.headerCellText}>{'대표자\n(관리인\n등)'}</Text>
-                </View>
-              ) : (
-                <View style={styles.headerCell} />
-              )}
-              <View style={styles.subHeaderCell}>
-                <Text style={styles.subHeaderCellText}>{field.label}</Text>
-              </View>
-              <View style={styles.valueCell}>
-                <Text style={styles.valueCellText}>{field.value}</Text>
-              </View>
+          <View style={styles.row}>
+            <View style={[styles.headerCell, { justifyContent: 'center' }]}>
+              <Text style={styles.headerCellText}>{'대표자\n(관리인\n등)'}</Text>
             </View>
-          ))}
+            <View style={{ flex: 1 }}>
+              {[
+                { label: '성명', value: representative?.name ?? '' },
+                { label: '주소', value: representative?.address ?? '' },
+                { label: '주민번호', value: representative?.residentNo ?? '' },
+                { label: '전화번호', value: representative?.phone ?? '' },
+              ].map((field, i, arr) => (
+                <View
+                  key={`rep-${field.label}`}
+                  style={{
+                    flexDirection: 'row',
+                    borderBottomWidth: i < arr.length - 1 ? 1 : 0,
+                    borderBottomColor: '#111827',
+                  }}
+                >
+                  <View style={styles.subHeaderCell}>
+                    <Text style={styles.subHeaderCellText}>{field.label}</Text>
+                  </View>
+                  <View style={styles.valueCell}>
+                    <Text style={styles.valueCellText}>{field.value}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
 
           {/* 피청구인 */}
           <View style={styles.row}>
