@@ -1,26 +1,41 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ChecklistItem from './ChecklistItem';
-import { EvidenceItem } from '@/app/appeal/claim/report/types';
+import { Evidence } from '@/app/appeal/claim/suggest/_types/evidence';
 
 interface ChecklistGroupProps {
-  items: EvidenceItem[];
-  onChange?: (selectedIds: number[]) => void; // 추가된 속성
+  items: Evidence[]; // 공통 Evidence 타입으로 변경
+  onChange?: (selectedIds: number[]) => void;
   hideHeader?: boolean;
+  disabled?: boolean; // 읽기 전용 처리를 위한 속성 추가
 }
 
-export default function ChecklistGroup({ items, onChange, hideHeader = false }: ChecklistGroupProps) {
-  const [checkedIds, setCheckedIds] = useState<Set<number>>(() => {
+export default function ChecklistGroup({
+  items,
+  onChange,
+  hideHeader = false,
+  disabled = false,
+}: ChecklistGroupProps) {
+  const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
+
+  // API에서 데이터를 받아오거나 items 배열이 변경될 때 상태를 동기화
+  useEffect(() => {
     const initialChecked = new Set<number>();
     items.forEach((item) => {
       if (item.submitted) initialChecked.add(item.evidenceId);
     });
-    return initialChecked;
-  });
+
+    setCheckedIds(initialChecked);
+
+    if (onChange) {
+      onChange(Array.from(initialChecked));
+    }
+  }, [items, onChange]);
 
   const toggle = (id: number) => {
-    // 1. 기존 상태를 바탕으로 새로운 Set을 만듭니다.
+    if (disabled) return; // 비활성화 상태이면 클릭 무시
+
     const next = new Set(checkedIds);
 
     if (next.has(id)) {
@@ -29,10 +44,8 @@ export default function ChecklistGroup({ items, onChange, hideHeader = false }: 
       next.add(id);
     }
 
-    // 2. ChecklistGroup 내부의 상태를 업데이트합니다.
     setCheckedIds(next);
 
-    // 3. 상태 업데이트 함수(setState) 밖에서 부모의 onChange를 호출합니다.
     if (onChange) {
       onChange(Array.from(next));
     }
@@ -57,6 +70,8 @@ export default function ChecklistGroup({ items, onChange, hideHeader = false }: 
             title={item.evidenceType}
             checked={checkedIds.has(item.evidenceId)}
             onToggle={() => toggle(item.evidenceId)}
+            // ChecklistItem 컴포넌트 내부에 disabled 처리 로직이 있다면 아래 주석을 해제하여 사용합니다.
+            // disabled={disabled}
           />
         ))}
       </div>
