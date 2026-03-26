@@ -127,11 +127,13 @@ public class NarrativeService {
         Case found = getCaseOrThrow(caseNo);
         validateOwner(found, userNo);
 
-        GovDocument doc = govDocumentRepository
-                .findByCaseNoAndDocumentType(caseNo, "NOTICE")
-                .orElseThrow(() -> new BusinessException(ErrorCode.GOV_DOC_NOT_FOUND));
+        Optional<GovDocument> docOpt = govDocumentRepository
+                .findByCaseNoAndDocumentType(caseNo, "NOTICE");
 
-        return new NarrativeResponse(caseNo, doc.getFact(), doc.getOpinion());
+        String fact = docOpt.map(GovDocument::getFact).orElse(null);
+        String opinion = docOpt.map(GovDocument::getOpinion).orElse(null);
+
+        return new NarrativeResponse(caseNo, fact, opinion);
     }
 
     private Case getCaseOrThrow(Integer caseNo) {
