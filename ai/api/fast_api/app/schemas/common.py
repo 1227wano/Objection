@@ -212,43 +212,7 @@ class CaseInfo(BaseSchema):
     claimType: str
 
 
-class DraftDocumentContent(BaseSchema):
-    claimPurpose: str
-    claimReason: str
-    factSummary: str
-    legalArguments: list[str]
-    evidenceList: list[str]
-
-    @field_validator("legalArguments", "evidenceList")
-    @classmethod
-    def validateNonEmptyStringList(cls, value: list[str]) -> list[str]:
-        if not value:
-            raise ValueError("must not be empty")
-        return value
-
-
-class DraftDocument(BaseSchema):
-    title: str
-    contentJson: DraftDocumentContent
-
-
-class DocumentDraftResult(BaseSchema):
-    analysisNo: int
-    documentType: OutputDocumentType
-    title: str
-    contentJson: DraftDocumentContent
-
-
 class ReviewError(BaseSchema):
     field: str
     reason: str
     suggestion: str
-
-
-class DocumentReviewResult(BaseSchema):
-    analysisNo: int
-    documentType: OutputDocumentType
-    verification: str
-    needsRewrite: bool
-    errors: list[ReviewError]
-    draftDocument: DraftDocument

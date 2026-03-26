@@ -6,12 +6,8 @@ from app.schemas.common import (
     CaseGovResponse,
     CaseInfo,
     DecisionParsedFields,
-    DocumentDraftResult,
     DocumentExtractResult,
     DocumentExtractResultSummary,
-    DocumentReviewResult,
-    DraftDocument,
-    DraftDocumentContent,
     LawRetrieval,
     LegalIssueDocumentExtractResult,
     LegalIssue,
@@ -26,7 +22,12 @@ from app.schemas.common import (
 )
 from app.schemas.document_draft import DocumentDraftRequest, DocumentDraftResponse
 from app.schemas.document_extract import DocumentExtractRequest, DocumentExtractResponse
-from app.schemas.document_review import DocumentReviewRequest, DocumentReviewResponse
+from app.schemas.document_review import (
+    DocumentReviewRequest,
+    DocumentReviewResponse,
+    DocumentReviewResult,
+    DraftDocument,
+)
 from app.schemas.enums import InputDocumentType, OutputDocumentType, Stage, Status
 from app.schemas.legal_issue_analysis import (
     LegalIssueAnalysisRequest,
@@ -52,7 +53,6 @@ __all__ = [
     "DecisionParsedFields",
     "DocumentDraftRequest",
     "DocumentDraftResponse",
-    "DocumentDraftResult",
     "DocumentExtractRequest",
     "DocumentExtractResponse",
     "DocumentExtractResult",
@@ -61,7 +61,6 @@ __all__ = [
     "DocumentReviewResponse",
     "DocumentReviewResult",
     "DraftDocument",
-    "DraftDocumentContent",
     "InputDocumentType",
     "LawRetrieval",
     "LegalIssueDocumentExtractResult",
