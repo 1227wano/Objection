@@ -12,6 +12,4 @@ import java.util.Optional;
 public interface CaseRepository extends JpaRepository<Case,Integer> {
 
     List<Case> findByUserNoOrderByUpdatedAtDesc(Integer userNo);
-
-    Optional<Case> findByUserNoAndStatus(Integer userNo, CaseStatus status);
 }

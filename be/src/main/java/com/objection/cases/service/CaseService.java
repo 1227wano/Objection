@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,22 +28,10 @@ public class CaseService {
     @Transactional
     public CaseCreateResponse createCase(Integer userNo) {
 
-        // ONBOARDING 중인 사건이 있으면 기존 사건 재사용
-        Optional<Case> existing = caseRepository.findByUserNoAndStatus(userNo, CaseStatus.ONBOARDING);
-        if (existing.isPresent()) {
-            Case e = existing.get();
-            return new CaseCreateResponse(
-                    e.getCaseNo(),
-                    e.getTitle(),
-                    e.getStatus().name(),
-                    e.getCreatedAt()
-            );
-        }
-
         Case newCase = Case.builder()
                 .userNo(userNo)
                 .title("새 행정심판 사건")
-                .status(CaseStatus.ONBOARDING)
+                .status(CaseStatus.STARTED)
                 .stayStatus(StayStatus.NONE)
                 .build();
 
@@ -113,7 +101,25 @@ public class CaseService {
                 request.getAgencyName()
         );
 
-        found.updateStatus(CaseStatus.STARTED);
+        // 적법요건 검증 1. 청구인 적격
+        if (Boolean.FALSE.equals(request.getIsDirect())) {
+            found.updateStatus(CaseStatus.ANALYSIS_FAILED);
+            return new SurveySaveResponse(found.getCaseNo(), found.getUpdatedAt());
+        }
+
+        // 적법요건 검증 2. 청구기간 90일 초과 여부
+        if (request.getAwareDate() != null) {
+            LocalDate awareDate = LocalDate.parse(request.getAwareDate());
+            long daysSinceAware = ChronoUnit.DAYS.between(awareDate, LocalDate.now());
+            if (daysSinceAware > 90) {
+                found.updateStatus(CaseStatus.ANALYSIS_FAILED);
+                return new SurveySaveResponse(found.getCaseNo(), found.getUpdatedAt());
+            }
+        }
+
+        // 적법요건 통과 → ANALYZING → ANALYSIS_DONE
+        found.updateStatus(CaseStatus.ANALYZING);
+        found.updateStatus(CaseStatus.ANALYSIS_DONE);
 
         return new SurveySaveResponse(found.getCaseNo(), found.getUpdatedAt());
     }

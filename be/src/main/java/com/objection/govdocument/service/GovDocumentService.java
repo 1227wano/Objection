@@ -3,6 +3,7 @@ package com.objection.govdocument.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.objection.cases.entity.Case;
+import com.objection.cases.enums.CaseStatus;
 import com.objection.cases.repository.CaseRepository;
 import com.objection.common.s3.S3Service;
 import com.objection.govdocument.client.AiDocumentClient;
@@ -83,23 +84,30 @@ public class GovDocumentService {
         GovDocument savedDoc = govDocumentRepository.save(document);
 
         // 3. cases 테이블 업데이트
-        if (parsedFieldsNode != null) {
-            Case currentCase = caseRepository.findById(caseNo)
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사건 번호입니다: " + caseNo));
+        Case currentCase = caseRepository.findById(caseNo)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사건 번호입니다: " + caseNo));
 
+        if (parsedFieldsNode != null) {
             String sanctionType = extractString(parsedFieldsNode, "sanctionType");
             Integer sanctionValueInt = extractInteger(parsedFieldsNode, "sanctionValue");
             String violationLaw = extractArrayAsString(parsedFieldsNode, "legalBasis");
+            Short sanctionDays = sanctionValueInt != null ? sanctionValueInt.shortValue() : null;
+            String businessName = extractString(parsedFieldsNode, "businessName");
+            String businessAddress = extractString(parsedFieldsNode, "businessAddress");
+            String title = extractString(parsedFieldsNode, "title");
 
-            Short sanctionDays = null;
-            if (sanctionValueInt != null) {
-                sanctionDays = sanctionValueInt.shortValue();
-            }
-
-            currentCase.updateSanctionInfoFromDocument(sanctionType, sanctionDays, violationLaw);
+            currentCase.updateSanctionInfoFromDocument(sanctionType, sanctionDays, violationLaw,
+                    businessName, businessAddress, title);
         }
 
-        // 4. 프론트엔드 응답 포맷으로 변환
+        // 4. 상태 전이
+        switch (request.getDocumentType()) {
+            case "NOTICE"   -> currentCase.updateStatus(CaseStatus.DOC_UPLOADED);
+            case "ANSWER"   -> currentCase.updateStatus(CaseStatus.ANSWER_ANALYZING);
+            case "DECISION" -> currentCase.updateStatus(CaseStatus.DECISION_ANALYZING);
+        }
+
+        // 5. 프론트엔드 응답 포맷으로 변환
         return DocumentUploadResponse.builder()
                 .status("SUCCESS")
                 .message("문서가 성공적으로 인식 및 저장되었습니다.")

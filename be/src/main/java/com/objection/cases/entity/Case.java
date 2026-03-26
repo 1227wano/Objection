@@ -93,16 +93,17 @@ public class Case {
         this.status = status;
     }
 
-    public void updateSanctionInfoFromDocument(String sanctionType, Short sanctionDays, String violationType) {
-        if (sanctionType != null) {
-            this.sanctionType = sanctionType;
-        }
-        if (sanctionDays != null) {
-            this.sanctionDays = sanctionDays;
-        }
+    public void updateSanctionInfoFromDocument(String sanctionType, Short sanctionDays,
+                                               String violationType, String businessName,
+                                               String businessAddress, String title) {
+        if (sanctionType != null) this.sanctionType = sanctionType;
+        if (sanctionDays != null) this.sanctionDays = sanctionDays;
         if (violationType != null) {
-            // violationType 컬럼 길이가 20이므로, 너무 긴 법령 이름이 들어와서 DB 에러가 나는 것을 방지
-            this.violationType = violationType.length() > 20 ? violationType.substring(0, 20) : violationType;
+            this.violationType = violationType.length() > 20
+                    ? violationType.substring(0, 20) : violationType;
         }
+        if (businessName != null) this.businessName = businessName;
+        if (businessAddress != null) this.businessAddress = businessAddress;
+        if (title != null) this.title = title;
     }
 }

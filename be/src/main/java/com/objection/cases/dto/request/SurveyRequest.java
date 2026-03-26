@@ -12,4 +12,5 @@ public class SurveyRequest {
     private String disposalDate;
     private String awareDate;
     private String agencyName;
+    private Boolean hasDocument;
 }
