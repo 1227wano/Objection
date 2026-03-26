@@ -7,30 +7,53 @@ import SelectionGroup from './_components/SelectionGroup';
 import ChecklistGroup from '../../_components/ChecklistGroup';
 import RightSidebar from './_components/RightSidebar';
 import { Button } from '@/components/ui/button';
-import { MOCK_ANALYSIS_DATA, MOCK_EVIDENCE_DATA } from '../report/_mock/mockdata';
+import { MOCK_ANALYSIS_DATA } from '../report/_mock/mockdata';
 import { AppealType } from '../report/types';
+import { useEvidence } from './_hook/useEvidence';
 
 const analysisData = MOCK_ANALYSIS_DATA.data;
-const evidenceData = MOCK_EVIDENCE_DATA.data;
 
 export default function SuggestPage() {
   const router = useRouter();
+  const analysisNo = 1;
+  const { evidences, isLoading, isError, updateEvidences } = useEvidence(analysisNo);
 
-  // 선택된 상태 관리를 위한 State
   const [selectedType, setSelectedType] = useState<AppealType>(
     analysisData.claimType as AppealType,
   );
-  const [selectedChecklists, setSelectedChecklists] = useState<number[]>(
-    evidenceData.filter((item) => item.submitted).map((item) => item.evidenceId),
-  );
 
-  // 버튼 클릭 핸들러
-  const handleNextClick = () => {
-    console.log('선택된 심판 종류:', selectedType);
-    console.log('선택된 체크리스트 ID 배열:', selectedChecklists);
+  // 현재 체크된 항목의 ID 배열
+  const [selectedChecklists, setSelectedChecklists] = useState<number[]>([]);
 
-    router.push('/appeal/claim/write');
+  const handleNextClick = async () => {
+    // 기존 서버 데이터(evidences)와 현재 체크된 상태(selectedChecklists)를 비교하여 변경된 항목만 추출
+    const pendingChanges: Record<number, boolean> = {};
+
+    evidences.forEach((evidence) => {
+      const isNowChecked = selectedChecklists.includes(evidence.evidenceId);
+      if (evidence.submitted !== isNowChecked) {
+        pendingChanges[evidence.evidenceId] = isNowChecked;
+      }
+    });
+
+    const isSuccess = await updateEvidences(pendingChanges);
+
+    if (isSuccess) {
+      // 다음 단계로 이동하는 로직을 이곳에 작성합니다.
+      router.push('/appeal/claim/write');
+    } else {
+      alert('데이터 저장 중 문제가 발생했습니다.');
+    }
   };
+
+  // 데이터를 불러오는 동안 보여줄 화면
+  if (isLoading) {
+    return (
+      <div className="flex w-full min-h-screen justify-center items-center">
+        데이터를 불러오는 중입니다...
+      </div>
+    );
+  }
 
   return (
     <div className="flex w-full min-h-screen animate-in fade-in duration-500">
@@ -46,9 +69,9 @@ export default function SuggestPage() {
 
           <div className="w-full h-px bg-gray-100" />
 
-          <ChecklistGroup items={evidenceData} onChange={setSelectedChecklists} />
+          {/* 실제 API 데이터 연동 */}
+          <ChecklistGroup items={evidences} onChange={setSelectedChecklists} />
 
-          {/* NavigationAction (우측 정렬로 수정: justify-end) */}
           <div className="flex justify-end pt-4">
             <Button onClick={handleNextClick}>다음 단계로</Button>
           </div>

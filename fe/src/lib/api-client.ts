@@ -94,4 +94,19 @@ export const apiClient = {
       ...options,
     });
   },
+  async put<T>(endpoint: string, data: unknown, options: RequestOptions = {}) {
+    return request<T>(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      ...options,
+    });
+  },
+
+  async patch<T>(endpoint: string, data: unknown, options: RequestOptions = {}) {
+    return request<T>(endpoint, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+      ...options,
+    });
+  },
 };
