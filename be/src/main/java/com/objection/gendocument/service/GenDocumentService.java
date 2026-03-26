@@ -31,7 +31,6 @@ public class GenDocumentService {
     private final GovDocumentRepository govDocumentRepository;
     private final CaseRepository caseRepository;
     private final ObjectMapper objectMapper;
-    private final PdfService pdfService;
 
     // 문서 생성
     @Transactional
