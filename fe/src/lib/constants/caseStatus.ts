@@ -10,7 +10,7 @@ export interface CaseStatusInfo {
 export const CASE_STATUS_MAP = {
   // 처분서 단계
   STARTED: { label: '사건 생성 직후', href: '/appeal/start', majorStage: '처분서 분석', detailStep: '처분서 첨부' },
-  DOC_UPLOADED: { label: '파일 입력 완료', href: '/appeal/start', majorStage: '처분서 분석', detailStep: '처분서 분석 대기' },
+  DOC_UPLOADED: { label: '파일 입력 완료', href: '/appeal/survey', majorStage: '처분서 분석', detailStep: '처분서 분석 대기' },
   ANALYZING: { label: '처분서 분석 중', href: '/appeal/loading', majorStage: '처분서 분석', detailStep: '처분서 분석 중' },
   ANALYSIS_DONE: { label: '처분서 분석 완료', href: '/appeal/analysis', majorStage: '처분서 분석', detailStep: '분석 결과 검토' },
   ANALYSIS_FAILED: { label: '처분서 분석 실패', href: '/appeal/error', majorStage: '처분서 분석', detailStep: '분석 실패' },

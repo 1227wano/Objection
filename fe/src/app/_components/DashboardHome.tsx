@@ -1,6 +1,8 @@
 'use client';
 
+import { startTransition, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   getProgressSegments,
   isValidDetailStep,
@@ -9,47 +11,85 @@ import {
 } from '@/lib/appeal-progress';
 import { CASE_STATUS_MAP, type CaseStatus } from '@/lib/constants/caseStatus';
 import { START_STAGE_PREVIEWS, STAGE_ACCENT_STYLES } from '@/lib/constants/dashboard';
+import { type CaseListItem } from '@/lib/cases';
 import { formatDate } from '@/lib/utils';
 
-interface MockCase {
-  id: number;
-  title: string;
-  status: CaseStatus;
-  updatedAt: string;
+interface CreateCaseResponse {
+  status: 'SUCCESS' | 'FAIL' | 'ERROR';
+  message: string;
+  data: {
+    caseNo: number;
+    title: string;
+    status: string;
+    createdAt: string;
+  } | null;
 }
 
-const MOCK_CASES: MockCase[] = [
-  /*
-  {
-    id: 1,
-    title: '식품위생법 영업정지 처분 취소 청구',
-    status: 'NARRATIVE_WRITING',
-    updatedAt: '2026.03.25',
-  },
-  {
-    id: 2,
-    title: '영업허가 취소 처분 답변서 분석',
-    status: 'ANSWER_DONE',
-    updatedAt: '2026.03.25',
-  },
-  {
-    id: 3,
-    title: '과징금 부과 처분 사건 청구',
-    status: 'SUPPLEMENT_NARRATIVE',
-    updatedAt: '2026.03.25',
-  },
-  {
-    id: 4,
-    title: '도시계획 처분 재결서 검토',
-    status: 'DECISION_DONE',
-    updatedAt: '2026.03.25',
-  },*/
-];
+interface DashboardHomeProps {
+  cases: CaseListItem[];
+}
 
 const EMPTY_CASE_DESCRIPTION =
   '새 케이스를 시작하면 진행 단계와 최근 업데이트가 이곳에 쌓입니다.\n처음 사건을 등록해 두면 이후 흐름을 한눈에 이어서 확인할 수 있어요.';
 
-export default function DashboardHome() {
+function getCaseUpdatedLabel(createdAt: string) {
+  const parsedDate = new Date(createdAt);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return '-';
+  }
+
+  return formatDate(parsedDate);
+}
+
+function getCaseTitle(item: CaseListItem) {
+  return item.title?.trim() || `${item.caseNo}번 사건`;
+}
+
+function getCaseHref(baseHref: string, caseNo: number) {
+  if (baseHref === '/appeal/survey') {
+    return `${baseHref}?caseNo=${caseNo}`;
+  }
+
+  return baseHref;
+}
+
+export default function DashboardHome({ cases }: DashboardHomeProps) {
+  const router = useRouter();
+  const [isCreatingCase, setIsCreatingCase] = useState(false);
+
+  const handleCreateCase = async () => {
+    if (isCreatingCase) {
+      return;
+    }
+
+    setIsCreatingCase(true);
+
+    try {
+      const response = await fetch('/api/cases', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      const result = (await response.json().catch(() => null)) as CreateCaseResponse | null;
+      if (!response.ok || result?.status !== 'SUCCESS' || !result.data?.caseNo) {
+        throw new Error(result?.message || '새 케이스를 생성하지 못했습니다. 다시 시도해 주세요.');
+      }
+
+      const caseNo = String(result.data.caseNo);
+      window.sessionStorage.setItem('currentCaseNo', caseNo);
+      window.localStorage.setItem('currentCaseNo', caseNo);
+
+      startTransition(() => {
+        router.push(`/appeal/start?caseNo=${caseNo}`);
+      });
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '새 케이스 생성 중 문제가 발생했습니다.');
+    } finally {
+      setIsCreatingCase(false);
+    }
+  };
+
   return (
     <section className="mx-auto flex w-full max-w-[1440px] flex-col gap-12 px-6 py-16">
       <div className="grid grid-cols-1 items-stretch gap-6 xl:grid-cols-[2.15fr_1fr]">
@@ -96,7 +136,7 @@ export default function DashboardHome() {
                         </p>
 
                         <div className="mt-5">
-                          <p className="text-[18px] font-bold text-white/92">필요 서류</p>
+                          <p className="text-[18px] font-bold text-white/92">필요한 서류</p>
                           <div className="mt-2 h-px w-full bg-white/30" />
                         </div>
 
@@ -121,9 +161,13 @@ export default function DashboardHome() {
           </div>
         </div>
 
-        <Link
-          href="/appeal/start"
-          className="group flex h-full min-h-[260px] flex-col items-center justify-center rounded-[28px] bg-[linear-gradient(180deg,#2a2a97_0%,#1b1b84_100%)] px-6 py-8 text-center shadow-[0_16px_38px_rgba(15,15,112,0.18)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_22px_48px_rgba(15,15,112,0.24)] active:translate-y-0"
+        <button
+          type="button"
+          onClick={() => {
+            void handleCreateCase();
+          }}
+          disabled={isCreatingCase}
+          className="group flex h-full min-h-[260px] flex-col items-center justify-center rounded-[28px] bg-[linear-gradient(180deg,#2a2a97_0%,#1b1b84_100%)] px-6 py-8 text-center shadow-[0_16px_38px_rgba(15,15,112,0.18)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_22px_48px_rgba(15,15,112,0.24)] active:translate-y-0 disabled:cursor-wait disabled:opacity-90"
         >
           <div className="text-[84px] font-extralight leading-none text-white transition-transform duration-200 group-hover:scale-105">
             +
@@ -140,7 +184,7 @@ export default function DashboardHome() {
           <div className="mt-6 rounded-full bg-white px-6 py-3 text-lg font-bold text-first shadow-[0_8px_20px_rgba(0,0,0,0.12)] transition-transform duration-200 group-hover:scale-105">
             시작하기
           </div>
-        </Link>
+        </button>
       </div>
 
       <div className="flex flex-col gap-5">
@@ -148,29 +192,28 @@ export default function DashboardHome() {
           최근 진행 중인 케이스
         </h2>
 
-        {MOCK_CASES.length > 0 ? (
+        {cases.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {MOCK_CASES.map((item) => {
-              const statusInfo = CASE_STATUS_MAP[item.status];
+            {cases.map((item) => {
+              const statusInfo = CASE_STATUS_MAP[item.status as CaseStatus];
+              if (!statusInfo) {
+                return null;
+              }
+
               const isValid = isValidDetailStep(statusInfo.majorStage, statusInfo.detailStep);
               const filledSegments = getProgressSegments(statusInfo.majorStage);
-              const accent = STAGE_ACCENT_STYLES[statusInfo.majorStage] ?? {
-                line: 'bg-gray-500',
-                marker: 'text-gray-500',
-              };
+              const accent = STAGE_ACCENT_STYLES[statusInfo.majorStage];
 
               return (
                 <Link
-                  key={item.id}
-                  href={statusInfo.href}
+                  key={item.caseNo}
+                  href={getCaseHref(statusInfo.href, item.caseNo)}
                   className="relative flex flex-col gap-6 rounded-2xl border border-[#eef2f9] bg-white p-8 pl-10 shadow-[0_10px_28px_rgba(15,15,112,0.08)] transition-all duration-200 hover:-translate-y-1 hover:border-blue-100 hover:shadow-[0_18px_36px_rgba(15,15,112,0.10)]"
                 >
-                  <div
-                    className={`absolute bottom-0 left-0 top-0 w-1 rounded-l-2xl ${accent.line}`}
-                  />
+                  <div className={`absolute bottom-0 left-0 top-0 w-1 rounded-l-2xl ${accent.line}`} />
 
                   <p className="line-clamp-2 text-[24px] font-bold leading-tight tracking-[-0.02em] text-gray-900">
-                    {item.title}
+                    {getCaseTitle(item)}
                   </p>
 
                   <div className="flex gap-2 self-start">
@@ -179,7 +222,7 @@ export default function DashboardHome() {
                     >
                       {statusInfo.majorStage}
                     </span>
-                    <span className="inline-block rounded-full px-3 py-1.5 text-sm font-semibold bg-gray-100 text-gray-600">
+                    <span className="inline-block rounded-full bg-gray-100 px-3 py-1.5 text-sm font-semibold text-gray-600">
                       {statusInfo.label}
                     </span>
                   </div>
@@ -196,7 +239,7 @@ export default function DashboardHome() {
                     <div className="flex items-center gap-2">
                       {PROGRESS_STAGES.map((stage, index) => (
                         <div
-                          key={`${item.id}-${stage}`}
+                          key={`${item.caseNo}-${stage}`}
                           className={`h-2.5 flex-1 rounded-full transition-colors ${
                             index < filledSegments ? 'bg-first' : 'bg-gray-100'
                           }`}
@@ -206,7 +249,9 @@ export default function DashboardHome() {
                   </div>
 
                   <div className="mt-2 flex items-center justify-between border-t border-gray-100 pt-2">
-                    <span className="text-sm text-gray-400">최근 업데이트: {item.updatedAt}</span>
+                    <span className="text-sm text-gray-400">
+                      최근 업데이트: {getCaseUpdatedLabel(item.createdAt)}
+                    </span>
                     <span className="text-sm font-semibold text-first">계속 확인하기 &gt;</span>
                   </div>
                 </Link>
@@ -222,12 +267,16 @@ export default function DashboardHome() {
               <p className="mt-3 max-w-2xl whitespace-pre-line break-keep text-[16px] leading-7 text-slate-500">
                 {EMPTY_CASE_DESCRIPTION}
               </p>
-              <Link
-                href="/appeal/start"
-                className="mt-8 inline-flex h-12 items-center justify-center rounded-full border border-first/10 bg-first px-6 text-[15px] font-semibold text-white shadow-[0_10px_22px_rgba(15,15,112,0.10)] transition hover:bg-first/92"
+              <button
+                type="button"
+                onClick={() => {
+                  void handleCreateCase();
+                }}
+                disabled={isCreatingCase}
+                className="mt-8 inline-flex h-12 items-center justify-center rounded-full border border-first/10 bg-first px-6 text-[15px] font-semibold text-white shadow-[0_10px_22px_rgba(15,15,112,0.10)] transition hover:bg-first/92 disabled:cursor-wait disabled:opacity-90"
               >
                 새 케이스 시작하기
-              </Link>
+              </button>
             </div>
           </div>
         )}

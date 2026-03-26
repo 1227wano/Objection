@@ -1,12 +1,14 @@
 'use client';
 
-import { useRef, useState, type ChangeEvent, type DragEvent, type MouseEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState, type ChangeEvent, type DragEvent, type MouseEvent } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle2, FileText, FileUp, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import NoticeDocumentConfirmModal from './NoticeDocumentConfirmModal';
 
 const ACCEPTED_FILE_TYPES = '.pdf,.jpg,.jpeg,.png';
+const CURRENT_CASE_KEY = 'currentCaseNo';
+const CURRENT_NOTICE_DOC_KEY = 'currentNoticeGovDocNo';
 
 function formatFileSize(size: number) {
   if (size >= 1024 * 1024) {
@@ -16,10 +18,63 @@ function formatFileSize(size: number) {
   return `${Math.max(1, Math.round(size / 1024))}KB`;
 }
 
+function getSourceType(file: File) {
+  return file.type.startsWith('image/') ? 'IMAGE' : 'FILE';
+}
+
+function persistCaseNo(caseNo: string | null) {
+  if (typeof window === 'undefined' || !caseNo) {
+    return;
+  }
+
+  window.sessionStorage.setItem(CURRENT_CASE_KEY, caseNo);
+  window.localStorage.setItem(CURRENT_CASE_KEY, caseNo);
+}
+
+function persistNoticeGovDocNo(govDocNo: string | null) {
+  if (typeof window === 'undefined' || !govDocNo) {
+    return;
+  }
+
+  window.sessionStorage.setItem(CURRENT_NOTICE_DOC_KEY, govDocNo);
+  window.localStorage.setItem(CURRENT_NOTICE_DOC_KEY, govDocNo);
+}
+
+function persistNoticeGovDocNoForCase(caseNo: string, govDocNo: string | null) {
+  if (typeof window === 'undefined' || !govDocNo) {
+    return;
+  }
+
+  const storageKey = `${CURRENT_NOTICE_DOC_KEY}:${caseNo}`;
+  window.sessionStorage.setItem(storageKey, govDocNo);
+  window.localStorage.setItem(storageKey, govDocNo);
+}
+
+function resolveCaseNo(searchCaseNo: string | null) {
+  if (typeof window === 'undefined') {
+    return searchCaseNo;
+  }
+
+  return (
+    searchCaseNo ||
+    window.sessionStorage.getItem(CURRENT_CASE_KEY) ||
+    window.localStorage.getItem(CURRENT_CASE_KEY)
+  );
+}
+
 interface SelectedFileSummaryProps {
   fileName: string;
   fileSizeLabel: string;
   onClear: (event: MouseEvent<HTMLButtonElement>) => void;
+}
+
+interface UploadNoticeDocumentResponse {
+  status: 'SUCCESS' | 'FAIL' | 'ERROR';
+  message: string;
+  data?: {
+    govDocNo?: number;
+    documentType?: string;
+  } | null;
 }
 
 function SelectedFileSummary({ fileName, fileSizeLabel, onClear }: SelectedFileSummaryProps) {
@@ -50,33 +105,21 @@ function SelectedFileSummary({ fileName, fileSizeLabel, onClear }: SelectedFileS
 
 export default function UploadStartCard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const isCompleted = !!selectedFile;
+  const caseNoFromQuery = searchParams.get('caseNo');
 
-  const cardClassName = `flex h-[460px] flex-col rounded-3xl px-10 ${
-    isCompleted ? 'py-12' : 'py-16'
-  } text-center shadow-[0_10px_28px_rgba(15,15,112,0.06)] transition-colors ${
-    isDragging
-      ? 'border border-first bg-first/5'
-      : isCompleted
-        ? 'border border-first/12 bg-white'
-        : 'border border-dashed border-first/25 bg-white'
-  }`;
-  const contentClassName = `flex h-full flex-1 flex-col items-center text-center ${
-    isCompleted ? 'justify-center pt-4 pb-1' : ''
-  }`;
-  const iconWrapperClassName = `mx-auto flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl ${
-    isCompleted ? 'bg-first/8 text-first' : 'bg-first text-white'
-  }`;
-  const titleClassName = `${isCompleted ? 'mt-3' : 'mt-5'} min-h-[44px] text-[30px] font-extrabold tracking-[-0.04em] text-slate-900`;
-  const descriptionClassName = `${isCompleted ? 'mt-2' : 'mt-4'} min-h-[48px] max-w-[520px] break-keep text-[16px] leading-8 text-slate-500`;
-  const actionRowClassName = `${isCompleted ? 'mt-4' : 'mt-6'} flex min-h-[48px] items-center justify-center`;
+  useEffect(() => {
+    persistCaseNo(caseNoFromQuery);
+  }, [caseNoFromQuery]);
 
   function handleSelectFile(file: File | null) {
-    if (!file) {
+    if (!file || isUploading) {
       return;
     }
 
@@ -94,10 +137,59 @@ export default function UploadStartCard() {
   }
 
   function handleClearFile() {
+    if (isUploading) {
+      return;
+    }
+
     setSelectedFile(null);
 
     if (inputRef.current) {
       inputRef.current.value = '';
+    }
+  }
+
+  async function handleConfirmUpload() {
+    if (!selectedFile || isUploading) {
+      return;
+    }
+
+    const caseNo = resolveCaseNo(caseNoFromQuery);
+    if (!caseNo) {
+      alert('사건 번호를 찾지 못했습니다. 새 케이스를 먼저 생성한 뒤 다시 시도해 주세요.');
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('documentType', 'NOTICE');
+      formData.append('sourceType', getSourceType(selectedFile));
+      formData.append('file', selectedFile);
+
+      const response = await fetch(`/api/cases/${caseNo}/gov-documents`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+      const result = (await response.json().catch(() => null)) as UploadNoticeDocumentResponse | null;
+
+      if (!response.ok) {
+        throw new Error(result?.message || '처분서 업로드에 실패했습니다. 다시 시도해 주세요.');
+      }
+
+      if (result?.data?.govDocNo) {
+        const nextGovDocNo = String(result.data.govDocNo);
+        persistNoticeGovDocNo(nextGovDocNo);
+        persistNoticeGovDocNoForCase(caseNo, nextGovDocNo);
+      }
+
+      router.push('/appeal/survey?source=upload');
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '처분서 업로드 중 문제가 발생했습니다.');
+    } finally {
+      setIsUploading(false);
+      setIsConfirmModalOpen(false);
     }
   }
 
@@ -106,12 +198,12 @@ export default function UploadStartCard() {
       role={isCompleted ? undefined : 'button'}
       tabIndex={isCompleted ? undefined : 0}
       onClick={() => {
-        if (!isCompleted) {
+        if (!isCompleted && !isUploading) {
           inputRef.current?.click();
         }
       }}
       onDragOver={(event) => {
-        if (isCompleted) {
+        if (isCompleted || isUploading) {
           return;
         }
 
@@ -119,19 +211,19 @@ export default function UploadStartCard() {
         setIsDragging(true);
       }}
       onDragLeave={() => {
-        if (!isCompleted) {
+        if (!isCompleted && !isUploading) {
           setIsDragging(false);
         }
       }}
       onDrop={(event) => {
-        if (isCompleted) {
+        if (isCompleted || isUploading) {
           return;
         }
 
         handleDrop(event);
       }}
       onKeyDown={(event) => {
-        if (isCompleted) {
+        if (isCompleted || isUploading) {
           return;
         }
 
@@ -140,10 +232,18 @@ export default function UploadStartCard() {
           inputRef.current?.click();
         }
       }}
-      className={cardClassName}
+      className={`flex h-[460px] flex-col rounded-3xl px-10 ${
+        isCompleted ? 'py-12' : 'py-16'
+      } text-center shadow-[0_10px_28px_rgba(15,15,112,0.06)] transition-colors ${
+        isDragging
+          ? 'border border-first bg-first/5'
+          : isCompleted
+            ? 'border border-first/12 bg-white'
+            : 'border border-dashed border-first/25 bg-white'
+      }`}
     >
       <div
-        className={`flex h-full flex-1 flex-col items-center text-center ${isCompleted ? 'justify-center pt-4 pb-1' : ''}`}
+        className={`flex h-full flex-1 flex-col items-center text-center ${isCompleted ? 'justify-center pb-1 pt-4' : ''}`}
       >
         <div
           className={`mx-auto flex h-16 w-16 shrink-0 items-center justify-center rounded-[20px] ${
@@ -160,7 +260,7 @@ export default function UploadStartCard() {
         </h2>
 
         <p
-          className={`${isCompleted ? 'mt-2' : 'mt-4'} min-h-[48px] max-w-[520px] break-keep text-[16px] leading-8 text-slate-500`}
+          className={`${isCompleted ? 'mt-2' : 'mt-4'} min-h-[48px] max-w-[520px] whitespace-pre-line break-keep text-[16px] leading-8 text-slate-500`}
         >
           {isCompleted
             ? '업로드한 파일을 확인하고 바로 다음 단계로 진행할 수 있어요.'
@@ -193,6 +293,7 @@ export default function UploadStartCard() {
                 inputRef.current?.click();
               }}
               className="rounded-2xl bg-first hover:bg-first/90"
+              disabled={isUploading}
             >
               <Upload className="mr-2 h-4 w-4" />
               파일 선택
@@ -205,6 +306,7 @@ export default function UploadStartCard() {
                 setIsConfirmModalOpen(true);
               }}
               className="rounded-2xl bg-first hover:bg-first/90"
+              disabled={isUploading}
             >
               분석 시작하기
             </Button>
@@ -212,9 +314,7 @@ export default function UploadStartCard() {
         </div>
 
         {!isCompleted ? (
-          <p className="mt-4 min-h-[28px] text-sm font-medium text-first/70">
-            선택한 파일이 없습니다
-          </p>
+          <p className="mt-4 min-h-[28px] text-sm font-medium text-first/70">선택한 파일이 없습니다</p>
         ) : null}
       </div>
 
@@ -229,8 +329,15 @@ export default function UploadStartCard() {
       {isConfirmModalOpen && selectedFile ? (
         <NoticeDocumentConfirmModal
           fileName={selectedFile.name}
-          onClose={() => setIsConfirmModalOpen(false)}
-          onConfirm={() => router.push('/appeal/survey?source=upload')}
+          onClose={() => {
+            if (!isUploading) {
+              setIsConfirmModalOpen(false);
+            }
+          }}
+          onConfirm={() => {
+            void handleConfirmUpload();
+          }}
+          isSubmitting={isUploading}
         />
       ) : null}
     </div>
