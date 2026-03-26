@@ -92,7 +92,12 @@ public class GovDocumentService {
             Integer sanctionValueInt = extractInteger(parsedFieldsNode, "sanctionValue");
             String violationLaw = extractArrayAsString(parsedFieldsNode, "legalBasis");
             Short sanctionDays = sanctionValueInt != null ? sanctionValueInt.shortValue() : null;
-            currentCase.updateSanctionInfoFromDocument(sanctionType, sanctionDays, violationLaw);
+            String businessName = extractString(parsedFieldsNode, "businessName");
+            String businessAddress = extractString(parsedFieldsNode, "businessAddress");
+            String title = extractString(parsedFieldsNode, "title");
+
+            currentCase.updateSanctionInfoFromDocument(sanctionType, sanctionDays, violationLaw,
+                    businessName, businessAddress, title);
         }
 
         // 4. 상태 전이
