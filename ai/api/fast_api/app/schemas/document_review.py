@@ -12,7 +12,6 @@ from app.schemas.strategy_precedent_analysis import (
     StrategyPrecedentAnalysisResult,
 )
 
-
 # -------------------------------------------------
 # B 전용 스키마: A-3 contentJson 형태에 맞춤
 # -------------------------------------------------
