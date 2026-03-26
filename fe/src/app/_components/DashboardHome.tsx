@@ -29,6 +29,14 @@ interface DashboardHomeProps {
   cases: CaseListItem[];
 }
 
+const CURRENT_CASE_KEY = 'currentCaseNo';
+
+function persistCaseNo(caseNo: number) {
+  const value = String(caseNo);
+  window.sessionStorage.setItem(CURRENT_CASE_KEY, value);
+  window.localStorage.setItem(CURRENT_CASE_KEY, value);
+}
+
 const EMPTY_CASE_DESCRIPTION =
   '새 케이스를 시작하면 진행 단계와 최근 업데이트가 이곳에 쌓입니다.\n처음 사건을 등록해 두면 이후 흐름을 한눈에 이어서 확인할 수 있어요.';
 
@@ -77,8 +85,7 @@ export default function DashboardHome({ cases }: DashboardHomeProps) {
       }
 
       const caseNo = String(result.data.caseNo);
-      window.sessionStorage.setItem('currentCaseNo', caseNo);
-      window.localStorage.setItem('currentCaseNo', caseNo);
+      persistCaseNo(result.data.caseNo);
 
       startTransition(() => {
         router.push(`/appeal/start?caseNo=${caseNo}`);
@@ -199,7 +206,6 @@ export default function DashboardHome({ cases }: DashboardHomeProps) {
               if (!statusInfo) {
                 return null;
               }
-
               const isValid = isValidDetailStep(statusInfo.majorStage, statusInfo.detailStep);
               const filledSegments = getProgressSegments(statusInfo.majorStage);
               const accent = STAGE_ACCENT_STYLES[statusInfo.majorStage];
@@ -208,9 +214,12 @@ export default function DashboardHome({ cases }: DashboardHomeProps) {
                 <Link
                   key={item.caseNo}
                   href={getCaseHref(statusInfo.href, item.caseNo)}
+                  onClick={() => persistCaseNo(item.caseNo)}
                   className="relative flex flex-col gap-6 rounded-2xl border border-[#eef2f9] bg-white p-8 pl-10 shadow-[0_10px_28px_rgba(15,15,112,0.08)] transition-all duration-200 hover:-translate-y-1 hover:border-blue-100 hover:shadow-[0_18px_36px_rgba(15,15,112,0.10)]"
                 >
-                  <div className={`absolute bottom-0 left-0 top-0 w-1 rounded-l-2xl ${accent.line}`} />
+                  <div
+                    className={`absolute bottom-0 left-0 top-0 w-1 rounded-l-2xl ${accent.line}`}
+                  />
 
                   <p className="line-clamp-2 text-[24px] font-bold leading-tight tracking-[-0.02em] text-gray-900">
                     {getCaseTitle(item)}

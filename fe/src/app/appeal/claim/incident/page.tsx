@@ -1,11 +1,22 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { DocumentCard } from '@/components/ui/DocumentCard';
 import { DocumentInput } from '@/components/ui/DocumentInput';
 import { Button } from '@/components/ui/button';
+import { apiClient } from '@/lib/api-client';
 import SectionHeader from '../../_components/SectionHeader';
+
+const CURRENT_CASE_KEY = 'currentCaseNo';
+
+function resolveCaseNo(): string | null {
+  if (typeof window === 'undefined') return null;
+  return (
+    window.sessionStorage.getItem(CURRENT_CASE_KEY) || window.localStorage.getItem(CURRENT_CASE_KEY)
+  );
+}
 
 interface CaseDetailsForm {
   facts: string;
@@ -14,6 +25,7 @@ interface CaseDetailsForm {
 
 export default function CaseDetailsPage() {
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     register,
     handleSubmit,
@@ -25,9 +37,27 @@ export default function CaseDetailsPage() {
     },
   });
 
-  const onSubmit: SubmitHandler<CaseDetailsForm> = (data) => {
-    console.log('임시 저장 데이터:', data);
-    router.push('/appeal/claim/report');
+  const onSubmit: SubmitHandler<CaseDetailsForm> = async (data) => {
+    const caseNo = resolveCaseNo();
+    if (!caseNo) {
+      alert('사건 번호를 찾을 수 없습니다. 대시보드에서 다시 시작해 주세요.');
+      router.push('/');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await apiClient.post(`/cases/${caseNo}/narrative`, {
+        fact: data.facts,
+        opinion: data.unfairReasons,
+      });
+      router.push('/appeal/claim/report');
+    } catch (error) {
+      console.error('narrative 저장 실패:', error);
+      alert('저장 중 문제가 발생했습니다. 다시 시도해 주세요.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -73,7 +103,9 @@ export default function CaseDetailsPage() {
             </div>
 
             <div className="flex justify-end pt-8">
-              <Button type="submit">다음 단계로</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? '저장 중...' : '다음 단계로'}
+              </Button>
             </div>
           </form>
         </DocumentCard>
