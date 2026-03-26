@@ -2,9 +2,6 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { DocumentData } from '../../write/_types/document';
-
-const KO_ALPHA = ['가', '나', '다', '라', '마'];
 
 interface CopyFieldProps {
   label: string;
@@ -45,26 +42,22 @@ function CopyField({ label, value, showCount, rows = 5 }: CopyFieldProps) {
   );
 }
 
-interface Props {
-  data: DocumentData;
+interface PortalCopyTabProps {
+  dispositionContent: string;
+  claimPurpose: string;
+  claimReason: string;
 }
 
-export default function PortalCopyTab({ data }: Props) {
-  const dispositionSummary = `피청구인은 ${data.dispositionDate} 청구인에 대하여 ${data.caseTitle}의 처분을 하였습니다. 청구인은 ${data.dispositionKnownDate} 해당 처분을 통지받았습니다.`;
-
-  const claimReasonText = [
-    `1. 처분의 경위`,
-    data.claimReason.background,
-    ``,
-    `2. 이 사건 처분의 부당성`,
-    ...data.claimReason.arguments.map((a, i) => `${KO_ALPHA[i]}. ${a.title}\n${a.content}`),
-  ].join('\n');
-
+export default function PortalCopyTab({
+  dispositionContent,
+  claimPurpose,
+  claimReason,
+}: PortalCopyTabProps) {
   return (
     <div className="flex flex-col gap-6 w-full">
-      <CopyField label="처분내용 요약" value={dispositionSummary} rows={3} />
-      <CopyField label="청구취지" value={data.claimPurpose} rows={4} />
-      <CopyField label="청구원인" value={claimReasonText} showCount rows={8} />
+      <CopyField label="처분내용" value={dispositionContent} rows={3} />
+      <CopyField label="청구취지" value={claimPurpose} rows={4} />
+      <CopyField label="청구원인" value={claimReason} showCount rows={8} />
 
       <div className="flex justify-center pt-2">
         <a href="#" onClick={(e) => e.preventDefault()}>
