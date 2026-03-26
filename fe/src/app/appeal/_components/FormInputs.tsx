@@ -12,10 +12,14 @@ export function EditableInput({
   name,
   required = false,
   className = '',
+  disabled = false,
+  disabledMessage = '',
 }: {
   name: string;
   required?: boolean;
   className?: string;
+  disabled?: boolean;
+  disabledMessage?: string;
 }) {
   const {
     register,
@@ -48,7 +52,15 @@ export function EditableInput({
     'focus:bg-white focus:border-red-500 focus:ring-1 focus:ring-red-400',
   ];
 
-  const stateStyle = hasError ? errorStyle : required ? requiredStyle : normalStyle;
+  const disabledStyle = ['bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed'];
+
+  const stateStyle = disabled
+    ? disabledStyle
+    : hasError
+      ? errorStyle
+      : required
+        ? requiredStyle
+        : normalStyle;
 
   return (
     <div className="relative">
@@ -56,6 +68,8 @@ export function EditableInput({
         type="text"
         {...register(name, required ? { required: '필수 입력 항목입니다' } : {})}
         className={[...baseStyle, ...stateStyle, className].join(' ')}
+        disabled={disabled}
+        title={disabled ? disabledMessage : undefined}
       />
       {required && (
         <span className="absolute -top-1.5 -right-1 text-amber-500 text-[10px] font-bold leading-none">
@@ -77,12 +91,16 @@ export function EditableTextarea({
   rows = 4,
   required = false,
   className = '',
+  disabled = false,
+  disabledMessage = '',
 }: {
   id?: string;
   name: string;
   rows?: number;
   required?: boolean;
   className?: string;
+  disabled?: boolean;
+  disabledMessage?: string;
 }) {
   const {
     register,
@@ -114,7 +132,15 @@ export function EditableTextarea({
     'focus:bg-white focus:border-red-500 focus:ring-1 focus:ring-red-400',
   ];
 
-  const stateStyle = hasError ? errorStyle : required ? requiredStyle : normalStyle;
+  const disabledStyle = ['bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed'];
+
+  const stateStyle = disabled
+    ? disabledStyle
+    : hasError
+      ? errorStyle
+      : required
+        ? requiredStyle
+        : normalStyle;
 
   return (
     <div className="relative">
@@ -123,6 +149,8 @@ export function EditableTextarea({
         {...register(name, required ? { required: '필수 입력 항목입니다' } : {})}
         rows={rows}
         className={[...baseStyle, ...stateStyle, className].join(' ')}
+        disabled={disabled}
+        title={disabled ? disabledMessage : undefined}
       />
       {required && (
         <span className="absolute -top-1.5 -right-1 text-amber-500 text-[10px] font-bold leading-none">
