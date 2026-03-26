@@ -36,4 +36,12 @@ public class CaseAnalysis {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+    public void updateLawResult(String lawResult) {
+        this.lawResult = lawResult;
+    }
+
+    public void updatePrecedentResult(String precedentResult) {
+        this.precedentResult = precedentResult;
+    }
+
 }
