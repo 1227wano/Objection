@@ -2,9 +2,6 @@ package com.objection.cases.enums;
 
 public enum CaseStatus {
 
-    // 온보딩
-    ONBOARDING,                     // 사건 생성 직후 ~ 설문 제출 전
-
     // 파일 입력
     STARTED,                        // 사건 생성 직후
     DOC_UPLOADED,                   // 파일 입력 완료
