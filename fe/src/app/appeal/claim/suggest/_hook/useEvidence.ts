@@ -44,7 +44,6 @@ export function useEvidence(analysisNo: number) {
       );
 
       await Promise.all(updatePromises);
-      await fetchEvidence(); // 성공 시 최신 데이터로 화면 동기화
       return true;
     } catch (error) {
       console.error('업데이트 실패:', error);
