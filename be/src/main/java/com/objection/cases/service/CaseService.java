@@ -117,10 +117,9 @@ public class CaseService {
             }
         }
 
-        // 처분서 없으면 바로 ANALYZING
-        if (Boolean.FALSE.equals(request.getHasDocument())) {
-            found.updateStatus(CaseStatus.ANALYZING);
-        }
+        // 적법요건 통과 → ANALYZING → ANALYSIS_DONE
+        found.updateStatus(CaseStatus.ANALYZING);
+        found.updateStatus(CaseStatus.ANALYSIS_DONE);
 
         return new SurveySaveResponse(found.getCaseNo(), found.getUpdatedAt());
     }
