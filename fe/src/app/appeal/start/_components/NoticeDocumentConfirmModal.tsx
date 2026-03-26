@@ -9,6 +9,7 @@ interface NoticeDocumentConfirmModalProps {
   fileName: string;
   onClose: () => void;
   onConfirm: () => void;
+  isSubmitting?: boolean;
 }
 
 interface GuidePanelProps {
@@ -30,7 +31,7 @@ function PreNoticePreview() {
           <p className="text-[34px] font-black tracking-[0.28em] text-slate-900">
             행정처분 사전통지서
           </p>
-          <p className="mt-4 text-sm font-semibold text-rose-500">
+          <p className="mt-4 min-h-[40px] text-sm font-semibold text-rose-500">
             제목에 &apos;사전&apos;이 포함되면 최종 처분 전 단계일 가능성이 큽니다
           </p>
         </div>
@@ -85,7 +86,7 @@ function DispositionPreview() {
 
         <div className="mt-8 flex flex-1 flex-col items-center justify-center text-center">
           <p className="text-[34px] font-black tracking-[0.24em] text-slate-900">행정처분명령서</p>
-          <p className="mt-4 text-sm font-semibold text-emerald-600">
+          <p className="mt-4 min-h-[40px] text-sm font-semibold text-emerald-600">
             제목에 &apos;사전&apos;이 없고 처분 내용과 기간이 적혀 있으면 최종 처분서일 수 있습니다
           </p>
         </div>
@@ -137,22 +138,22 @@ function GuidePanel({ title, description, tone }: GuidePanelProps) {
           : 'border-emerald-200 bg-[linear-gradient(180deg,#f8fffc_0%,#f2fbf7_100%)]',
       )}
     >
-      <div className="flex items-center gap-3 text-left">
+      <div className="flex min-h-[80px] items-start gap-3 text-left">
         <div
           className={cn(
-            'flex h-11 w-11 items-center justify-center rounded-full',
+            'mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-full',
             isWarning ? 'bg-rose-100 text-rose-500' : 'bg-emerald-100 text-emerald-600',
           )}
         >
           {isWarning ? <AlertTriangle className="h-5 w-5" /> : <BadgeCheck className="h-5 w-5" />}
         </div>
-        <div>
+        <div className="flex min-h-[80px] flex-1 flex-col">
           <h3 className="text-[24px] font-extrabold tracking-[-0.03em] text-slate-900">{title}</h3>
           <p className="mt-1 text-sm leading-6 text-slate-500">{description}</p>
         </div>
       </div>
 
-      <div className="mt-6 flex-1">{isWarning ? <PreNoticePreview /> : <DispositionPreview />}</div>
+      <div className="mt-2 flex-1">{isWarning ? <PreNoticePreview /> : <DispositionPreview />}</div>
     </div>
   );
 }
@@ -161,6 +162,7 @@ export default function NoticeDocumentConfirmModal({
   fileName,
   onClose,
   onConfirm,
+  isSubmitting = false,
 }: NoticeDocumentConfirmModalProps) {
   const includesPreNotice = fileName.includes('사전');
 
@@ -185,7 +187,9 @@ export default function NoticeDocumentConfirmModal({
                   : 'border-slate-200 bg-slate-50 text-slate-700',
               )}
             >
-              <p className="text-xs font-semibold tracking-[0.14em] text-slate-400">선택한 파일</p>
+              <p className="text-xs font-semibold tracking-[0.14em] text-slate-400">
+                업로드한 파일
+              </p>
               <p className="mt-2 break-all text-[16px] font-semibold">{fileName}</p>
               <p className="mt-2 text-sm leading-6">
                 {includesPreNotice
@@ -210,14 +214,20 @@ export default function NoticeDocumentConfirmModal({
         </div>
 
         <div className="flex flex-col-reverse gap-3 border-t border-slate-100 bg-white/80 px-8 py-6 md:flex-row md:justify-end md:px-12">
-          <Button variant="outline" onClick={onClose} className="rounded-2xl px-7">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="rounded-2xl px-7"
+            disabled={isSubmitting}
+          >
             다시 확인할게요
           </Button>
           <Button
             onClick={onConfirm}
             className="rounded-2xl px-7 shadow-[0_10px_24px_rgba(15,15,112,0.18)]"
+            disabled={isSubmitting}
           >
-            확인했습니다
+            {isSubmitting ? '업로드 중...' : '확인했습니다'}
           </Button>
         </div>
       </div>

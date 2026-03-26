@@ -21,6 +21,9 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+const CURRENT_CASE_KEY = 'currentCaseNo';
+const CURRENT_NOTICE_DOC_KEY = 'currentNoticeGovDocNo';
+
 const CLAIMANT_OPTIONS = [
   {
     value: 'direct',
@@ -51,6 +54,162 @@ const DATE_HELP_TEXT = {
   },
 } as const;
 
+interface NoticeDocumentParsedJson {
+  agencyName?: string;
+  disposalDate?: string;
+  sanctionType?: string;
+  etc?: Record<string, unknown>;
+}
+
+interface NoticeDocumentDetailResponse {
+  status: 'SUCCESS' | 'FAIL' | 'ERROR';
+  message: string;
+  data?: {
+    govDocNo: number;
+    documentType: string;
+    parsedJson?: string | NoticeDocumentParsedJson | null;
+  } | null;
+}
+
+interface CurrentUserResponse {
+  status: 'SUCCESS' | 'FAIL' | 'ERROR';
+  message: string;
+  data?: {
+    userName?: string;
+  } | null;
+}
+
+interface SurveySaveResponse {
+  status: 'SUCCESS' | 'FAIL' | 'ERROR';
+  message: string;
+  data?: unknown;
+}
+
+function resolveStoredValue(key: string) {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  return window.sessionStorage.getItem(key) || window.localStorage.getItem(key);
+}
+
+function resolveNoticeGovDocNo(caseNo: string | null) {
+  if (!caseNo || typeof window === 'undefined') {
+    return resolveStoredValue(CURRENT_NOTICE_DOC_KEY);
+  }
+
+  const storageKey = `${CURRENT_NOTICE_DOC_KEY}:${caseNo}`;
+  return (
+    window.sessionStorage.getItem(storageKey) ||
+    window.localStorage.getItem(storageKey) ||
+    resolveStoredValue(CURRENT_NOTICE_DOC_KEY)
+  );
+}
+
+function normalizeActionType(value: string | undefined) {
+  if (!value) {
+    return '';
+  }
+
+  if (value.includes('영업정지')) {
+    return ACTION_OPTIONS[0];
+  }
+
+  if (value.includes('과징금')) {
+    return ACTION_OPTIONS[1];
+  }
+
+  if (value.includes('영업허가') && value.includes('취소')) {
+    return ACTION_OPTIONS[2];
+  }
+
+  if (value.includes('영업') && value.includes('폐쇄')) {
+    return ACTION_OPTIONS[3];
+  }
+
+  return '';
+}
+
+function normalizeDateValue(value: string | undefined) {
+  if (!value) {
+    return '';
+  }
+
+  const matched = value.match(/\d{4}-\d{2}-\d{2}/);
+  return matched ? matched[0] : '';
+}
+
+function parseParsedJson(rawParsedJson: NoticeDocumentDetailResponse['data'] extends { parsedJson?: infer T } ? T : never) {
+  if (!rawParsedJson) {
+    return null;
+  }
+
+  if (typeof rawParsedJson === 'string') {
+    try {
+      return JSON.parse(rawParsedJson) as NoticeDocumentParsedJson;
+    } catch {
+      return null;
+    }
+  }
+
+  return rawParsedJson;
+}
+
+function normalizePersonName(value: string | null | undefined) {
+  return value?.replace(/\s/g, '') ?? '';
+}
+
+function extractRepresentativeName(parsedJson: NoticeDocumentParsedJson) {
+  const etc = parsedJson.etc;
+  if (!etc) {
+    return '';
+  }
+
+  const infoRecord =
+    typeof etc['info'] === 'object' && etc['info'] !== null
+      ? (etc['info'] as Record<string, unknown>)
+      : null;
+  const infoText = typeof etc['info'] === 'string' ? etc['info'] : '';
+
+  const candidateKeys = ['대표자', '대표자명', '성명', '이름'];
+  for (const key of candidateKeys) {
+    const value = etc[key];
+    if (typeof value === 'string' && value.trim()) {
+      return value;
+    }
+  }
+
+  for (const [key, value] of Object.entries(etc)) {
+    if (typeof value === 'string' && key.includes('대표자') && value.trim()) {
+      return value;
+    }
+  }
+
+  if (infoRecord) {
+    for (const key of candidateKeys) {
+      const value = infoRecord[key];
+      if (typeof value === 'string' && value.trim()) {
+        return value;
+      }
+    }
+
+    for (const [key, value] of Object.entries(infoRecord)) {
+      if (typeof value === 'string' && key.includes('대표자') && value.trim()) {
+        return value;
+      }
+    }
+  }
+
+  if (infoText) {
+    const matched = infoText.match(/대표자\s*([가-힣]+)/);
+    if (matched?.[1]) {
+      return matched[1];
+    }
+  }
+
+  return '';
+}
+
 function sanitizeDateInput(value: string) {
   if (!value) {
     return '';
@@ -78,6 +237,7 @@ export default function AppealSurveyPage() {
   const [actionDate, setActionDate] = useState('');
   const [agency, setAgency] = useState('');
   const [openHelp, setOpenHelp] = useState<keyof typeof DATE_HELP_TEXT | null>(null);
+  const [isSubmittingSurvey, setIsSubmittingSurvey] = useState(false);
 
   const selectedOptionClassName =
     'border-first/35 bg-[linear-gradient(180deg,#eef2ff_0%,#dfe6ff_100%)] text-first shadow-[0_18px_40px_rgba(15,15,112,0.10)]';
@@ -100,14 +260,142 @@ export default function AppealSurveyPage() {
     };
   }, [openHelp]);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  useEffect(() => {
+    const caseNo = searchParams.get('caseNo') || resolveStoredValue(CURRENT_CASE_KEY);
+    const govDocNo = resolveNoticeGovDocNo(caseNo);
 
-    if (!claimantType || !actionType || !recognizedDate || !actionDate || !agency.trim()) {
+    if (!caseNo || !govDocNo) {
       return;
     }
 
-    router.push('/appeal/documents');
+    let isMounted = true;
+
+    async function hydrateSurveyFromNotice() {
+      try {
+        const [documentResponse, currentUserResponse] = await Promise.all([
+          fetch(`/api/cases/${caseNo}/gov-documents/${govDocNo}`, {
+            method: 'GET',
+            credentials: 'include',
+          }),
+          fetch('/api/user/me', {
+            method: 'GET',
+            credentials: 'include',
+          }),
+        ]);
+
+        if (!documentResponse.ok) {
+          return;
+        }
+
+        const result = (await documentResponse.json().catch(() => null)) as NoticeDocumentDetailResponse | null;
+        if (result?.status !== 'SUCCESS' || result.data?.documentType !== 'NOTICE') {
+          return;
+        }
+
+        const currentUserResult = currentUserResponse.ok
+          ? ((await currentUserResponse.json().catch(() => null)) as CurrentUserResponse | null)
+          : null;
+        const parsedJson = parseParsedJson(result.data.parsedJson);
+        if (!parsedJson || !isMounted) {
+          return;
+        }
+
+        const nextActionType = normalizeActionType(parsedJson.sanctionType);
+        const nextActionDate = normalizeDateValue(parsedJson.disposalDate);
+        const nextAgency = parsedJson.agencyName?.trim() ?? '';
+        const representativeName = extractRepresentativeName(parsedJson);
+        const currentUserName = currentUserResult?.data?.userName ?? '';
+
+        if (nextActionType) {
+          setActionType(nextActionType);
+        }
+
+        if (nextActionDate) {
+          setActionDate(nextActionDate);
+          setRecognizedDate(nextActionDate);
+        }
+
+        if (nextAgency) {
+          setAgency(nextAgency);
+        }
+
+        const normalizedCurrentUserName = normalizePersonName(currentUserName);
+        const normalizedRepresentativeName = normalizePersonName(representativeName);
+
+        console.log('survey notice autofill names', {
+          currentUserName,
+          representativeName,
+          normalizedCurrentUserName,
+          normalizedRepresentativeName,
+          parsedJson,
+        });
+
+        if (normalizedCurrentUserName && normalizedRepresentativeName) {
+          setClaimantType(
+            normalizedCurrentUserName === normalizedRepresentativeName ? 'direct' : 'representative',
+          );
+        }
+      } catch {
+        // Keep the survey editable even when OCR lookup fails.
+      }
+    }
+
+    void hydrateSurveyFromNotice();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [hasUploadedNotice, searchParams]);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (
+      isSubmittingSurvey ||
+      !claimantType ||
+      !actionType ||
+      !recognizedDate ||
+      !actionDate ||
+      !agency.trim()
+    ) {
+      return;
+    }
+
+    const caseNo = searchParams.get('caseNo') || resolveStoredValue(CURRENT_CASE_KEY);
+    if (!caseNo) {
+      alert('사건 번호를 찾지 못했습니다. 처음부터 다시 진행해 주세요.');
+      return;
+    }
+
+    setIsSubmittingSurvey(true);
+
+    try {
+      const response = await fetch(`/api/cases/${caseNo}/survey`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          isDirect: claimantType === 'direct',
+          sanctionType: actionType,
+          disposalDate: actionDate,
+          awareDate: recognizedDate,
+          agencyName: agency.trim(),
+        }),
+      });
+
+      const result = (await response.json().catch(() => null)) as SurveySaveResponse | null;
+      if (!response.ok || result?.status !== 'SUCCESS') {
+        throw new Error(result?.message || '설문 저장에 실패했습니다. 다시 시도해 주세요.');
+      }
+
+      router.push('/appeal/documents');
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '설문 저장 중 문제가 발생했습니다.');
+    } finally {
+      setIsSubmittingSurvey(false);
+    }
   }
 
   function toggleHelp(key: keyof typeof DATE_HELP_TEXT) {
@@ -393,6 +681,7 @@ export default function AppealSurveyPage() {
 
                 <Button
                   type="submit"
+                  disabled={isSubmittingSurvey}
                   className="h-14 rounded-2xl px-8 text-base font-semibold shadow-[0_18px_40px_rgba(15,15,112,0.10)]"
                 >
                   다음 단계로
