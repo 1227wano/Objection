@@ -1,3 +1,17 @@
+export class ApiError extends Error {
+  status: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: Record<string, any>;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor(status: number, message: string, data: Record<string, any> = {}) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.data = data;
+  }
+}
+
 const BASE_URL = '/api/';
 
 let refreshPromise: Promise<boolean> | null = null;
@@ -68,12 +82,12 @@ async function request<T>(
     }
 
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || '인증이 만료되었습니다. 다시 로그인해 주세요.');
+    throw new ApiError(401, errorData.message || '인증이 만료되었습니다. 다시 로그인해 주세요.', errorData);
   }
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `API error: ${response.status} ${response.statusText}`);
+    throw new ApiError(response.status, errorData.message || `API error: ${response.status}`, errorData);
   }
 
   return response.json();
@@ -90,6 +104,21 @@ export const apiClient = {
   async post<T>(endpoint: string, data: unknown, options: RequestOptions = {}) {
     return request<T>(endpoint, {
       method: 'POST',
+      body: JSON.stringify(data),
+      ...options,
+    });
+  },
+  async put<T>(endpoint: string, data: unknown, options: RequestOptions = {}) {
+    return request<T>(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      ...options,
+    });
+  },
+
+  async patch<T>(endpoint: string, data: unknown, options: RequestOptions = {}) {
+    return request<T>(endpoint, {
+      method: 'PATCH',
       body: JSON.stringify(data),
       ...options,
     });

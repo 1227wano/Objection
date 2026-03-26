@@ -13,7 +13,6 @@ export default function DocumentEditor() {
   
   const filingDate = watch('filingDate') || '';
   const claimantName = watch('claimant.name') || '';
-  const appealCommittee = watch('appealCommittee') || '';
 
   return (
     <div className="bg-white shadow-sm border border-gray-200 rounded-lg p-10 md:p-12 max-w-[850px] mx-auto text-black font-medium leading-relaxed">
@@ -77,29 +76,7 @@ export default function DocumentEditor() {
             <span className="ml-2 text-sm tracking-tighter text-gray-600">(서명 또는 인)</span>
           </p>
         </div>
-        <p className="text-2xl font-bold mt-10 tracking-widest ml-[10%]">
-          {appealCommittee} 귀중
-        </p>
       </div>
-
-      {/* Attachment info table */}
-      <table className="w-full border-collapse border border-black mb-16 text-xs">
-        <colgroup>
-          <col className="w-[20%]" />
-          <col className="w-[60%]" />
-          <col className="w-[20%]" />
-        </colgroup>
-        <tbody>
-          <tr>
-            <td className="border border-black p-2 text-center font-semibold text-sm">첨부서류</td>
-            <td className="border border-black p-2 leading-tight">
-              1. 대표자, 관리인, 선정대표자 또는 대리인의 자격을 소명하는 서류(대표자, 관리인, 선정대표자 또는 대리인을 선임하는 경우에만 제출합니다)<br/>
-              2. 주장을 뒷받침하는 증거서류나 증거물
-            </td>
-            <td className="border border-black p-2 text-center font-semibold text-sm">수수료<br/>없음</td>
-          </tr>
-        </tbody>
-      </table>
 
       <ClaimReasonSection />
     </div>
