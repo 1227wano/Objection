@@ -67,6 +67,13 @@ class NoticeParsedFields(BaseModel):
     legalBasis: list[str] = Field(default_factory=list)
     etc: dict[str, str] = Field(default_factory=dict)
 
+    @field_validator("sanctionValue", mode="before")
+    @classmethod
+    def normalizeSanctionValue(cls, value: object) -> str | None:
+        if value is None:
+            return None
+        return str(value).strip()
+
 
 class AnswerParsedFields(BaseModel):
     """답변서(ANSWER) 파싱 결과"""
