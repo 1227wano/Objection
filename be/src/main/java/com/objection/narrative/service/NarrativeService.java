@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -41,25 +42,31 @@ public class NarrativeService {
         Case found = getCaseOrThrow(caseNo);
         validateOwner(found, userNo);
 
-        GovDocument doc = govDocumentRepository
-                .findByCaseNoAndDocumentType(caseNo, "NOTICE")
-                .orElseThrow(() -> new BusinessException(ErrorCode.GOV_DOC_NOT_FOUND));
+        // 처분서 없어도 동작
+        Optional<GovDocument> docOpt = govDocumentRepository
+                .findByCaseNoAndDocumentType(caseNo, "NOTICE");
 
-        // 1. 경위 저장
-        doc.updateNarrative(request.getFact(), request.getOpinion());
+        // 처분서 있으면 경위 저장
+        docOpt.ifPresent(doc -> doc.updateNarrative(request.getFact(), request.getOpinion()));
 
-        // 2. STRATEGY_GENERATING 전이
+        // doc null 가능
+        GovDocument doc = docOpt.orElse(null);
+        Integer govDocNo = doc != null ? doc.getGovDocNo() : null;
+        String extractedText = doc != null ? doc.getExtractedText() : null;
+        String parsedJsonStr = doc != null ? doc.getParsedJson() : null;
+
+        // STRATEGY_GENERATING 전이
         found.updateStatus(CaseStatus.STRATEGY_GENERATING);
 
         try {
-            Map<String, Object> parsedFields = doc.getParsedJson() != null
-                    ? objectMapper.readValue(doc.getParsedJson(), new TypeReference<>() {})
+            Map<String, Object> parsedFields = parsedJsonStr != null
+                    ? objectMapper.readValue(parsedJsonStr, new TypeReference<>() {})
                     : null;
 
             AiLegalIssueRequest.CaseInfo caseInfo = new AiLegalIssueRequest.CaseInfo(
                     found.getSanctionType(),
                     found.getSanctionDays() != null ? found.getSanctionDays().intValue() : null,
-                    doc.getExtractedText(),
+                    extractedText,
                     parsedFields
             );
 
@@ -68,9 +75,9 @@ public class NarrativeService {
                     request.getOpinion()
             );
 
-            // 3. A-1 호출
+            // A-1 호출
             AiLegalIssueRequest a1Request = new AiLegalIssueRequest(
-                    caseNo, doc.getGovDocNo(), "NOTICE", caseInfo, caseContext
+                    caseNo, govDocNo, "NOTICE", caseInfo, caseContext
             );
             AiLegalIssueResponse a1Response = aiAnalysisClient.analyzeLegalIssue(a1Request);
 
@@ -79,15 +86,15 @@ public class NarrativeService {
                 return new NarrativeSaveResponse(caseNo, LocalDateTime.now());
             }
 
-            // 4. A-2 호출 (A-1 결과 포함)
+            // A-2 호출
             AiStrategyRequest a2Request = new AiStrategyRequest(
                     caseNo,
-                    doc.getGovDocNo(),
+                    govDocNo,
                     "NOTICE",
                     new AiStrategyRequest.CaseInfo(
                             found.getSanctionType(),
                             found.getSanctionDays() != null ? found.getSanctionDays().intValue() : null,
-                            doc.getExtractedText(),
+                            extractedText,
                             parsedFields
                     ),
                     new AiStrategyRequest.CaseContext(
@@ -103,7 +110,6 @@ public class NarrativeService {
             AiStrategyResponse a2Response = aiAnalysisClient.analyzeStrategy(a2Request);
 
             if ("SUCCESS".equals(a2Response.getStatus())) {
-                // 5. 성공 → STRATEGY_DONE
                 found.updateStatus(CaseStatus.STRATEGY_DONE);
             } else {
                 found.updateStatus(CaseStatus.STRATEGY_FAILED);
