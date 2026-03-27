@@ -129,7 +129,7 @@ def _buildPrompt(request: DocumentDraftRequest) -> str:
 - 이 문서는 행정심판 청구서 초안이다.
 - 행정청의 처분 또는 부작위에 대해 취소, 무효확인, 의무이행을 구하는 본안 청구 문서다.
 - 처분 내용을 객관적으로 특정하고, 청구취지와 청구이유를 명확하고 단정적인 문장으로 제시해야 한다.
-- claimPurpose는 결론형 문장으로 작성하고, claimReason은 핵심 위법사유와 주요 사정을 간결하게 정리한다."""
+- claimPurpose는 결론형 문장으로 작성하고, claimReason은 핵심 위법사유와 주요 사정을 간결하게 정리한다. 이때 preparedEvidenceList도 함께 활용해야 한다."""
         responseShape = """{
   "contentJson": {
     "committeeType": "실제 소관 행정심판위원회 명칭 | null",
