@@ -27,7 +27,7 @@ public class GovDocument {
     @Column(nullable = false, length = 13)
     private String documentType;
 
-    @Column(nullable = false, length =  6)
+    @Column(length = 6)
     private String sourceType;
 
     @Column(length = 255)
