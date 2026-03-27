@@ -12,7 +12,9 @@ from app.schemas.document_draft import (
     OutputDocumentType,
     SupplementStatementContentJson,
 )
+from app.schemas.document_review import DocumentReviewRequest, DraftDocument
 from app.schemas.enums import Status
+from app.services.document_review_service import reviewDocument
 
 OPENAI_CHAT_COMPLETIONS_URL = "https://gms.ssafy.io/gmsapi/api.openai.com/v1/chat/completions"
 DRAFT_MODEL = os.getenv("DRAFT_MODEL", "gpt-5.2")
@@ -32,15 +34,30 @@ placeholder, 예시명, 임의의 기관명은 사용하지 않는다.
 
 
 def createDocumentDraft(request: DocumentDraftRequest) -> DocumentDraftResponse:
+    initialDraftResult = _generateDraftResult(request)
+    reviewRequest = DocumentReviewRequest(
+        analysisNo=request.analysisNo,
+        documentType=request.documentType,
+        draftDocument=DraftDocument(
+            title=None,
+            contentJson=initialDraftResult.contentJson,
+        ),
+        caseInfo=request.caseInfo.model_dump(mode="python"),
+        legalIssueAnalysisResult=request.legalIssueAnalysisResult.model_dump(
+            mode="python"
+        ),
+        strategyPrecedentAnalysisResult=
+        request.strategyPrecedentAnalysisResult.model_dump(mode="python"),
+        preparedEvidenceList=request.preparedEvidenceList or [],
+    )
+
+    return reviewDocument(reviewRequest)
+
+
+def _generateDraftResult(request: DocumentDraftRequest) -> DocumentDraftResult:
     responseData = _callDraftLLM(request)
     result = _parseResult(responseData, request)
-
-    return DocumentDraftResponse(
-        status=Status.SUCCESS,
-        message="document draft created",
-        result=result,
-        warnings=[],
-    )
+    return result
 
 
 def _callDraftLLM(request: DocumentDraftRequest) -> dict:

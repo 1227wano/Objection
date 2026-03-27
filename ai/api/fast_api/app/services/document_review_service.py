@@ -7,11 +7,12 @@ from app.core.exceptions import ServiceException
 from app.schemas.common import ReviewError
 from app.schemas.document_draft import (
     AppealClaimContentJson,
+    DocumentDraftResponse,
+    DocumentDraftResult,
     SupplementStatementContentJson,
 )
 from app.schemas.document_review import (
     DocumentReviewRequest,
-    DocumentReviewResponse,
     DocumentReviewResult,
     DraftDocument,
 )
@@ -37,13 +38,17 @@ SYSTEM_PROMPT = """당신은 한국 행정심판 문서를 검증하는 법률 �
 반드시 JSON 형식으로만 응답하세요. JSON 외 다른 텍스트, 설명, 마크다운 코드블록은 절대 포함하지 마세요."""
 
 
-def reviewDocument(request: DocumentReviewRequest) -> DocumentReviewResponse:
+def reviewDocument(request: DocumentReviewRequest) -> DocumentDraftResponse:
     reviewResult = _callLLM(request)
 
-    return DocumentReviewResponse(
+    return DocumentDraftResponse(
         status=Status.SUCCESS,
         message="document review completed",
-        result=reviewResult,
+        result=DocumentDraftResult(
+            analysisNo=reviewResult.analysisNo,
+            documentType=reviewResult.documentType,
+            contentJson=reviewResult.draftDocument.contentJson,
+        ),
         warnings=[],
     )
 
