@@ -18,7 +18,7 @@ class A1CaseInfo(BaseSchema):
     disposalDate: str | None = None
     agencyName: str | None = None
     sanctionType: str | None = None
-    sanctionValue: int | None = Field(default=None, gt=0)
+    sanctionValue: str | None = None
     parsedFields: NoticeParsedFields | AnswerParsedFields | DecisionParsedFields
     rawText: str | None = None
 

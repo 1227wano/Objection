@@ -36,7 +36,7 @@ class CaseInfo(BaseSchema):
     disposalDate: str | None = None
     agencyName: str | None = None
     sanctionType: str | None = None
-    sanctionValue: int | float | None = None
+    sanctionValue: str | None = None
     parsedFields: dict[str, Any] | None = None
     rawText: str | None = None
 
