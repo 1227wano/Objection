@@ -5,17 +5,9 @@ import PrecedentList from './_components/PrecedentList';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { MOCK_SUPPLEMENT_ANALYSIS_DATA } from './_mock/mockdata';
-import { Reason, Precedent } from './types';
+import { Precedent } from './types';
 
 const ad = MOCK_SUPPLEMENT_ANALYSIS_DATA.data;
-
-// legalIssues → Reason[]
-const reasons: Reason[] = ad.legalIssues.map((issue) => ({
-  title: issue.title,
-  cause: issue.basisText,
-  opinion: issue.description,
-  lawBasis: issue.lawBasis,
-}));
 
 // representativePrecedent → Precedent[]
 const precedents: Precedent[] = [
@@ -37,7 +29,7 @@ export default function SupplementReportPage() {
         <AiJudgment label="보충서면 대응 전략" summation={ad.strategySummary} />
 
         {/* 3. 상세 아코디언 */}
-        <DetailAccordion reasons={reasons} evidences={[]} mainPoints={ad.mainPoints} />
+        <DetailAccordion mainPoints={ad.mainPoints} />
 
         {/* 4. 유사 판례 */}
         <PrecedentList precedents={precedents} />

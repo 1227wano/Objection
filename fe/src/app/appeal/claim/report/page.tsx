@@ -6,8 +6,8 @@ import UrgentNotice from './_components/UrgentNotice';
 import PrecedentList from './_components/PrecedentList';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { MOCK_ANALYSIS_DATA, MOCK_EVIDENCE_DATA } from './_mock/mockdata';
-import { AppealType, PossibilityType, Reason, Precedent, Evidence } from './types';
+import { MOCK_ANALYSIS_DATA } from './_mock/mockdata';
+import { AppealType, PossibilityType, Precedent } from './types';
 
 // ── mock → 컴포넌트 Props 매핑 ──────────────────────────
 const ad = MOCK_ANALYSIS_DATA.data;
@@ -19,14 +19,6 @@ const possibilityLookup: Record<string, PossibilityType> = {
   LOW: 'l',
 };
 
-// legalIssues → Reason[]
-const reasons: Reason[] = ad.legalIssues.map((issue) => ({
-  title: issue.title,
-  cause: issue.basisText,
-  opinion: issue.description,
-  lawBasis: issue.lawBasis,
-}));
-
 // representativePrecedent → Precedent[]
 const precedents: Precedent[] = [
   {
@@ -35,11 +27,6 @@ const precedents: Precedent[] = [
     result: ad.representativePrecedent.result,
   },
 ];
-
-// evidenceData → Evidence[]
-const evidences: Evidence[] = MOCK_EVIDENCE_DATA.data.map((e) => ({
-  title: e.evidenceType,
-}));
 
 export default function ReportPage() {
   return (
@@ -64,7 +51,7 @@ export default function ReportPage() {
         <AiJudgment summation={ad.strategySummary} />
 
         {/* 5. 상세 아코디언 */}
-        <DetailAccordion reasons={reasons} evidences={evidences} mainPoints={ad.mainPoints} />
+        <DetailAccordion mainPoints={ad.mainPoints} />
 
         {/* 6. 유사 판례 */}
         <PrecedentList precedents={precedents} />

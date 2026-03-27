@@ -38,20 +38,20 @@ export default function MainPointCard({ points, title = '핵심 쟁점' }: MainP
               </h4>
             </div>
 
-            {/* 중간: 대응 방향 */}
+            {/* 중간: 근거 */}
             <div className="px-5 pb-5">
               <div className="flex items-center gap-1.5 mb-2">
                 <CircleAlert className="w-4 h-4 text-gray-700" />
-                <span className="font-bold text-gray-900 text-base">대응 방향</span>
+                <span className="font-bold text-gray-900 text-base">근거</span>
               </div>
               <p className="text-gray-800 text-base leading-relaxed pl-5.5">{mp.reason}</p>
             </div>
 
-            {/* 하단: 근거 */}
+            {/* 하단: 인용 사항 */}
             <div className="px-5 pt-4 pb-5 bg-gray-50/50 border-t border-gray-100">
               <div className="flex items-center gap-1.5 mb-2">
                 <Scale className="w-4 h-4 text-blue-700" />
-                <span className="font-bold text-blue-800 text-base">근거</span>
+                <span className="font-bold text-blue-800 text-base">인용 사항</span>
               </div>
               <div className="mt-2 bg-white border-l-4 border-blue-500 shadow-sm rounded-r-lg p-4">
                 <p className="text-gray-700 text-[15px] leading-relaxed italic">
