@@ -81,16 +81,18 @@ public class AnalysisPipelineService {
                 }
 
                 for (String legalBasis : legalBasisList) {
-                    // "식품위생법 제44조" → ["식품위생법", "제44조"]
                     String[] parts = legalBasis.trim().split(" ");
                     if (parts.length >= 2) {
                         String lawName = parts[0];
-                        String articleNo = parts[1];
-                        String provisionText = caseAnalysisRepository
-                                .findProvisionTextByLawNameAndArticle(lawName, articleNo);
-                        if (provisionText != null) {
-                            lawRetrievals.add(new AiLegalIssueRequest.LawRetrieval(
-                                    lawName, articleNo, provisionText));
+                        String rawArticle = parts[1]; // "제44조"
+                        String articleNo = rawArticle.replaceAll("[^0-9]", ""); // "44"
+                        if (!articleNo.isEmpty()) {
+                            String provisionText = caseAnalysisRepository
+                                    .findProvisionTextByLawNameAndArticle(lawName, articleNo);
+                            if (provisionText != null) {
+                                lawRetrievals.add(new AiLegalIssueRequest.LawRetrieval(
+                                        lawName, rawArticle, provisionText));
+                            }
                         }
                     }
                 }
