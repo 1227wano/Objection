@@ -59,6 +59,6 @@ public class GlobalExceptionHandler {
         log.error("서버 내부 오류 발생", e);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("서버 내부 오류가 발생했습니다."));
+                .body(ApiResponse.error(e.getMessage() != null ? e.getMessage() : "서버 내부 오류가 발생했습니다."));
     }
 }
