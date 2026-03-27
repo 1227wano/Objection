@@ -12,4 +12,6 @@ public interface EvidenceDocumentRepository extends JpaRepository<EvidenceDocume
 
     Optional<EvidenceDocument> findByEvidenceIdAndAnalysisNo(Integer evidenceId, Integer analysisNo);
 
+    List<EvidenceDocument> findAllByAnalysisNoOrderByEvidenceIdAsc(Integer analysisNo);
+
 }
