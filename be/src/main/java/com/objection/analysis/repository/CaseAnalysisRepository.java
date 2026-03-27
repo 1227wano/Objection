@@ -16,7 +16,7 @@ public interface CaseAnalysisRepository extends JpaRepository<CaseAnalysis, Inte
     // 1. 법령 텍스트 조회용 네이티브 쿼리 (엔티티 불필요)
     @Query(value = """
         SELECT lp.provision_text 
-        FROM laws_provisions lp 
+        FROM law_provisions lp 
         JOIN laws l ON lp.law_no = l.law_no 
         WHERE l.law_name = :lawName AND lp.article_no = :articleNo 
         LIMIT 1
