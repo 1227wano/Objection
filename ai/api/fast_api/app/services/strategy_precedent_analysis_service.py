@@ -137,7 +137,7 @@ def _buildPrompt(request: StrategyPrecedentAnalysisRequest) -> str:
       "usagePoint": "활용 포인트 또는 null"
     }}
   ],
-  "recommendedEvidence": ["증거 항목, 한 항목씩 제시하기"]
+  "recommendedEvidence": ["증거 자료명을 한 항목에 하나씩 간결하게 나열. 설명·입증 목적 불필요. 예: 'CCTV 영상', '매출장부', '직원 교육일지'"]
 }}
 
 입력 JSON:
