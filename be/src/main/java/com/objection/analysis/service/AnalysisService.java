@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Optional;
 
@@ -49,8 +51,12 @@ public class AnalysisService {
 
         found.updateStatus(CaseStatus.STRATEGY_GENERATING);
 
-        // 별도 빈으로 분리된 서비스 호출 → 프록시 타서 진짜 비동기로 동작
-        analysisPipelineService.runPipeline(found, analysis, doc, request.getCaseStage());
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                analysisPipelineService.runPipeline(found, analysis, doc, request.getCaseStage());
+            }
+        });
 
         return new AnalysisStartResponse(
                 analysis.getAnalysisNo(),
