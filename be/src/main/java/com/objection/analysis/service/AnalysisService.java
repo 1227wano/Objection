@@ -3,6 +3,7 @@ package com.objection.analysis.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.objection.analysis.dto.request.AnalysisRequest;
+import com.objection.analysis.dto.response.AnalysisResultResponse;
 import com.objection.analysis.dto.response.AnalysisStartResponse;
 import com.objection.analysis.dto.response.PrecedentMatchResultDto;
 import com.objection.analysis.entity.CaseAnalysis;
@@ -167,5 +168,18 @@ public class AnalysisService {
         if (!found.getUserNo().equals(userNo)) {
             throw new BusinessException(ErrorCode.CASE_ACCESS_DENIED);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public AnalysisResultResponse getPrecedentResult(Integer analysisNo) {
+
+        // 1. 분석 결과 조회
+        CaseAnalysis caseAnalysis = caseAnalysisRepository.findByAnalysisNo(analysisNo)
+                .orElseThrow(() -> new IllegalArgumentException("해당 분석 결과를 찾을 수 없습니다. 분석번호: " + analysisNo));
+
+        // 2. DTO 변환 및 반환
+        return AnalysisResultResponse.builder()
+                .precedentResult(caseAnalysis.getPrecedentResult())
+                .build();
     }
 }
