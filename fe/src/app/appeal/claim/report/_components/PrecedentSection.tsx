@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
 import PrecedentList from './PrecedentList';
-import { PrecedentItem, PrecedentsResponse } from '../types';
+import { PrecedentInfo, PrecedentsResponse, EnrichedPrecedent } from '../types';
 
 const CURRENT_ANALYSIS_KEY = 'currentAnalysisNo';
 
@@ -15,8 +15,14 @@ function resolveAnalysisNo(): number {
   return val ? Number(val) : 0;
 }
 
-export default function PrecedentSection() {
-  const [precedents, setPrecedents] = useState<PrecedentItem[]>([]);
+interface PrecedentSectionProps {
+  precedentInfos: PrecedentInfo[];
+}
+
+export default function PrecedentSection({ precedentInfos }: PrecedentSectionProps) {
+  const [enriched, setEnriched] = useState<EnrichedPrecedent[]>(() =>
+    precedentInfos.map((p) => ({ ...p, similarityScore: undefined })),
+  );
 
   useEffect(() => {
     const analysisNo = resolveAnalysisNo();
@@ -24,9 +30,20 @@ export default function PrecedentSection() {
 
     apiClient
       .get<PrecedentsResponse>(`/analysis/${analysisNo}/precedents`)
-      .then((res) => setPrecedents([res.data]))
-      .catch(() => {});
-  }, []);
+      .then((res) => {
+        const scoreMap: Record<string, number> = {};
+        const item = res.data;
+        if (item?.precedentNo) scoreMap[item.precedentNo] = item.similarityScore;
 
-  return <PrecedentList precedents={precedents} />;
+        setEnriched(
+          precedentInfos.map((p) => ({
+            ...p,
+            similarityScore: scoreMap[p.precedentNo],
+          })),
+        );
+      })
+      .catch(() => {});
+  }, [precedentInfos]);
+
+  return <PrecedentList precedents={enriched} />;
 }

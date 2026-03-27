@@ -31,9 +31,6 @@ export default function SupplementReportPage() {
         {/* 3. 상세 아코디언 */}
         <DetailAccordion mainPoints={ad.mainPoints} />
 
-        {/* 4. 유사 판례 */}
-        <PrecedentList precedents={precedents} />
-
         {/* 하단 이동 버튼 */}
         <div className="flex justify-end pt-8">
           <Button asChild>

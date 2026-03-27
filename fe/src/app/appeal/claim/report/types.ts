@@ -66,6 +66,36 @@ export interface AnalysisResponse {
   data: AnalysisData;
 }
 
+// ── /api/analysis/{analysisNo} 실제 API 타입 ──────────────
+
+export interface PrecedentInfo {
+  precedentNo: string;
+  precedentName: string;
+  matchReason: string;
+  summary: string;
+  usagePoint: string;
+}
+
+export interface PrecedentResult {
+  appealPossibility: string;
+  claimType: ClaimType;
+  mainPoints: MainPoint[];
+  precedentInfos: PrecedentInfo[];
+  recommendedEvidence: string[];
+  stayRecommended: boolean;
+  strategySummary: string;
+}
+
+export interface AnalysisApiData {
+  precedentResult: PrecedentResult;
+}
+
+export interface AnalysisApiResponse {
+  status: string;
+  message: string;
+  data: AnalysisApiData;
+}
+
 export interface PrecedentItem {
   precedentNo: string;
   precedentName: string;
@@ -76,6 +106,14 @@ export interface PrecedentsResponse {
   status: string;
   message: string;
   data: PrecedentItem;
+}
+
+export interface EnrichedPrecedent {
+  precedentNo: string;
+  precedentName: string;
+  matchReason: string;
+  usagePoint: string;
+  similarityScore?: number;
 }
 
 export interface EvidenceItem {
