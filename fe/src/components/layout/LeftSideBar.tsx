@@ -31,7 +31,7 @@ const MENU_STEPS = [
     basePath: '/appeal/answer',
     subMenus: [
       { path: '/appeal/answer/upload', title: '답변서 첨부' },
-      { path: '/appeal/answer/report', title: 'AI 분석 결과' },
+      { path: '/appeal/answer/report', title: 'AI 요약 결과' },
     ],
   },
   {
@@ -41,6 +41,7 @@ const MENU_STEPS = [
     basePath: '/appeal/supplement',
     subMenus: [
       { path: '/appeal/supplement/case', title: '보충 경위서 작성' },
+      { path: '/appeal/supplement/report', title: 'AI 분석 결과' },
       { path: '/appeal/supplement/suggest', title: 'AI 제안' },
       { path: '/appeal/supplement/write', title: '문서 작성' },
       { path: '/appeal/supplement/complete', title: '완료' },

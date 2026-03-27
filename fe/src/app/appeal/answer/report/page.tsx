@@ -11,7 +11,7 @@ export default function RebuttalAnalysisPage() {
     <div className="mx-auto flex w-full max-w-3xl flex-col p-4 py-12 md:py-16 animate-in fade-in duration-500">
       <div className="w-full flex flex-col gap-8">
         {/* 헤더 */}
-        <SectionHeader title="답변서 분석 결과" badge={{ text: 'AI 분석 완료' }} />
+        <SectionHeader title="답변서 요약 결과" />
 
         {/* 섹션: 답변서 요약 (피청구인 주장) */}
         <RespondentSummary summary={rd.respondentSummary} />
