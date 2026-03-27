@@ -15,7 +15,16 @@ import { useEvidence } from './_hook/useEvidence';
 import { apiClient } from '@/lib/api-client';
 
 const analysisData = MOCK_ANALYSIS_DATA.data;
-const analysisNo = 1;
+
+const CURRENT_ANALYSIS_KEY = 'currentAnalysisNo';
+
+function resolveAnalysisNo(): number {
+  if (typeof window === 'undefined') return 0;
+  const val =
+    window.sessionStorage.getItem(CURRENT_ANALYSIS_KEY) ||
+    window.localStorage.getItem(CURRENT_ANALYSIS_KEY);
+  return val ? Number(val) : 0;
+}
 
 type PageStep = 'suggest' | 'loading';
 
@@ -32,6 +41,7 @@ async function createDocument(params: {
 
 export default function SuggestPage() {
   const router = useRouter();
+  const analysisNo = resolveAnalysisNo();
   const { evidences, isLoading, isError, updateEvidences } = useEvidence(analysisNo);
 
   const [selectedType, setSelectedType] = useState<AppealType>(
