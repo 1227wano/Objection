@@ -45,7 +45,7 @@ export default function RulingUploadPage() {
     setIsSubmitting(true);
     try {
       const formData = new FormData();
-      formData.append('documentType', 'RULING');
+      formData.append('documentType', 'DECISION');
       formData.append('sourceType', getSourceType(uploadedFile));
       formData.append('file', uploadedFile);
 
@@ -62,6 +62,7 @@ export default function RulingUploadPage() {
 
       router.push('/appeal/ruling/analysis');
     } catch (err) {
+      console.log(err);
       alert(err instanceof Error ? err.message : '파일 업로드 중 오류가 발생했습니다.');
     } finally {
       setIsSubmitting(false);
