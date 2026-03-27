@@ -39,6 +39,14 @@ public class AnalysisPipelineService {
     public void runPipeline(Case found, CaseAnalysis analysis,
                             GovDocument doc, String caseStage) {
         try {
+            // caseStage → sourceDocumentType 변환
+            String sourceDocumentType = switch (caseStage) {
+                case "APPEAL"   -> "NOTICE";
+                case "REPLY"    -> "ANSWER";
+                case "DECISION" -> "DECISION";
+                default         -> "NOTICE";
+            };
+
             String extractedText = doc != null ? doc.getExtractedText() : null;
             String parsedJsonStr  = doc != null ? doc.getParsedJson()   : null;
             String fact           = doc != null ? doc.getFact()         : null;
@@ -57,7 +65,7 @@ public class AnalysisPipelineService {
             AiLegalIssueRequest a1Request = new AiLegalIssueRequest(
                     found.getCaseNo(),
                     doc != null ? doc.getGovDocNo() : null,
-                    "NOTICE",
+                    sourceDocumentType,
                     new AiLegalIssueRequest.CaseInfo(
                             disposalDate,
                             found.getAgencyName(),
@@ -99,7 +107,7 @@ public class AnalysisPipelineService {
             AiStrategyRequest a2Request = new AiStrategyRequest(
                     found.getCaseNo(),
                     doc != null ? doc.getGovDocNo() : null,
-                    "NOTICE",
+                    sourceDocumentType,
                     new AiStrategyRequest.CaseInfo(
                             disposalDate,
                             found.getAgencyName(),
