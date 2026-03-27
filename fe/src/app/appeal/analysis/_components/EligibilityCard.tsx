@@ -40,7 +40,7 @@ export default function EligibilityCard({ eligibility }: EligibilityCardProps) {
   return (
     <div className="mb-14">
       <h2 className="text-lg font-extrabold text-gray-900 mb-4 flex items-center">
-        <span className="text-first font-extrabold mr-3 text-[24px]">02</span>
+        <span className="text-first font-extrabold mr-3 text-[24px]">•</span>
         행정 심판 적격성 검토
       </h2>
 

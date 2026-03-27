@@ -90,7 +90,7 @@ export default function DdayProgressCard({ deadline }: DdayProgressCardProps) {
   return (
     <div className="mb-12">
       <h2 className="text-lg font-extrabold text-gray-900 mb-4 flex items-center">
-        <span className="text-first font-extrabold mr-3 text-[24px]">03</span>
+        <span className="text-first font-extrabold mr-3 text-[24px]">•</span>
         행정 심판 청구까지 남은 날짜
       </h2>
 
