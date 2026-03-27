@@ -64,7 +64,7 @@ export default function ReportPage() {
         <AiJudgment summation={ad.strategySummary} />
 
         {/* 5. 상세 아코디언 */}
-        <DetailAccordion reasons={reasons} evidences={evidences} />
+        <DetailAccordion reasons={reasons} evidences={evidences} mainPoints={ad.mainPoints} />
 
         {/* 6. 유사 판례 */}
         <PrecedentList precedents={precedents} />
