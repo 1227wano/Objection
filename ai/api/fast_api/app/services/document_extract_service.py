@@ -224,7 +224,7 @@ def _buildMappingPrompt(rawText: str, documentType: InputDocumentType) -> str:
 {{
   "isValidForStage": true/false,
   "invalidReason": null 또는 "사전통지서로 판단됨" 등 사유,
-  "summary": "문서를 1~2줄로 요약",
+  "summary": "문서의 핵심 내용을 3~5문장으로 요약. 다음을 포함할 것: ① 처분의 배경(위반사실, 원래 처분 내용), ② 쟁점(청구인과 피청구인의 핵심 다툼), ③ 판단 결과 및 그 근거(절차적 하자, 비례원칙 위반 등 구체적 사유), ④ 최종 결론(인용/기각/일부인용 여부와 구체적 내용)",
   "parsedFields": {{
 {fieldsSpec}
   }}
