@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import SectionHeader from '../../_components/SectionHeader';
 import SelectionGroup from './_components/SelectionGroup';
@@ -9,12 +9,9 @@ import RightSidebar from './_components/RightSidebar';
 import ConfirmModal from './_components/ConfirmModal';
 import GenerationLoadingPage from './_components/GenerationLoadingPage';
 import { Button } from '@/components/ui/button';
-import { MOCK_ANALYSIS_DATA } from '../report/_mock/mockdata';
-import { AppealType } from '../report/types';
+import { AppealType, AnalysisData, AnalysisResponse } from '../report/types';
 import { useEvidence } from './_hook/useEvidence';
 import { apiClient } from '@/lib/api-client';
-
-const analysisData = MOCK_ANALYSIS_DATA.data;
 
 const CURRENT_ANALYSIS_KEY = 'currentAnalysisNo';
 
@@ -28,29 +25,39 @@ function resolveAnalysisNo(): number {
 
 type PageStep = 'suggest' | 'loading';
 
-async function createDocument(params: {
-  analysisNo: number;
-  documentType: string;
-  userInput?: string;
-}) {
+async function createDocument(params: { analysisNo: number; documentType: string }) {
   return apiClient.post(`/analysis/${params.analysisNo}/documents`, {
     documentType: params.documentType,
-    userInput: params.userInput ?? null,
+    userInput: null,
   });
 }
 
 export default function SuggestPage() {
   const router = useRouter();
   const analysisNo = resolveAnalysisNo();
-  const { evidences, isLoading, isError, updateEvidences } = useEvidence(analysisNo);
+  const { evidences, isLoading: isEvidenceLoading, updateEvidences } = useEvidence(analysisNo);
 
-  const [selectedType, setSelectedType] = useState<AppealType>(
-    analysisData.claimType as AppealType,
-  );
+  const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
+  const [isAnalysisLoading, setIsAnalysisLoading] = useState(true);
+  const [selectedType, setSelectedType] = useState<AppealType | null>(null);
   const [selectedChecklists, setSelectedChecklists] = useState<number[]>([]);
   const [pageStep, setPageStep] = useState<PageStep>('suggest');
   const [showModal, setShowModal] = useState(false);
   const [documentPromise, setDocumentPromise] = useState<Promise<any> | null>(null);
+
+  useEffect(() => {
+    if (!analysisNo) return;
+    apiClient
+      .get<AnalysisResponse>(`/analysis/${analysisNo}`)
+      .then((res) => {
+        if (res.status === 'SUCCESS' && res.data) {
+          setAnalysisData(res.data);
+          setSelectedType(res.data.claimType as AppealType);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setIsAnalysisLoading(false));
+  }, [analysisNo]);
 
   const handleNextClick = async () => {
     const pendingChanges: Record<number, boolean> = {};
@@ -92,7 +99,7 @@ export default function SuggestPage() {
     setPageStep('suggest');
   };
 
-  if (isLoading) {
+  if (isEvidenceLoading || isAnalysisLoading) {
     return (
       <div className="flex w-full min-h-screen justify-center items-center">
         데이터를 불러오는 중입니다...
@@ -110,7 +117,6 @@ export default function SuggestPage() {
     );
   }
 
-  // 체크된 증거 항목 (모달에 전달)
   const checkedItems = evidences
     .filter((e) => selectedChecklists.includes(e.evidenceId))
     .map((e) => ({ id: String(e.evidenceId), label: e.evidenceType }));
@@ -118,15 +124,16 @@ export default function SuggestPage() {
   return (
     <>
       <div className="flex w-full min-h-screen animate-in fade-in duration-500">
-        {/* ── MainContent (중앙) ── */}
         <div className="flex-1 flex justify-center py-12 md:py-16">
           <div className="w-full max-w-4xl px-8 flex flex-col gap-8">
             <SectionHeader title="AI 사안 및 법리 검토" description="심판 유형 분석 및 추천 결과" />
 
-            <SelectionGroup
-              recommended={analysisData.claimType as AppealType}
-              onSelect={setSelectedType}
-            />
+            {analysisData && selectedType && (
+              <SelectionGroup
+                recommended={analysisData.claimType as AppealType}
+                onSelect={setSelectedType}
+              />
+            )}
 
             <div className="w-full h-px bg-gray-100" />
 
@@ -138,8 +145,7 @@ export default function SuggestPage() {
           </div>
         </div>
 
-        {/* ── RightSidebar (우측) ── */}
-        <RightSidebar data={analysisData} />
+        {analysisData && <RightSidebar data={analysisData} />}
       </div>
 
       {showModal && (
