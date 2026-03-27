@@ -36,8 +36,15 @@ public class AnalysisService {
         Case found = getCaseOrThrow(caseNo);
         validateOwner(found, userNo);
 
+        String documentType = switch (request.getCaseStage()) {
+            case "APPEAL"   -> "NOTICE";
+            case "REPLY"    -> "ANSWER";
+            case "DECISION" -> "DECISION";
+            default         -> "NOTICE";
+        };
+
         Optional<GovDocument> docOpt = govDocumentRepository
-                .findByCaseNoAndDocumentType(caseNo, "NOTICE");
+                .findByCaseNoAndDocumentType(caseNo, documentType);
         GovDocument doc = docOpt.orElse(null);
 
         Integer govDocNo = request.getGovDocNo() != null
