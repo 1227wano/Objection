@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-
 import { useFormContext } from 'react-hook-form';
 import { EditableInput } from '@/app/appeal/_components/FormInputs';
 import { DocumentData } from '../_types/document';
+import { useEvidence } from '@/app/appeal/claim/suggest/_hook/useEvidence';
+
+const analysisNo = 1;
 
 export default function EvidenceAndRequestSection() {
   const { watch, setValue } = useFormContext<DocumentData>();
@@ -14,6 +16,16 @@ export default function EvidenceAndRequestSection() {
 
   const [selectedPublicDefender, setSelectedPublicDefender] = useState<boolean | null>(publicDefenderRequest ?? null);
   const [selectedOralHearing, setSelectedOralHearing] = useState<boolean | null>(oralHearingRequest ?? null);
+
+  const { evidences } = useEvidence(analysisNo);
+
+  // submitted=true인 항목만 폼에 반영
+  useEffect(() => {
+    const submitted = evidences.filter((e) => e.submitted).map((e) => e.evidenceType);
+    if (submitted.length > 0) {
+      setValue('evidenceList', submitted);
+    }
+  }, [evidences, setValue]);
 
   useEffect(() => {
     setSelectedPublicDefender(publicDefenderRequest ?? null);
