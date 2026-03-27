@@ -122,7 +122,7 @@ def _buildPrompt(request: StrategyPrecedentAnalysisRequest) -> str:
   "strategySummary": "전략 요약 또는 null",
   "mainPoints": [
     {{
-      "point": "주장 포인트(1~3 단어로 표현)",
+      "point": "주장 포인트(30자 이내)",
       "reason": "이유 또는 null",
       "sourceText": "근거 문장(caseContext, precedentRetrievals[].summary, rawText, appealClaimContent 중에서 추출) 또는 null"
     }}
@@ -130,9 +130,9 @@ def _buildPrompt(request: StrategyPrecedentAnalysisRequest) -> str:
   "stayRecommended": true,
   "precedentInfos": [
     {{
-      "precedentNo": "판례 번호",
-      "precedentName": "판례명",
-      "summary": "판례 요약 또는 null",
+      "precedentNo": "입력 precedentRetrievals의 precedentNo를 그대로 복사",
+      "precedentName": "입력 precedentRetrievals의 precedentName을 그대로 복사",
+      "summary": "입력 precedentRetrievals의 summary를 그대로 복사",
       "matchReason": "유사성 설명 또는 null",
       "usagePoint": "활용 포인트 또는 null"
     }}
