@@ -66,6 +66,18 @@ export interface AnalysisResponse {
   data: AnalysisData;
 }
 
+export interface PrecedentItem {
+  precedentNo: string;
+  precedentName: string;
+  similarityScore: number;
+}
+
+export interface PrecedentsResponse {
+  status: string;
+  message: string;
+  data: PrecedentItem;
+}
+
 export interface EvidenceItem {
   evidenceId: number;
   evidenceType: string;

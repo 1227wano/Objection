@@ -3,11 +3,11 @@ import StrategySummary from './_components/StrategySummary';
 import AiJudgment from '../../_components/AiJudgment';
 import DetailAccordion from './_components/DetailAccordion';
 import UrgentNotice from './_components/UrgentNotice';
-import PrecedentList from './_components/PrecedentList';
+import PrecedentSection from './_components/PrecedentSection';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { MOCK_ANALYSIS_DATA } from './_mock/mockdata';
-import { AppealType, PossibilityType, Precedent } from './types';
+import { AppealType, PossibilityType } from './types';
 
 // ── mock → 컴포넌트 Props 매핑 ──────────────────────────
 const ad = MOCK_ANALYSIS_DATA.data;
@@ -18,15 +18,6 @@ const possibilityLookup: Record<string, PossibilityType> = {
   MEDIUM: 'm',
   LOW: 'l',
 };
-
-// representativePrecedent → Precedent[]
-const precedents: Precedent[] = [
-  {
-    caseName: ad.representativePrecedent.precedentName,
-    point: ad.representativePrecedent.matchReason,
-    result: ad.representativePrecedent.result,
-  },
-];
 
 export default function ReportPage() {
   return (
@@ -54,7 +45,7 @@ export default function ReportPage() {
         <DetailAccordion mainPoints={ad.mainPoints} />
 
         {/* 6. 유사 판례 */}
-        <PrecedentList precedents={precedents} />
+        <PrecedentSection />
 
         {/* 하단 이동 버튼 */}
         <div className="flex justify-end pt-8">
