@@ -1,5 +1,6 @@
 package com.objection.gendocument.dto.ai;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import java.util.Map;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AiDocumentDraftRequest {
 
     private Integer analysisNo;
@@ -22,6 +24,7 @@ public class AiDocumentDraftRequest {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class CaseInfo {
         private String disposalDate;
         private String agencyName;
@@ -34,6 +37,7 @@ public class AiDocumentDraftRequest {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class LegalIssueAnalysisResult {
         private String legalIssueSummary;
         private Boolean legalWeaknessFound;
@@ -43,6 +47,7 @@ public class AiDocumentDraftRequest {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class LegalIssue {
         private String issueType;
         private String description;
@@ -54,6 +59,7 @@ public class AiDocumentDraftRequest {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class StrategyPrecedentAnalysisResult {
         private String claimType;
         private String appealPossibility;
@@ -65,6 +71,7 @@ public class AiDocumentDraftRequest {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class MainPoint {
         private String point;
         private String reason;
@@ -74,6 +81,7 @@ public class AiDocumentDraftRequest {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class PrecedentInfo {
         private String precedentNo;
         private String precedentName;
