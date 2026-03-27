@@ -105,9 +105,9 @@ export default function SupplementEditor() {
               <div className="flex flex-col gap-6">
                 {sections.map((_, idx) => (
                   <div key={idx}>
-                    <p className="font-bold text-sm mb-2">
+                    <div className="font-bold text-sm mb-2">
                       <EditableInput name={`submissionContent.${idx}.title`} />
-                    </p>
+                    </div>
                     <EditableTextarea name={`submissionContent.${idx}.content`} rows={4} />
                   </div>
                 ))}

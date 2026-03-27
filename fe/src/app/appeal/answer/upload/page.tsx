@@ -6,6 +6,19 @@ import UploadForm from '@/components/form/UploadForm';
 import SectionHeader from '../../_components/SectionHeader';
 import { Button } from '@/components/ui/button';
 
+const CURRENT_CASE_KEY = 'currentCaseNo';
+
+function resolveCaseNo(): string | null {
+  if (typeof window === 'undefined') return null;
+  return (
+    window.sessionStorage.getItem(CURRENT_CASE_KEY) || window.localStorage.getItem(CURRENT_CASE_KEY)
+  );
+}
+
+function getSourceType(file: File) {
+  return file.type.startsWith('image/') ? 'IMAGE' : 'FILE';
+}
+
 export default function AnswerAttachPage() {
   const router = useRouter();
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -22,11 +35,21 @@ export default function AnswerAttachPage() {
   const handleSubmit = async () => {
     if (!uploadedFile) return;
 
+    const caseNo = resolveCaseNo();
+    if (!caseNo) {
+      alert('사건 번호를 찾을 수 없습니다. 대시보드에서 다시 시작해 주세요.');
+      router.push('/');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const formData = new FormData();
+      formData.append('documentType', 'ANSWER');
+      formData.append('sourceType', getSourceType(uploadedFile));
       formData.append('file', uploadedFile);
-      const res = await fetch('/api/appeal/answer', {
+
+      const res = await fetch(`/api/cases/${caseNo}/gov-documents`, {
         method: 'POST',
         body: formData,
         credentials: 'include',
@@ -44,8 +67,6 @@ export default function AnswerAttachPage() {
       setIsSubmitting(false);
     }
   };
-
-  const fileSizeMB = uploadedFile ? (uploadedFile.size / (1024 * 1024)).toFixed(2) : null;
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col p-4 py-12 md:py-16 animate-in fade-in duration-500">
