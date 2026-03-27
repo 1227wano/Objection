@@ -25,7 +25,7 @@ public class AiStrategyRequest {
         private String disposalDate;
         private String agencyName;
         private String sanctionType;
-        private Integer sanctionValue;
+        private String sanctionValue;  // Integer → String
         private Map<String, Object> parsedFields;
         private String rawText;
     }

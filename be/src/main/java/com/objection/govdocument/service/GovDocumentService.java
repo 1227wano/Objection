@@ -171,4 +171,22 @@ public class GovDocumentService {
         }
         return null;
     }
+
+    @Transactional
+    public Integer createNoneDocument(Integer caseNo) {
+        GovDocument document = GovDocument.builder()
+                .caseNo(caseNo)
+                .documentType("NONE")
+                .sourceType(null)
+                .build();
+
+        GovDocument savedDoc = govDocumentRepository.save(document);
+
+        Case currentCase = caseRepository.findById(caseNo)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사건 번호입니다: " + caseNo));
+
+        currentCase.updateStatus(CaseStatus.ANALYZING);
+
+        return savedDoc.getGovDocNo();
+    }
 }

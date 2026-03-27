@@ -8,13 +8,16 @@ import java.util.List;
 @NoArgsConstructor
 public class AiLegalIssueResponse {
     private Integer caseNo;
+    private Integer govDocNo;
     private String status;
     private String message;
     private Result result;
+    private List<String> warnings;
 
     @Getter
     @NoArgsConstructor
     public static class Result {
+        private String sourceDocumentType;
         private String legalIssueSummary;
         private Boolean legalWeaknessFound;
         private List<LegalIssue> legalIssues;

@@ -12,7 +12,7 @@ public class AiLegalIssueRequest {
 
     private Integer caseNo;
     private Integer govDocNo;
-    private String sourceDocumentType;
+        private String sourceDocumentType;
     private CaseInfo caseInfo;
     private CaseContext caseContext;
     private List<LawRetrieval> lawRetrievals;
@@ -24,7 +24,7 @@ public class AiLegalIssueRequest {
         private String disposalDate;
         private String agencyName;
         private String sanctionType;
-        private Integer sanctionValue;
+        private String sanctionValue;
         private Map<String, Object> parsedFields;
         private String rawText;
     }

@@ -8,9 +8,11 @@ import java.util.List;
 @NoArgsConstructor
 public class AiStrategyResponse {
     private Integer caseNo;
+    private Integer govDocNo;
     private String status;
     private String message;
     private Result result;
+    private List<String> warnings;
 
     @Getter
     @NoArgsConstructor
