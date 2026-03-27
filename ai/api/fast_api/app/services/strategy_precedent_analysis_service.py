@@ -137,7 +137,7 @@ def _buildPrompt(request: StrategyPrecedentAnalysisRequest) -> str:
       "usagePoint": "활용 포인트 또는 null"
     }}
   ],
-  "recommendedEvidence": ["증거 자료명을 한 항목에 하나씩 간결하게 나열. 설명·입증 목적 불필요. 예: 'CCTV 영상', '매출장부', '직원 교육일지'"]
+  "recommendedEvidence": ["증거 자료명을 한 항목에 정확히 하나만 작성한다. 괄호 안에 여러 자료를 나열하거나, 쉼표·'등'으로 묶는 것을 금지한다. 예시 - 올바름: ['직원 교육일지', '신분증 확인 절차 개선 안내문', '매출장부'] / 잘못됨: ['시정조치 증빙 자료 (직원 교육일지, 신분증 확인 절차 개선 안내문 등)']"]
 }}
 
 입력 JSON:
