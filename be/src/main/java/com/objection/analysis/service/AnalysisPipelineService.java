@@ -39,7 +39,6 @@ public class AnalysisPipelineService {
     public void runPipeline(Case found, CaseAnalysis analysis,
                             GovDocument doc, String caseStage) {
         try {
-            // caseStage → sourceDocumentType 변환
             String sourceDocumentType = switch (caseStage) {
                 case "APPEAL"   -> "NOTICE";
                 case "REPLY"    -> "ANSWER";
@@ -61,6 +60,10 @@ public class AnalysisPipelineService {
                     ? found.getDisposalDate().toString()
                     : null;
 
+            String sanctionValue = found.getSanctionDays() != null
+                    ? found.getSanctionDays().toString()
+                    : null;
+
             // Step 1: A-1 호출
             AiLegalIssueRequest a1Request = new AiLegalIssueRequest(
                     found.getCaseNo(),
@@ -70,7 +73,7 @@ public class AnalysisPipelineService {
                             disposalDate,
                             found.getAgencyName(),
                             found.getSanctionType(),
-                            found.getSanctionDays() != null ? found.getSanctionDays().intValue() : null,
+                            sanctionValue,
                             parsedFields,
                             extractedText
                     ),
@@ -112,7 +115,7 @@ public class AnalysisPipelineService {
                             disposalDate,
                             found.getAgencyName(),
                             found.getSanctionType(),
-                            found.getSanctionDays() != null ? found.getSanctionDays().intValue() : null,
+                            sanctionValue,
                             parsedFields,
                             extractedText
                     ),
