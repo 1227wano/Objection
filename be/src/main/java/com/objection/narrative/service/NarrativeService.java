@@ -39,7 +39,7 @@ public class NarrativeService {
         docOpt.ifPresent(doc -> doc.updateNarrative(request.getFact(), request.getOpinion()));
 
         // 상태 전이
-        found.updateStatus(CaseStatus.NARRATIVE_WRITING);  // ← STRATEGY_GENERATING 대신 이걸로
+        found.updateStatus(CaseStatus.NARRATIVE_WRITING);
 
         return new NarrativeSaveResponse(caseNo, LocalDateTime.now());
     }
