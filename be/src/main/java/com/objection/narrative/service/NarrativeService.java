@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -64,10 +65,12 @@ public class NarrativeService {
                     : null;
 
             AiLegalIssueRequest.CaseInfo caseInfo = new AiLegalIssueRequest.CaseInfo(
+                    found.getDisposalDate() != null ? found.getDisposalDate().toString() : null,
+                    found.getAgencyName(),
                     found.getSanctionType(),
                     found.getSanctionDays() != null ? found.getSanctionDays().intValue() : null,
-                    extractedText,
-                    parsedFields
+                    parsedFields,
+                    extractedText
             );
 
             AiLegalIssueRequest.CaseContext caseContext = new AiLegalIssueRequest.CaseContext(
@@ -77,7 +80,9 @@ public class NarrativeService {
 
             // A-1 호출
             AiLegalIssueRequest a1Request = new AiLegalIssueRequest(
-                    caseNo, govDocNo, "NOTICE", caseInfo, caseContext
+                    caseNo, govDocNo, "NOTICE", caseInfo, caseContext,
+                    Collections.emptyList(),
+                    null
             );
             AiLegalIssueResponse a1Response = aiAnalysisClient.analyzeLegalIssue(a1Request);
 
@@ -92,10 +97,12 @@ public class NarrativeService {
                     govDocNo,
                     "NOTICE",
                     new AiStrategyRequest.CaseInfo(
+                            found.getDisposalDate() != null ? found.getDisposalDate().toString() : null,
+                            found.getAgencyName(),
                             found.getSanctionType(),
                             found.getSanctionDays() != null ? found.getSanctionDays().intValue() : null,
-                            extractedText,
-                            parsedFields
+                            parsedFields,
+                            extractedText
                     ),
                     new AiStrategyRequest.CaseContext(
                             request.getFact(),
@@ -105,7 +112,9 @@ public class NarrativeService {
                             a1Response.getResult().getLegalIssueSummary(),
                             a1Response.getResult().getLegalWeaknessFound(),
                             a1Response.getResult().getLegalIssues()
-                    )
+                    ),
+                    Collections.emptyList(),
+                    null
             );
             AiStrategyResponse a2Response = aiAnalysisClient.analyzeStrategy(a2Request);
 
