@@ -178,9 +178,17 @@
                 caseAnalysisRepository.save(analysis);
 
                 log.info("Step 4 완료 - precedent_result 저장 analysisNo={}", analysis.getAnalysisNo());
-                // 3) case_precedent_matches 테이블에 매칭 사유(match_reason) 업데이트
-                //    precedentMatchingService.updateMatchReason(analysis.getAnalysisNo(), a2Response.getMatchReason());
-                //
+
+                // Step 5: match_reason 업데이트
+                String matchReason = null;
+                if (a2Response.getResult().getPrecedentInfos() != null
+                        && !a2Response.getResult().getPrecedentInfos().isEmpty()) {
+                    matchReason = a2Response.getResult().getPrecedentInfos().get(0).getMatchReason();
+                }
+                precedentMatchingService.updateMatchReason(analysis.getAnalysisNo(), matchReason);
+
+                log.info("Step 5 완료 - match_reason 저장 analysisNo={}", analysis.getAnalysisNo());
+
                 // 4) 상태 업데이트 및 마무리 (CaseStatus.COMPLETED 등)
 
             } catch (Exception e) {
