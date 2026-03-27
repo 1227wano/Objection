@@ -85,4 +85,17 @@ public class CaseController {
                 .ok(ApiResponse.success("설문조사가 저장되었습니다.", response));
 
     }
+
+    // 사건 상세 정보 전체 조회
+    @GetMapping("/{caseNo}")
+    public ResponseEntity<ApiResponse<CaseDetailResponse>> getCaseDetail(
+            @PathVariable Integer caseNo,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        // 서비스 호출 (caseNo와 토큰에서 꺼낸 userNo를 함께 넘김)
+        CaseDetailResponse response = caseService.getCaseDetail(caseNo, userDetails.getUserNo());
+
+        return ResponseEntity
+                .ok(ApiResponse.success("사건 상세 정보 조회 성공", response));
+    }
 }

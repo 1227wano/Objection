@@ -134,4 +134,41 @@ public class CaseService {
             throw new BusinessException(ErrorCode.CASE_ACCESS_DENIED);
         }
     }
+
+    /**
+     * 사건 상세 정보 조회
+     */
+    @Transactional(readOnly = true)
+    public CaseDetailResponse getCaseDetail(Integer caseNo, Integer userNo) {
+        // 1. 사건 조회 (없으면 예외 발생)
+        Case foundCase = getCaseOrThrow(caseNo);
+
+        // 2. 권한 검증: 본인 사건이 맞는지 확인 (보안)
+        if (!foundCase.getUserNo().equals(userNo)) {
+            // 팀 공통 예외 처리 방식에 맞게 수정하세요 (예: UNAUTHORIZED_ACCESS)
+            throw new IllegalArgumentException("해당 사건을 조회할 권한이 없습니다.");
+        }
+
+        // 3. 엔티티를 DTO로 변환하여 반환
+        return CaseDetailResponse.builder()
+                .caseNo(foundCase.getCaseNo())
+                .userNo(foundCase.getUserNo())
+                .title(foundCase.getTitle())
+                .status(foundCase.getStatus())
+                .stayStatus(foundCase.getStayStatus())
+                .disposalDate(foundCase.getDisposalDate())
+                .awareDate(foundCase.getAwareDate())
+                .agencyName(foundCase.getAgencyName())
+                .claimType(foundCase.getClaimType())
+                .sanctionType(foundCase.getSanctionType())
+                .sanctionDays(foundCase.getSanctionDays())
+                .claimant(foundCase.getClaimant())
+                .violationType(foundCase.getViolationType())
+                .businessName(foundCase.getBusinessName())
+                .businessAddress(foundCase.getBusinessAddress())
+                .isDirect(foundCase.getIsDirect())
+                .createdAt(foundCase.getCreatedAt())
+                .updatedAt(foundCase.getUpdatedAt())
+                .build();
+    }
 }
