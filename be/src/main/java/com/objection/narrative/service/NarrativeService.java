@@ -1,6 +1,5 @@
 package com.objection.narrative.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.objection.cases.entity.Case;
 import com.objection.cases.enums.CaseStatus;
 import com.objection.cases.repository.CaseRepository;
@@ -8,7 +7,6 @@ import com.objection.common.exception.BusinessException;
 import com.objection.common.exception.ErrorCode;
 import com.objection.govdocument.entity.GovDocument;
 import com.objection.govdocument.repository.GovDocumentRepository;
-import com.objection.narrative.client.AiAnalysisClient;
 import com.objection.narrative.dto.request.NarrativeRequest;
 import com.objection.narrative.dto.response.NarrativeResponse;
 import com.objection.narrative.dto.response.NarrativeSaveResponse;
@@ -28,8 +26,6 @@ public class NarrativeService {
 
     private final CaseRepository caseRepository;
     private final GovDocumentRepository govDocumentRepository;
-    private final AiAnalysisClient aiAnalysisClient;
-    private final ObjectMapper objectMapper;
 
     @Transactional
     public NarrativeSaveResponse saveNarrative(Integer caseNo, Integer userNo, NarrativeRequest request) {
