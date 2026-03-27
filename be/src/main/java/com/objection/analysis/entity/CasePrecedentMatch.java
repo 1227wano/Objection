@@ -38,4 +38,9 @@ public class CasePrecedentMatch {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    // 엔티티 내부의 값을 안전하게 변경하기 위한 메서드 추가
+    public void updateMatchReason(String matchReason) {
+        this.matchReason = matchReason;
+    }
 }

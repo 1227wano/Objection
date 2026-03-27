@@ -137,4 +137,14 @@ public class PrecedentMatchingService {
             sb.append(text).append("\n");
         }
     }
+
+    // A-2(판례/전략 Agent) API 연결할때 사용해!
+    @Transactional
+    public void updateMatchReason(Integer analysisNo, String matchReason) {
+        CasePrecedentMatch match = casePrecedentMatchRepository.findByAnalysisNo(analysisNo)
+                .orElseThrow(() -> new IllegalArgumentException("매칭된 판례 이력이 없습니다."));
+
+        // 엔티티에 updateMatchReason 같은 변경 감지용(Dirty Checking) 메서드를 만들어두고 호출
+        match.updateMatchReason(matchReason);
+    }
 }

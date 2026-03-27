@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.objection.analysis.dto.request.AnalysisRequest;
 import com.objection.analysis.dto.response.AnalysisStartResponse;
+import com.objection.analysis.dto.response.PrecedentMatchResultDto;
 import com.objection.analysis.entity.CaseAnalysis;
 import com.objection.analysis.repository.CaseAnalysisRepository;
 import com.objection.cases.entity.Case;
@@ -36,6 +37,8 @@ public class AnalysisService {
     private final CaseAnalysisRepository caseAnalysisRepository;
     private final AiAnalysisClient aiAnalysisClient;
     private final ObjectMapper objectMapper;
+
+    private final PrecedentMatchingService precedentMatchingService;
 
     @Transactional
     public AnalysisStartResponse startAnalysis(Integer caseNo, Integer userNo,
@@ -122,8 +125,27 @@ public class AnalysisService {
 
             log.info("Step 2 완료 - law_result 저장 analysisNo={}", analysis.getAnalysisNo());
 
-            // TODO: Step 3 팀원 작업 완료 후 연동
-            // TODO: Step 4, 5, 6 - A-2 호출
+            // Step 3: '유사 판례 매칭 및 저장' 로직 호출
+            log.info("Step 3 시작 - 유사 판례 매칭 진행 analysisNo={}", analysis.getAnalysisNo());
+
+            // precedentMatchingService 내부에서 DB 저장까지 완벽하게 수행하고 매칭된 결과를 반환합니다.
+            PrecedentMatchResultDto matchedPrecedent =
+                    precedentMatchingService.matchPrecedent(analysis.getAnalysisNo());
+
+            log.info("Step 3 완료 - 매칭된 판례번호={}", matchedPrecedent.getPrecedentNo());
+            // ----------------------------------------------------------------------
+            // TODO: Step 4, 5, 6 - A-2(판례/전략 Agent) 호출
+            // ----------------------------------------------------------------------
+            // 1) A-2 호출 시 matchedPrecedent.getPrecedentNo() 혹은 관련 데이터를 파라미터로 넘겨줍니다.
+            //    예: AiStrategyResponse a2Response = aiAnalysisClient.analyzeStrategy(..., matchedPrecedent.getPrecedentNo());
+            //
+            // 2) A-2 응답을 받으면 analysis 테이블에 판례분석결과 업데이트
+            //    analysis.updatePrecedentResult(a2Response.getJsonData());
+            //
+            // 3) case_precedent_matches 테이블에 매칭 사유(match_reason) 업데이트
+            //    precedentMatchingService.updateMatchReason(analysis.getAnalysisNo(), a2Response.getMatchReason());
+            //
+            // 4) 상태 업데이트 및 마무리 (CaseStatus.COMPLETED 등)
 
         } catch (Exception e) {
             log.error("A-1 파이프라인 실패 analysisNo={}", analysis.getAnalysisNo(), e);

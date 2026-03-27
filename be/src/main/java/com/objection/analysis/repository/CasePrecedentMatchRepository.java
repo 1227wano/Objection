@@ -22,4 +22,7 @@ public interface CasePrecedentMatchRepository extends JpaRepository<CasePreceden
         LIMIT 1
     """, nativeQuery = true)
     Optional<PrecedentMatchResultDto> findExistingMatchWithPrecedentName(@Param("analysisNo") Integer analysisNo);
+
+    // 해당 분석 번호로 매칭 엔티티를 찾아오는 기본 메서드
+    Optional<CasePrecedentMatch> findByAnalysisNo(Integer analysisNo);
 }
