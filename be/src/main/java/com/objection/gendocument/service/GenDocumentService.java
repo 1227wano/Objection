@@ -13,8 +13,6 @@ import com.objection.common.exception.ErrorCode;
 import com.objection.gendocument.client.AiDocumentDraftClient;
 import com.objection.gendocument.dto.ai.AiDocumentDraftRequest;
 import com.objection.gendocument.dto.ai.AiDocumentDraftResponse;
-import com.objection.gendocument.dto.ai.AiDocumentReviewRequest;
-import com.objection.gendocument.dto.ai.AiDocumentReviewResponse;
 import com.objection.gendocument.dto.request.DocumentCreateRequest;
 import com.objection.gendocument.dto.response.DocumentResponse;
 import com.objection.gendocument.entity.GenDocument;
@@ -105,33 +103,7 @@ public class GenDocumentService {
             throw new BusinessException(ErrorCode.DOCUMENT_GENERATION_FAILED);
         }
 
-        Map<String, Object> draftContentJson = draftResponse.getResult().getContentJson();
-
-        // B 호출
-        AiDocumentReviewRequest reviewRequest = new AiDocumentReviewRequest(
-                analysisNo,
-                request.getDocumentType(),
-                new AiDocumentReviewRequest.DraftDocument(draftContentJson),
-                new AiDocumentReviewRequest.CaseInfo(
-                        foundCase.getAgencyName(),
-                        foundCase.getSanctionType(),
-                        sanctionValue,
-                        parsedFields,
-                        extractedText
-                ),
-                lawResult != null ? objectMapper.convertValue(lawResult, AiDocumentReviewRequest.LegalIssueAnalysisResult.class) : null,
-                precedentResult != null ? objectMapper.convertValue(precedentResult, AiDocumentReviewRequest.StrategyPrecedentAnalysisResult.class) : null,
-                Collections.emptyList()
-        );
-
-        AiDocumentReviewResponse reviewResponse = aiDocumentDraftClient.reviewDocument(reviewRequest);
-        log.info("B 응답 수신 analysisNo={}, status={}", analysisNo, reviewResponse.getStatus());
-
-        Map<String, Object> finalContentJson = draftContentJson;
-        if ("SUCCESS".equals(reviewResponse.getStatus()) && reviewResponse.getResult() != null
-                && reviewResponse.getResult().getContentJson() != null) {
-            finalContentJson = reviewResponse.getResult().getContentJson();
-        }
+        Map<String, Object> finalContentJson = draftResponse.getResult().getContentJson();
 
         // APPEAL_CLAIM이면 parsedJson에서 Inform, InformContent 추가
         if ("APPEAL_CLAIM".equals(request.getDocumentType()) && parsedFields != null) {
@@ -193,6 +165,10 @@ public class GenDocumentService {
     private Case getCaseByAnalysisNoOrThrow(Integer analysisNo) {
         CaseAnalysis analysis = caseAnalysisRepository.findById(analysisNo)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ANALYSIS_NOT_FOUND));
+
+        if (analysis.getGovDocNo() == null) {
+            throw new BusinessException(ErrorCode.GOV_DOC_NOT_FOUND);
+        }
 
         GovDocument govDoc = govDocumentRepository.findById(analysis.getGovDocNo())
                 .orElseThrow(() -> new BusinessException(ErrorCode.GOV_DOC_NOT_FOUND));
