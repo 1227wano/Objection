@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.objection.analysis.client.AiEmbeddingClient;
 import com.objection.analysis.dto.ai.EmbeddingRequest;
 import com.objection.analysis.dto.ai.EmbeddingResponse;
+import com.objection.analysis.dto.response.MatchedPrecedentResponse;
 import com.objection.analysis.dto.response.PrecedentMatchResultDto;
 import com.objection.analysis.entity.CaseAnalysis;
 import com.objection.analysis.entity.CasePrecedentMatch;
@@ -146,5 +147,23 @@ public class PrecedentMatchingService {
 
         // 엔티티에 updateMatchReason 같은 변경 감지용(Dirty Checking) 메서드를 만들어두고 호출
         match.updateMatchReason(matchReason);
+    }
+
+    /**
+     * 분석 번호(analysisNo)로 매칭된 유사 판례 상세 정보 조회 (판례명 포함)
+     */
+    @Transactional(readOnly = true) // 단순 조회이므로 readOnly=true로 성능 최적화
+    public MatchedPrecedentResponse getMatchedPrecedentInfo(Integer analysisNo) {
+
+        // 🌟 우리가 예전에 만들어둔 조인 네이티브 쿼리를 재사용합니다!
+        PrecedentMatchResultDto matchResult = casePrecedentMatchRepository.findExistingMatchWithPrecedentName(analysisNo)
+                .orElseThrow(() -> new IllegalArgumentException("해당 분석 번호에 대한 판례 매칭 결과가 없습니다. 분석번호: " + analysisNo));
+
+        // 프론트 응답용 DTO로 변환하여 반환
+        return MatchedPrecedentResponse.builder()
+                .precedentNo(matchResult.getPrecedentNo())
+                .precedentName(matchResult.getPrecedentName())
+                .similarityScore(matchResult.getSimilarityScore().floatValue())
+                .build();
     }
 }
