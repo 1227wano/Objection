@@ -1,4 +1,4 @@
-import { MainPoint } from '../../claim/report/types';
+import type { MainPoint } from '../../_components/MainPointCard';
 
 export type { MainPoint };
 

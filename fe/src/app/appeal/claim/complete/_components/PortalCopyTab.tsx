@@ -60,7 +60,10 @@ export default function PortalCopyTab({
       <CopyField label="청구원인" value={claimReason} showCount rows={8} />
 
       <div className="flex justify-center pt-2">
-        <a href="#" onClick={(e) => e.preventDefault()}>
+        <a
+          href="https://simpan.go.kr/com/zz/999/main.do?cmnMenuCd=main"
+          onClick={(e) => e.preventDefault()}
+        >
           <Button variant="outline">온라인 행정심판 포털 이동하기</Button>
         </a>
       </div>
