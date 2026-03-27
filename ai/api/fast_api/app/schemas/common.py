@@ -1,6 +1,6 @@
 from typing import Generic, TypeVar
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
 from app.schemas.enums import InputDocumentType, OutputDocumentType, Stage, Status
 
@@ -15,9 +15,15 @@ class BaseSchema(BaseModel):
 
     @field_validator("*", mode="before")
     @classmethod
-    def validateStringField(cls, value: object) -> object:
+    def validateStringField(
+        cls,
+        value: object,
+        info: ValidationInfo,
+    ) -> object:
         if isinstance(value, str):
             strippedValue = value.strip()
+            if info.field_name == "sanctionValue":
+                return strippedValue
             if not strippedValue:
                 raise ValueError("must not be blank")
             return strippedValue
