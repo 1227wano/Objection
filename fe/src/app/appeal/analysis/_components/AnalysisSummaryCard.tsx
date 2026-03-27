@@ -6,6 +6,8 @@ interface AnalysisSummaryCardProps {
 }
 
 export default function AnalysisSummaryCard({ summary, details }: AnalysisSummaryCardProps) {
+  if (!summary && (!details || details.length === 0)) return null;
+
   return (
     <div className="mb-14">
       <h2 className="text-lg font-extrabold text-gray-900 mb-4 flex items-center">

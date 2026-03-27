@@ -63,7 +63,7 @@ export default function SupplementSuggestPage() {
     setDocumentPromise(
       createDocument({
         analysisNo,
-        documentType: 'SUPPLEMENT',
+        documentType: 'SUPPLEMENT_STATEMENT',
       }),
     );
     setShowModal(false);

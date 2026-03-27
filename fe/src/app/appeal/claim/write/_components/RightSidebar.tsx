@@ -15,15 +15,6 @@ export default function RightSidebar({ legalIssues }: Props) {
     <RightSidebarFrame>
       {/* 체크리스트 */}
       <ChecklistCard />
-
-      {/* AI 주요 검토 쟁점 */}
-      <SidebarCard title="AI 주요 검토 쟁점">
-        <div className="flex flex-col gap-3">
-          {legalIssues.map((issue, idx) => (
-            <IssuePointCard key={idx} issue={issue} />
-          ))}
-        </div>
-      </SidebarCard>
     </RightSidebarFrame>
   );
 }

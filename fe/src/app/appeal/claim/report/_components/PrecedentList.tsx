@@ -1,7 +1,7 @@
-import { PrecedentItem } from '../types';
+import { EnrichedPrecedent } from '../types';
 
 interface PrecedentListProps {
-  precedents: PrecedentItem[];
+  precedents: EnrichedPrecedent[];
 }
 
 export default function PrecedentList({ precedents }: PrecedentListProps) {
@@ -17,12 +17,17 @@ export default function PrecedentList({ precedents }: PrecedentListProps) {
             key={idx}
             className="border border-gray-200 bg-white rounded-2xl p-5 shadow-sm transition-shadow hover:shadow-md"
           >
-            <div className="grid grid-cols-[85px_1fr] sm:grid-cols-[100px_1fr] gap-y-3.5 gap-x-4">
-              <div className="text-sm text-gray-500 font-semibold whitespace-nowrap self-start pt-0.5">
-                판례 번호
-              </div>
-              <div className="text-[15px] text-gray-700 leading-snug">{precedent.precedentNo}</div>
+            {/* 헤더: 판례 번호 + 유사도 badge */}
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm text-gray-500 font-semibold">{precedent.precedentNo}</span>
+              {precedent.similarityScore !== undefined && (
+                <span className="text-xs font-black text-blue-600 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-full">
+                  유사도 {Math.round(precedent.similarityScore * 100)}%
+                </span>
+              )}
+            </div>
 
+            <div className="grid grid-cols-[85px_1fr] sm:grid-cols-[100px_1fr] gap-y-3.5 gap-x-4">
               <div className="text-sm text-gray-500 font-semibold whitespace-nowrap self-start pt-0.5">
                 판례명
               </div>
@@ -31,11 +36,14 @@ export default function PrecedentList({ precedents }: PrecedentListProps) {
               </div>
 
               <div className="text-sm text-gray-500 font-semibold whitespace-nowrap self-start pt-0.5">
-                유사도
+                매칭 사유
               </div>
-              <div className="text-[15px] font-black text-blue-600 leading-snug bg-blue-50 px-2 py-1 -ml-2 rounded w-max">
-                {Math.round(precedent.similarityScore * 100)}%
+              <div className="text-[15px] text-gray-700 leading-snug">{precedent.matchReason}</div>
+
+              <div className="text-sm text-gray-500 font-semibold whitespace-nowrap self-start pt-0.5">
+                활용 포인트
               </div>
+              <div className="text-[15px] text-gray-700 leading-snug">{precedent.usagePoint}</div>
             </div>
           </div>
         ))}

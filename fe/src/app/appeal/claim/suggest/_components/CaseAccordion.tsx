@@ -38,10 +38,6 @@ export default function CaseAccordion({ precedent }: CaseAccordionProps) {
             <span className="text-xs font-semibold text-gray-400">유사 포인트</span>
             <span className="text-sm text-gray-700 leading-relaxed">{precedent.matchReason}</span>
           </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold text-gray-400">판결 결과</span>
-            <span className="text-sm font-bold text-blue-600">{precedent.result}</span>
-          </div>
         </div>
       )}
     </div>
