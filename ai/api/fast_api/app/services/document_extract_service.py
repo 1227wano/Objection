@@ -181,7 +181,7 @@ def _buildMappingPrompt(rawText: str, documentType: InputDocumentType) -> str:
 
     if documentType == InputDocumentType.NOTICE:
         fieldsSpec = """\
-    "disposalDate": "YYYY-MM-DD 형식. 처분일자/행정처분일/처분 시작일. 없으면 null",
+    "disposalDate": "YYYY-MM-DD 형식. 문서 하단(끝부분)에 기재된 처분 발령일/통보일을 우선 사용. 처분일자/행정처분일. 없으면 null",
     "agencyName": "처분 기관명 (예: 서울특별시 강남구청). 문서 하단 발신자 참고. 없으면 null",
     "sanctionType": "영업정지 / 과징금 / 영업허가취소 / 영업폐쇄명령 중 정확히 하나. 없으면 null",
     "sanctionValue": "영업정지·폐쇄명령이면 일수(숫자), 과징금이면 금액(원, 숫자), 허가취소면 null",
