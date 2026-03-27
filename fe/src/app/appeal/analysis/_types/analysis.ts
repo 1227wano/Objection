@@ -1,4 +1,31 @@
-// 설계도 (Type)
+// 적법요건 판단 결과 조회 API 응답 타입
+export interface CaseApiResponse {
+  status: 'SUCCESS' | 'FAIL' | 'ERROR';
+  message: string;
+  data: CaseData;
+}
+
+export interface CaseData {
+  caseNo: number;
+  title: string;
+  status: string;
+  stayStatus: string;
+  claimType: 'CANCEL' | 'INVALID' | 'ORDER' | null;
+  sanctionType: string | null;
+  sanctionDays: number | null;
+  agencyName: string | null;
+  violationType: string | null;
+  businessName: string | null;
+  businessAddress: string | null;
+  disposalDate: string | null;
+  awareDate: string | null;
+  claimant: string | null;
+  isDirect: boolean | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 프론트 UI용 타입
 export interface Eligibility {
   id: number;
   title: string;
@@ -13,13 +40,3 @@ export interface AnalysisData {
   eligibility: Eligibility[];
   details?: { label: string; value: string }[];
 }
-
-export const ANALYSIS_MOCK_DATA : AnalysisData = {
-  summary: "본 사건은 음주운전으로 인한 운전면허 취소 처분에 대한 건으로, 혈중알코올농도 0.081% 상태에서 운전 중 적발되었습니다. 청구인은 운전의 필수성과 생계 유지의 어려움을 주장하고 있습니다.",
-  originalText: "행정처분 통지서 내용 전문... (생략)",
-  deadline: new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // D-Day 계산용 (현재일 기준 5일 뒤)
-  eligibility: [
-    { id: 1, title: "청구인 적격", status: "pass", description: "처분의 직접 상대방으로서 청구인 자격이 충분합니다." },
-    { id: 2, title: "대상 적격", status: "pass", description: "행정심판의 대상이 되는 행정처분에 해당합니다." },
-  ],
-};

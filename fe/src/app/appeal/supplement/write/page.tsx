@@ -1,24 +1,110 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 import SectionHeader from '../../_components/SectionHeader';
 import { Button } from '@/components/ui/button';
 import SupplementEditor from './_components/SupplementEditor';
 import RightSidebar from './_components/RightSidebar';
-import { MOCK_SUPPLEMENT_DOC } from './_mock/mockDocumentData';
-import { SupplementDocumentData } from './_types/document';
-import { useRouter } from 'next/navigation';
+import { SupplementDocumentData, SubmissionSection } from './_types/document';
+import { apiClient } from '@/lib/api-client';
+
+const CURRENT_ANALYSIS_KEY = 'currentAnalysisNo';
+
+function resolveAnalysisNo(): string | null {
+  if (typeof window === 'undefined') return null;
+  return (
+    window.sessionStorage.getItem(CURRENT_ANALYSIS_KEY) ||
+    window.localStorage.getItem(CURRENT_ANALYSIS_KEY)
+  );
+}
+
+function parseSubmissionContent(text: string): SubmissionSection[] {
+  const lines = text.split('\n');
+  const sections: SubmissionSection[] = [];
+  let currentTitle = '';
+  let currentLines: string[] = [];
+
+  for (const line of lines) {
+    if (/^\d+\.\s/.test(line)) {
+      if (currentTitle) {
+        sections.push({ title: currentTitle, content: currentLines.join('\n').trim() });
+      }
+      currentTitle = line.trim();
+      currentLines = [];
+    } else {
+      currentLines.push(line);
+    }
+  }
+
+  if (currentTitle) {
+    sections.push({ title: currentTitle, content: currentLines.join('\n').trim() });
+  }
+
+  return sections.length > 0 ? sections : [{ title: '본문', content: text }];
+}
+
+const EMPTY_DEFAULTS: SupplementDocumentData = {
+  caseName: '',
+  caseNo: '',
+  claimantName: '',
+  claimantPhone: '',
+  claimantAddress: '',
+  respondent: '',
+  documentType: '보충서면',
+  submissionContent: [],
+  filingDate: '',
+  submitterName: '',
+  committee: '',
+  attachments: [],
+};
 
 export default function SupplementWritePage() {
-  const methods = useForm<SupplementDocumentData>({
-    defaultValues: MOCK_SUPPLEMENT_DOC,
-  });
-
   const router = useRouter();
+  const methods = useForm<SupplementDocumentData>({ defaultValues: EMPTY_DEFAULTS });
 
-  const onSubmit = (data: SupplementDocumentData) => {
-    console.log('보충서면 제출 데이터:', data);
-    router.push('/appeal/supplement/complete');
+  useEffect(() => {
+    const analysisNo = resolveAnalysisNo();
+    if (!analysisNo) return;
+
+    apiClient
+      .get<{
+        status: string;
+        data: {
+          contentJson: {
+            submissionContent: string;
+          };
+        };
+      }>(`/analysis/${analysisNo}/documents`)
+      .then((res) => {
+        if (res.status === 'SUCCESS' && res.data?.contentJson?.submissionContent) {
+          methods.reset({
+            ...EMPTY_DEFAULTS,
+            submissionContent: parseSubmissionContent(res.data.contentJson.submissionContent),
+          });
+        }
+      })
+      .catch(() => {});
+  }, [methods]);
+
+  const onSubmit = async (data: SupplementDocumentData) => {
+    const analysisNo = resolveAnalysisNo();
+    if (!analysisNo) return;
+
+    const submissionText = data.submissionContent
+      .map((s) => `${s.title}\n${s.content}`)
+      .join('\n\n');
+
+    try {
+      await apiClient.patch(`/analysis/${analysisNo}/documents`, {
+        documentType: 'SUPPLEMENT_STATEMENT',
+        contentJson: { submissionContent: submissionText },
+      });
+      router.push('/appeal/supplement/complete');
+    } catch {
+      alert('저장 중 오류가 발생했습니다.');
+    }
   };
 
   return (

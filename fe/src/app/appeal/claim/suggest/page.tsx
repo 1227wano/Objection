@@ -9,7 +9,7 @@ import RightSidebar from './_components/RightSidebar';
 import ConfirmModal from './_components/ConfirmModal';
 import GenerationLoadingPage from './_components/GenerationLoadingPage';
 import { Button } from '@/components/ui/button';
-import { AppealType, AnalysisData, AnalysisResponse } from '../report/types';
+import { AppealType, AnalysisApiResponse, PrecedentResult } from '../report/types';
 import { useEvidence } from './_hook/useEvidence';
 import { apiClient } from '@/lib/api-client';
 
@@ -37,7 +37,7 @@ export default function SuggestPage() {
   const analysisNo = resolveAnalysisNo();
   const { evidences, isLoading: isEvidenceLoading, updateEvidences } = useEvidence(analysisNo);
 
-  const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
+  const [analysisData, setAnalysisData] = useState<PrecedentResult | null>(null);
   const [isAnalysisLoading, setIsAnalysisLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<AppealType | null>(null);
   const [selectedChecklists, setSelectedChecklists] = useState<number[]>([]);
@@ -48,11 +48,11 @@ export default function SuggestPage() {
   useEffect(() => {
     if (!analysisNo) return;
     apiClient
-      .get<AnalysisResponse>(`/analysis/${analysisNo}`)
+      .get<AnalysisApiResponse>(`/analysis/${analysisNo}`)
       .then((res) => {
-        if (res.status === 'SUCCESS' && res.data) {
-          setAnalysisData(res.data);
-          setSelectedType(res.data.claimType as AppealType);
+        if (res.status === 'SUCCESS' && res.data?.precedentResult) {
+          setAnalysisData(res.data.precedentResult);
+          setSelectedType(res.data.precedentResult.claimType as AppealType);
         }
       })
       .catch(console.error)
