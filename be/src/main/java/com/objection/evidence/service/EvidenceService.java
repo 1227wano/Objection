@@ -35,7 +35,7 @@ public class EvidenceService {
 
         validateOwner(analysisNo, userNo);
 
-        return evidenceDocumentRepository.findAllByAnalysisNo(analysisNo)
+        return evidenceDocumentRepository.findAllByAnalysisNoOrderByEvidenceIdAsc(analysisNo)
                 .stream()
                 .map(EvidenceResponse::from)
                 .collect(Collectors.toList());
@@ -61,6 +61,11 @@ public class EvidenceService {
 
         CaseAnalysis analysis = caseAnalysisRepository.findById(analysisNo)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ANALYSIS_NOT_FOUND));
+
+        // govDocNo null 방어 처리
+        if (analysis.getGovDocNo() == null) {
+            throw new BusinessException(ErrorCode.GOV_DOC_NOT_FOUND);
+        }
 
         GovDocument govDoc = govDocumentRepository.findById(analysis.getGovDocNo())
                 .orElseThrow(() -> new BusinessException(ErrorCode.GOV_DOC_NOT_FOUND));

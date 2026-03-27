@@ -8,6 +8,8 @@ import com.objection.analysis.repository.CaseAnalysisRepository;
 import com.objection.cases.entity.Case;
 import com.objection.cases.enums.CaseStatus;
 import com.objection.cases.repository.CaseRepository;
+import com.objection.evidence.entity.EvidenceDocument;
+import com.objection.evidence.repository.EvidenceDocumentRepository;
 import com.objection.govdocument.entity.GovDocument;
 import com.objection.narrative.client.AiAnalysisClient;
 import com.objection.narrative.dto.ai.AiLegalIssueRequest;
@@ -35,6 +37,7 @@ public class AnalysisPipelineService {
     private final AiAnalysisClient aiAnalysisClient;
     private final ObjectMapper objectMapper;
     private final PrecedentMatchingService precedentMatchingService;
+    private final EvidenceDocumentRepository evidenceDocumentRepository;
 
     @Async("analysisExecutor")
     @Transactional
@@ -187,6 +190,21 @@ public class AnalysisPipelineService {
             analysis.updatePrecedentResult(precedentResultJson);
             caseAnalysisRepository.save(analysis);
             log.info("Step 4 완료 - precedent_result 저장 analysisNo={}", analysis.getAnalysisNo());
+
+            // Step 4 완료 후 추가
+            if (a2Response.getResult().getRecommendedEvidence() != null
+                    && !a2Response.getResult().getRecommendedEvidence().isEmpty()) {
+                List<EvidenceDocument> evidences = new ArrayList<>();
+                for (String evidenceName : a2Response.getResult().getRecommendedEvidence()) {
+                    evidences.add(EvidenceDocument.builder()
+                            .analysisNo(analysis.getAnalysisNo())
+                            .evidenceType(evidenceName)
+                            .submitted(false)
+                            .build());
+                }
+                evidenceDocumentRepository.saveAll(evidences);
+                log.info("증거 목록 저장 완료 analysisNo={}, size={}", analysis.getAnalysisNo(), evidences.size());
+            }
 
             // Step 5: match_reason 업데이트
             String matchReason = null;
