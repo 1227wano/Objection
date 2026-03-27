@@ -115,6 +115,10 @@
                 AiLegalIssueResponse a1Response = aiAnalysisClient.analyzeLegalIssue(a1Request);
                 log.info("A-1 응답 수신 caseNo={}, status={}", found.getCaseNo(), a1Response.getStatus());
 
+                if (a1Response.getWarnings() != null && !a1Response.getWarnings().isEmpty()) {
+                    log.warn("A-1 warnings caseNo={}, warnings={}", found.getCaseNo(), a1Response.getWarnings());
+                }
+
                 if (!"SUCCESS".equals(a1Response.getStatus())) {
                     markFailed(found);
                     return;
@@ -166,6 +170,10 @@
 
                 AiStrategyResponse a2Response = aiAnalysisClient.analyzeStrategy(a2Request);
                 log.info("A-2 응답 수신 caseNo={}, status={}", found.getCaseNo(), a2Response.getStatus());
+
+                if (a2Response.getWarnings() != null && !a2Response.getWarnings().isEmpty()) {
+                    log.warn("A-2 warnings caseNo={}, warnings={}", found.getCaseNo(), a2Response.getWarnings());
+                }
 
                 if (!"SUCCESS".equals(a2Response.getStatus())) {
                     markFailed(found);
