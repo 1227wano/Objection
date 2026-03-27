@@ -1,9 +1,7 @@
 from fastapi import APIRouter
 
-from app.schemas.document_review import (
-    DocumentReviewRequest,
-    DocumentReviewResponse,
-)
+from app.schemas.document_draft import DocumentDraftResponse
+from app.schemas.document_review import DocumentReviewRequest
 from app.services.document_review_service import reviewDocument
 
 router = APIRouter(
@@ -12,8 +10,8 @@ router = APIRouter(
 )
 
 
-@router.post("", response_model=DocumentReviewResponse)
+@router.post("", response_model=DocumentDraftResponse)
 def documentReview(
     request: DocumentReviewRequest,
-) -> DocumentReviewResponse:
+) -> DocumentDraftResponse:
     return reviewDocument(request)
