@@ -1,34 +1,45 @@
-import RightSidebarFrame from '@/components/layout/RightSidebarFrame';
-import { MOCK_REBUTTAL_DATA } from '../../../answer/report/_mock/mockdata';
-import { SidebarCard } from '@/components/ui/SidebarCard';
+'use client';
 
-const rd = MOCK_REBUTTAL_DATA.data;
+import { useState, useEffect } from 'react';
+import RightSidebarFrame from '@/components/layout/RightSidebarFrame';
+import { SidebarCard } from '@/components/ui/SidebarCard';
+import { apiClient } from '@/lib/api-client';
+
+const CURRENT_CASE_KEY = 'currentCaseNo';
+const CURRENT_DECISION_DOC_KEY = 'currentDecisionGovDocNo';
+
+interface GovDocumentResponse {
+  status: string;
+  message: string;
+  data: {
+    summary: string | null;
+  };
+}
 
 export default function RightSidebar() {
+  const [summary, setSummary] = useState<string | null>(null);
+
+  useEffect(() => {
+    const caseNo =
+      window.sessionStorage.getItem(CURRENT_CASE_KEY) ||
+      window.localStorage.getItem(CURRENT_CASE_KEY);
+    const govDocNo =
+      window.sessionStorage.getItem(CURRENT_DECISION_DOC_KEY) ||
+      window.localStorage.getItem(CURRENT_DECISION_DOC_KEY);
+
+    if (!caseNo || !govDocNo) return;
+
+    apiClient
+      .get<GovDocumentResponse>(`/cases/${caseNo}/gov-documents/${govDocNo}`)
+      .then((res) => setSummary(res.data.summary))
+      .catch(() => {});
+  }, []);
+
   return (
     <RightSidebarFrame>
-      {/* AI 분석 요약 — 일반 카드 스타일 (콜아웃 아님) */}
-      <SidebarCard title="AI 분석 요약">
-        {/* 전략 요약 */}
-        <div className="flex flex-col gap-1.5">
-          <span className="text-sm font-semibold text-blue-400">대응 전략</span>
-          <p className="text-sm text-gray-700 leading-relaxed">{rd.strategySummary}</p>
-        </div>
-
-        {/* 핵심 대응 포인트 */}
-        <div className="flex flex-col gap-2.5">
-          <span className="text-sm font-semibold text-red-400">핵심 논리</span>
-          <ul className="flex flex-col gap-3">
-            {rd.mainPoints.map((item, idx) => (
-              <li key={idx} className="flex flex-col gap-0.5">
-                <div className="flex gap-2">
-                  <span className="text-red-500 font-bold text-sm">•</span>
-                  <p className="text-sm font-bold text-gray-800 leading-snug">{item.point}</p>
-                </div>
-                <p className="text-[13px] text-gray-500 pl-4 leading-relaxed">{item.reason}</p>
-              </li>
-            ))}
-          </ul>
+      <SidebarCard title="재관 요지">
+        <div className="text-gray-700 text-[14.5px] leading-relaxed whitespace-pre-wrap">
+          {summary ?? '불러오는 중...'}
         </div>
       </SidebarCard>
     </RightSidebarFrame>

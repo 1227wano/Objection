@@ -60,6 +60,12 @@ export default function RulingUploadPage() {
         throw new Error(errorData.message || '파일 업로드에 실패했습니다.');
       }
 
+      const result = await res.json();
+      if (result.data?.govDocNo) {
+        window.sessionStorage.setItem('currentDecisionGovDocNo', String(result.data.govDocNo));
+        window.localStorage.setItem('currentDecisionGovDocNo', String(result.data.govDocNo));
+      }
+
       router.push('/appeal/ruling/analysis');
     } catch (err) {
       console.log(err);
