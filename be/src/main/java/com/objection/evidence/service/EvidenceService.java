@@ -35,7 +35,7 @@ public class EvidenceService {
 
         validateOwner(analysisNo, userNo);
 
-        return evidenceDocumentRepository.findAllByAnalysisNo(analysisNo)
+        return evidenceDocumentRepository.findAllByAnalysisNoOrderByEvidenceIdAsc(analysisNo)
                 .stream()
                 .map(EvidenceResponse::from)
                 .collect(Collectors.toList());
