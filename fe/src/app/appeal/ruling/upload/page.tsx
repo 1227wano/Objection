@@ -6,6 +6,19 @@ import UploadForm from '@/components/form/UploadForm';
 import SectionHeader from '../../_components/SectionHeader';
 import { Button } from '@/components/ui/button';
 
+const CURRENT_CASE_KEY = 'currentCaseNo';
+
+function resolveCaseNo(): string | null {
+  if (typeof window === 'undefined') return null;
+  return (
+    window.sessionStorage.getItem(CURRENT_CASE_KEY) || window.localStorage.getItem(CURRENT_CASE_KEY)
+  );
+}
+
+function getSourceType(file: File) {
+  return file.type.startsWith('image/') ? 'IMAGE' : 'FILE';
+}
+
 export default function RulingUploadPage() {
   const router = useRouter();
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -22,11 +35,21 @@ export default function RulingUploadPage() {
   const handleSubmit = async () => {
     if (!uploadedFile) return;
 
+    const caseNo = resolveCaseNo();
+    if (!caseNo) {
+      alert('사건 번호를 찾을 수 없습니다. 대시보드에서 다시 시작해 주세요.');
+      router.push('/');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const formData = new FormData();
+      formData.append('documentType', 'RULING');
+      formData.append('sourceType', getSourceType(uploadedFile));
       formData.append('file', uploadedFile);
-      const res = await fetch('/api/appeal/ruling', {
+
+      const res = await fetch(`/api/cases/${caseNo}/gov-documents`, {
         method: 'POST',
         body: formData,
         credentials: 'include',
@@ -37,7 +60,7 @@ export default function RulingUploadPage() {
         throw new Error(errorData.message || '파일 업로드에 실패했습니다.');
       }
 
-      router.push('/appeal/ruling/report');
+      router.push('/appeal/ruling/analysis');
     } catch (err) {
       alert(err instanceof Error ? err.message : '파일 업로드 중 오류가 발생했습니다.');
     } finally {
@@ -47,10 +70,7 @@ export default function RulingUploadPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col p-4 py-12 md:py-16 animate-in fade-in duration-500">
-      <SectionHeader
-        title="재결서를 수령하셨나요?"
-        description="수령하신 재결서를 올려주세요"
-      />
+      <SectionHeader title="재결서를 수령하셨나요?" description="수령하신 재결서를 올려주세요" />
 
       <div className="w-full space-y-4 mt-8">
         <div className="min-h-64">
