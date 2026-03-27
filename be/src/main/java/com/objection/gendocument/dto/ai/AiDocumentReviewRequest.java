@@ -2,11 +2,13 @@ package com.objection.gendocument.dto.ai;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
 
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
 public class AiDocumentReviewRequest {
 
@@ -19,12 +21,14 @@ public class AiDocumentReviewRequest {
     private List<String> preparedEvidenceList;
 
     @Getter
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class DraftDocument {
         private Map<String, Object> contentJson;
     }
 
     @Getter
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class CaseInfo {
         private String agencyName;
@@ -35,6 +39,7 @@ public class AiDocumentReviewRequest {
     }
 
     @Getter
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class LegalIssueAnalysisResult {
         private String legalIssueSummary;
@@ -43,6 +48,7 @@ public class AiDocumentReviewRequest {
     }
 
     @Getter
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class LegalIssue {
         private String issueType;
@@ -53,6 +59,7 @@ public class AiDocumentReviewRequest {
     }
 
     @Getter
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class StrategyPrecedentAnalysisResult {
         private String claimType;
@@ -63,6 +70,7 @@ public class AiDocumentReviewRequest {
     }
 
     @Getter
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class MainPoint {
         private String point;
@@ -71,6 +79,7 @@ public class AiDocumentReviewRequest {
     }
 
     @Getter
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class PrecedentInfo {
         private String precedentNo;
