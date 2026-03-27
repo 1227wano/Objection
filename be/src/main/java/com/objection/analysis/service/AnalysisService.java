@@ -189,7 +189,11 @@
 
                 log.info("Step 5 완료 - match_reason 저장 analysisNo={}", analysis.getAnalysisNo());
 
-                // 4) 상태 업데이트 및 마무리 (CaseStatus.COMPLETED 등)
+                // Step 6: 상태 업데이트
+                found.updateStatus(CaseStatus.STRATEGY_DONE);
+                caseRepository.save(found);
+
+                log.info("Step 6 완료 - 분석 파이프라인 종료 caseNo={}", found.getCaseNo());
 
             } catch (Exception e) {
                 log.error("A-1 파이프라인 실패 analysisNo={}", analysis.getAnalysisNo(), e);
