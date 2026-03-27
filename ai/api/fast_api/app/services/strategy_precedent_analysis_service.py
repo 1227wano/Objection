@@ -123,8 +123,8 @@ def _buildPrompt(request: StrategyPrecedentAnalysisRequest) -> str:
   "mainPoints": [
     {{
       "point": "주장 포인트(30자 이내)",
-      "reason": "이유 또는 null",
-      "sourceText": "근거 문장(caseContext, precedentRetrievals[].summary, rawText, appealClaimContent 중에서 추출) 또는 null"
+      "reason": "이유를 반드시 null이 아닌 문자열로 작성",
+      "sourceText": "근거 문장을 반드시 null이 아닌 문자열로 작성(caseContext, precedentRetrievals[].summary, rawText, appealClaimContent 중에서 추출)"
     }}
   ],
   "stayRecommended": true,
@@ -133,8 +133,8 @@ def _buildPrompt(request: StrategyPrecedentAnalysisRequest) -> str:
       "precedentNo": "입력 precedentRetrievals의 precedentNo를 그대로 복사",
       "precedentName": "입력 precedentRetrievals의 precedentName을 그대로 복사",
       "summary": "입력 precedentRetrievals의 summary를 그대로 복사",
-      "matchReason": "유사성 설명 또는 null",
-      "usagePoint": "활용 포인트 또는 null"
+      "matchReason": "유사성 설명을 반드시 null이 아닌 문자열로 작성",
+      "usagePoint": "활용 포인트를 반드시 null이 아닌 문자열로 작성"
     }}
   ],
   "recommendedEvidence": [
