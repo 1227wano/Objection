@@ -60,12 +60,6 @@ export default function SupplementReportPage() {
 
   const { precedentResult } = data;
 
-  const precedents: Precedent[] = precedentResult.precedentInfos.map((p: PrecedentInfo) => ({
-    caseName: p.precedentName,
-    point: p.matchReason,
-    result: p.usagePoint,
-  }));
-
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col p-4 py-12 md:py-16 animate-in fade-in duration-500">
       <div className="w-full flex flex-col gap-8">
@@ -77,9 +71,6 @@ export default function SupplementReportPage() {
 
         {/* 3. 상세 아코디언 */}
         <DetailAccordion mainPoints={precedentResult.mainPoints} />
-
-        {/* 4. 유사 판례 */}
-        <PrecedentList precedents={precedents} />
 
         {/* 하단 이동 버튼 */}
         <div className="flex justify-end pt-8">

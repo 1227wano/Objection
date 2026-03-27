@@ -88,6 +88,7 @@ export interface PrecedentResult {
 
 export interface AnalysisApiData {
   precedentResult: PrecedentResult;
+  awareDate?: string | null;
 }
 
 export interface AnalysisApiResponse {

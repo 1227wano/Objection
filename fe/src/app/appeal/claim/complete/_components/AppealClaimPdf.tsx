@@ -340,9 +340,6 @@ export default function AppealClaimPdf({ data }: AppealClaimPdfProps) {
           <Text style={[styles.signatureText, { marginTop: 8 }]}>
             청구인    {name}    (서명 또는 인)
           </Text>
-          <Text style={[styles.signatureText, { marginTop: 16 }]}>
-            {appealCommittee} 귀중
-          </Text>
         </View>
       </Page>
 

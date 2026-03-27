@@ -62,7 +62,8 @@ export default function PortalCopyTab({
       <div className="flex justify-center pt-2">
         <a
           href="https://simpan.go.kr/com/zz/999/main.do?cmnMenuCd=main"
-          onClick={(e) => e.preventDefault()}
+          target="_blank"
+          rel="noopener noreferrer"
         >
           <Button variant="outline">온라인 행정심판 포털 이동하기</Button>
         </a>

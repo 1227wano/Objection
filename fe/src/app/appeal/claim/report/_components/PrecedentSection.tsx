@@ -21,10 +21,12 @@ interface PrecedentSectionProps {
 
 export default function PrecedentSection({ precedentInfos }: PrecedentSectionProps) {
   const [enriched, setEnriched] = useState<EnrichedPrecedent[]>(() =>
-    precedentInfos.map((p) => ({ ...p, similarityScore: undefined })),
+    (precedentInfos ?? []).map((p) => ({ ...p, similarityScore: undefined })),
   );
 
   useEffect(() => {
+    if (!precedentInfos?.length) return;
+
     const analysisNo = resolveAnalysisNo();
     if (!analysisNo) return;
 

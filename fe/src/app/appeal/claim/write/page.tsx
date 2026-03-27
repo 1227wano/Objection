@@ -11,11 +11,21 @@ import SavingModal from './_components/SavingModal';
 import { DocumentData } from './_types/document';
 import { apiClient } from '@/lib/api-client';
 import { useDocumentStore } from '../_store/useDocumentStore';
+import { AnalysisApiResponse } from '../report/types';
 
-const analysisNo = 1;
+const CURRENT_ANALYSIS_KEY = 'currentAnalysisNo';
+
+function resolveAnalysisNo(): number {
+  if (typeof window === 'undefined') return 0;
+  const val =
+    window.sessionStorage.getItem(CURRENT_ANALYSIS_KEY) ||
+    window.localStorage.getItem(CURRENT_ANALYSIS_KEY);
+  return val ? Number(val) : 0;
+}
 
 // API committeeType 문자열 → 폼 CommitteeType 매핑
-function mapCommitteeType(value: string): '중앙' | '시도' | '기타' {
+function mapCommitteeType(value: string | null): '중앙' | '시도' | '기타' {
+  if (!value) return '기타';
   if (value.includes('중앙')) return '중앙';
   if (value.includes('시도')) return '시도';
   return '기타';
@@ -44,6 +54,7 @@ const EMPTY_DOCUMENT_DATA: DocumentData = {
 
 export default function WritePage() {
   const router = useRouter();
+  const analysisNo = resolveAnalysisNo();
   const { setDocumentData } = useDocumentStore();
   const [saving, setSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,21 +68,35 @@ export default function WritePage() {
   useEffect(() => {
     const loadDocument = async () => {
       try {
-        const res = await apiClient.get<{
-          status: string;
-          data: {
-            contentJson: {
-              committeeType: string;
-              dispositionContent: string;
-              claimPurpose: string;
-              claimReason: string;
+        const [res, analysisRes] = await Promise.all([
+          apiClient.get<{
+            status: string;
+            data: {
+              contentJson: {
+                committeeType: string | null;
+                dispositionContent: string;
+                claimPurpose: string;
+                claimReason: string;
+                grievanceContent?: string;
+                grievanceNotified?: boolean;
+              };
             };
-          };
-        }>(`/analysis/${analysisNo}/documents`);
+          }>(`/analysis/${analysisNo}/documents`),
+          apiClient.get<AnalysisApiResponse>(`/analysis/${analysisNo}`),
+        ]);
 
         if (res.status === 'SUCCESS' && res.data?.contentJson) {
-          const { committeeType, dispositionContent, claimPurpose, claimReason } =
-            res.data.contentJson;
+          const {
+            committeeType,
+            dispositionContent,
+            claimPurpose,
+            claimReason,
+            grievanceContent,
+            grievanceNotified,
+          } = res.data.contentJson;
+          const awareDate = analysisRes.data?.awareDate ?? '';
+          const today = new Date();
+          const todayFormatted = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}.`;
           methods.reset({
             ...EMPTY_DOCUMENT_DATA,
             appealCommitteeType: mapCommitteeType(committeeType),
@@ -81,6 +106,10 @@ export default function WritePage() {
               background: claimReason,
               arguments: [],
             },
+            grievanceContent: grievanceContent ?? '',
+            grievanceNotified: grievanceNotified ?? false,
+            dispositionKnownDate: awareDate,
+            filingDate: todayFormatted,
           });
         } else {
           setLoadError(true);
@@ -128,6 +157,8 @@ export default function WritePage() {
       dispositionContent: data.dispositionContent,
       claimPurpose: data.claimPurpose,
       claimReason: claimReasonText,
+      grievanceContent: data.grievanceContent,
+      grievanceNotified: data.grievanceNotified,
     };
 
     try {

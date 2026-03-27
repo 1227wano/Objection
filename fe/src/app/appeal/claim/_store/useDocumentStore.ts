@@ -5,6 +5,8 @@ export interface ContentJson {
   dispositionContent: string;
   claimPurpose: string;
   claimReason: string;
+  grievanceContent: string;
+  grievanceNotified: boolean;
 }
 
 export interface PersonalInfo {

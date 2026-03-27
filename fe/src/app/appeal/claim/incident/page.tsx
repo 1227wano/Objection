@@ -46,8 +46,39 @@ interface AnalysisResponse {
   message: string;
   data: {
     analysisNo: number;
+    status: string;
+    estimatedSeconds?: number;
     [key: string]: unknown;
   } | null;
+}
+
+const POLL_INTERVAL_MS = 1500;
+const POLL_MAX_ATTEMPTS = 120; // 최대 3분 (1.5초 × 120)
+
+interface AnalysisStatusResponse {
+  status: string;
+  message: string;
+  data: {
+    precedentResult: unknown;
+    [key: string]: unknown;
+  } | null;
+}
+
+/**
+ * precedentResult가 null이 아닐 때까지 폴링
+ */
+async function pollUntilDone(analysisNo: string): Promise<void> {
+  for (let attempt = 0; attempt < POLL_MAX_ATTEMPTS; attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+
+    const res = await apiClient.get<AnalysisStatusResponse>(`/analysis/${analysisNo}`);
+
+    if (res.data?.precedentResult !== null && res.data?.precedentResult !== undefined) {
+      return;
+    }
+  }
+
+  throw new Error('AI 분석 시간이 초과되었습니다. 잠시 후 다시 시도해 주세요.');
 }
 
 type PageStep = 'form' | 'loading';
@@ -128,7 +159,7 @@ export default function CaseDetailsPage() {
       // 3) 로딩 화면 전환
       setPageStep('loading');
 
-      // 4) AI 분석 요청
+      // 4) AI 분석 요청 (백엔드는 PROCESSING 상태로 즉시 응답)
       const result = await apiClient.post<AnalysisResponse>(`/cases/${caseNo}/analysis`, {
         govDocNo: Number(govDocNo),
         caseStage: 'APPEAL',
@@ -138,10 +169,15 @@ export default function CaseDetailsPage() {
         throw new Error(result.message || 'AI 분석 요청에 실패했습니다.');
       }
 
-      // 5) analysisNo 저장
-      persistAnalysisNo(String(result.data.analysisNo));
+      const analysisNo = String(result.data.analysisNo);
 
-      // 6) 분석 결과 페이지로 이동
+      // 5) analysisNo 저장
+      persistAnalysisNo(analysisNo);
+
+      // 6) 분석 완료까지 폴링 대기
+      await pollUntilDone(analysisNo);
+
+      // 7) 분석 결과 페이지로 이동
       router.push('/appeal/claim/report');
     } catch (error) {
       console.error('사건 경위 저장 또는 AI 분석 실패:', error);

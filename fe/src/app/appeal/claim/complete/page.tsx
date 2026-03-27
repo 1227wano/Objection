@@ -20,9 +20,7 @@ export default function ClaimCompletePage() {
     }
   }, [store, router]);
 
-  // "다음 절차로" 버튼 클릭 시 정리
   const handleNext = () => {
-    store.clear();
     router.push('/appeal/answer/upload');
   };
 
