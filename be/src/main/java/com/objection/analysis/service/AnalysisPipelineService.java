@@ -20,7 +20,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -64,6 +66,38 @@ public class AnalysisPipelineService {
                     ? found.getSanctionDays().toString()
                     : null;
 
+            // lawRetrievals 채우기
+            List<AiLegalIssueRequest.LawRetrieval> lawRetrievals = new ArrayList<>();
+            if (parsedFields != null && parsedFields.get("legalBasis") != null) {
+                Object legalBasisObj = parsedFields.get("legalBasis");
+                List<String> legalBasisList = new ArrayList<>();
+
+                if (legalBasisObj instanceof List) {
+                    for (Object item : (List<?>) legalBasisObj) {
+                        legalBasisList.add(item.toString());
+                    }
+                } else {
+                    legalBasisList.add(legalBasisObj.toString());
+                }
+
+                for (String legalBasis : legalBasisList) {
+                    // "식품위생법 제44조" → ["식품위생법", "제44조"]
+                    String[] parts = legalBasis.trim().split(" ");
+                    if (parts.length >= 2) {
+                        String lawName = parts[0];
+                        String articleNo = parts[1];
+                        String provisionText = caseAnalysisRepository
+                                .findProvisionTextByLawNameAndArticle(lawName, articleNo);
+                        if (provisionText != null) {
+                            lawRetrievals.add(new AiLegalIssueRequest.LawRetrieval(
+                                    lawName, articleNo, provisionText));
+                        }
+                    }
+                }
+            }
+
+            log.info("lawRetrievals 구성 완료 size={}", lawRetrievals.size());
+
             // Step 1: A-1 호출
             AiLegalIssueRequest a1Request = new AiLegalIssueRequest(
                     found.getCaseNo(),
@@ -78,7 +112,7 @@ public class AnalysisPipelineService {
                             extractedText
                     ),
                     new AiLegalIssueRequest.CaseContext(fact, opinion),
-                    Collections.emptyList(),
+                    lawRetrievals,
                     null
             );
 
