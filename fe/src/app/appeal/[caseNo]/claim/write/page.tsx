@@ -24,12 +24,12 @@ function resolveAnalysisNo(): number {
 }
 
 // API committeeType 문자열 → 폼 CommitteeType 매핑
-// 중앙행정심판위원회, 기타가 아닌 모든 값(시도, 특별시 등)은 '시도'
 function mapCommitteeType(value: string | null): '중앙' | '시도' | '기타' {
-  if (!value) return '기타';
-  if (value === '중앙행정심판위원회') return '중앙';
-  if (value === '기타') return '기타';
-  return '시도';
+  if (!value) return '시도'; // null 이거나 매칭 안 되면 무조건 '시도'를 기본값으로
+  const trimmed = value.trim(); // 혹시 모를 공백 제거
+  if (trimmed === '중앙행정심판위원회') return '중앙';
+  if (trimmed === '기타') return '기타';
+  return '시도'; 
 }
 
 const EMPTY_DOCUMENT_DATA: DocumentData = {
@@ -38,8 +38,8 @@ const EMPTY_DOCUMENT_DATA: DocumentData = {
   claimant: { name: '', address: '', residentNo: '', phone: '' },
   representative: { type: null, name: '', address: '', residentNo: '', phone: '' },
   respondent: '',
-  appealCommitteeType: '기타',
-  appealCommittee: '',
+  appealCommitteeType: '시도', // '기타'에서 '시도'로 변경
+  appealCommittee: 'OO시·도행정심판위원회', // 기본 텍스트 삽입
   dispositionContent: '',
   dispositionKnownDate: '',
   claimPurpose: '',
@@ -106,11 +106,22 @@ export default function WritePage() {
           const awareDate = caseRes.data?.awareDate ?? '';
           const today = new Date();
           const todayFormatted = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}.`;
+          // 초기 위원회 텍스트 결정 로직
+          const mappedType = mapCommitteeType(committeeType);
+          let finalCommittee = '';
+          if (mappedType === '중앙') {
+            finalCommittee = '중앙행정심판위원회';
+          } else if (mappedType === '시도') {
+            // 값이 아예 없거나 '기타'라는 텍스트만 덩그러니 있으면 기본 텍스트로 대체, 아니면 받아온 텍스트 사용
+            finalCommittee = (committeeType && committeeType !== '기타') ? committeeType : 'OO시·도행정심판위원회';
+          } else {
+            finalCommittee = '';
+          }
+
           methods.reset({
             ...EMPTY_DOCUMENT_DATA,
-            appealCommitteeType: mapCommitteeType(committeeType),
-            // '시도'인 경우 원본 이름을 appealCommittee에 보존
-            appealCommittee: mapCommitteeType(committeeType) === '시도' ? (committeeType ?? '') : '',
+            appealCommitteeType: mappedType,
+            appealCommittee: finalCommittee,
             dispositionContent,
             claimPurpose,
             claimReason: {

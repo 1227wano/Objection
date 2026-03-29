@@ -154,10 +154,15 @@ function checkbox(checked: boolean) {
 function committeeCheckboxLine(committeeType: string, appealCommittee: string) {
   const isCentral = committeeType === '중앙';
   const isSido = committeeType === '시도';
-  const isEtc = !isCentral && !isSido;
+  const isEtc = committeeType === '기타';
+  
   // '시도'일 때 실제 위원회명을 표시, 없으면 기본라벨
   const sidoLabel = isSido && appealCommittee ? appealCommittee : 'OO시·도행정심판위원회';
-  return `${checkbox(isCentral)} 중앙행정심판위원회    ${checkbox(isSido)} ${sidoLabel}    ${checkbox(isEtc)} 기타`;
+  
+  // '기타'일 때 입력한 위원회명을 괄호 안에 표시
+  const etcLabel = isEtc && appealCommittee ? `기타(${appealCommittee})` : '기타';
+  
+  return `${checkbox(isCentral)} 중앙행정심판위원회    ${checkbox(isSido)} ${sidoLabel}    ${checkbox(isEtc)} ${etcLabel}`;
 }
 
 interface AppealClaimPdfProps {
