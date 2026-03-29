@@ -2,8 +2,8 @@
 
 import { useParams } from 'next/navigation';
 import { FileQuestion } from 'lucide-react';
-import NoticeEntryCard from '@/app/appeal/start/_components/NoticeEntryCard';
-import UploadStartCard from '@/app/appeal/start/_components/UploadStartCard';
+import NoticeEntryCard from './_components/NoticeEntryCard';
+import UploadStartCard from './_components/UploadStartCard';
 
 export default function AppealStartPage() {
   const { caseNo } = useParams<{ caseNo: string }>();
