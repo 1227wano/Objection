@@ -4,64 +4,67 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Search, FileEdit, MessageSquareQuote, FilePlus, Gavel } from 'lucide-react';
 
-const MENU_STEPS = [
-  {
-    id: 'analysis',
-    title: '처분서 분석',
-    icon: Search,
-    basePath: '/appeal/analysis',
-  },
-  {
-    id: 'claim',
-    title: '행정심판청구서 작성',
-    icon: FileEdit,
-    basePath: '/appeal/claim',
-    subMenus: [
-      { path: '/appeal/claim/incident', title: '사건 경위 작성' },
-      { path: '/appeal/claim/report', title: 'AI 분석 결과' },
-      { path: '/appeal/claim/suggest', title: 'AI 제안' },
-      { path: '/appeal/claim/write', title: '문서 작성' },
-      { path: '/appeal/claim/complete', title: '완료' },
-    ],
-  },
-  {
-    id: 'answer',
-    title: '답변서 분석',
-    icon: MessageSquareQuote,
-    basePath: '/appeal/answer',
-    subMenus: [
-      { path: '/appeal/answer/upload', title: '답변서 첨부' },
-      { path: '/appeal/answer/report', title: 'AI 요약 결과' },
-    ],
-  },
-  {
-    id: 'supplement',
-    title: '보충서면 작성',
-    icon: FilePlus,
-    basePath: '/appeal/supplement',
-    subMenus: [
-      { path: '/appeal/supplement/case', title: '보충 경위서 작성' },
-      { path: '/appeal/supplement/report', title: 'AI 분석 결과' },
-      { path: '/appeal/supplement/suggest', title: 'AI 제안' },
-      { path: '/appeal/supplement/write', title: '문서 작성' },
-      { path: '/appeal/supplement/complete', title: '완료' },
-    ],
-  },
-  {
-    id: 'ruling',
-    title: '재결서 분석',
-    icon: Gavel,
-    basePath: '/appeal/ruling',
-    subMenus: [
-      { path: '/appeal/ruling/upload', title: '재결서 첨부' },
-      { path: '/appeal/ruling/analysis', title: '재결서 분석' },
-    ],
-  },
+interface SidebarProps {
+  caseNo: string;
+}
 
-];
-
-export default function Sidebar() {
+export default function Sidebar({ caseNo }: SidebarProps) {
   const pathname = usePathname();
+
+  const MENU_STEPS = [
+    {
+      id: 'analysis',
+      title: '처분서 분석',
+      icon: Search,
+      basePath: `/appeal/${caseNo}/analysis`,
+    },
+    {
+      id: 'claim',
+      title: '행정심판청구서 작성',
+      icon: FileEdit,
+      basePath: `/appeal/${caseNo}/claim`,
+      subMenus: [
+        { path: `/appeal/${caseNo}/claim/incident`, title: '사건 경위 작성' },
+        { path: `/appeal/${caseNo}/claim/report`, title: 'AI 분석 결과' },
+        { path: `/appeal/${caseNo}/claim/suggest`, title: 'AI 제안' },
+        { path: `/appeal/${caseNo}/claim/write`, title: '문서 작성' },
+        { path: `/appeal/${caseNo}/claim/complete`, title: '완료' },
+      ],
+    },
+    {
+      id: 'answer',
+      title: '답변서 분석',
+      icon: MessageSquareQuote,
+      basePath: `/appeal/${caseNo}/answer`,
+      subMenus: [
+        { path: `/appeal/${caseNo}/answer/upload`, title: '답변서 첨부' },
+        { path: `/appeal/${caseNo}/answer/report`, title: 'AI 요약 결과' },
+      ],
+    },
+    {
+      id: 'supplement',
+      title: '보충서면 작성',
+      icon: FilePlus,
+      basePath: `/appeal/${caseNo}/supplement`,
+      subMenus: [
+        { path: `/appeal/${caseNo}/supplement/case`, title: '보충 경위서 작성' },
+        { path: `/appeal/${caseNo}/supplement/report`, title: 'AI 분석 결과' },
+        { path: `/appeal/${caseNo}/supplement/suggest`, title: 'AI 제안' },
+        { path: `/appeal/${caseNo}/supplement/write`, title: '문서 작성' },
+        { path: `/appeal/${caseNo}/supplement/complete`, title: '완료' },
+      ],
+    },
+    {
+      id: 'ruling',
+      title: '재결서 분석',
+      icon: Gavel,
+      basePath: `/appeal/${caseNo}/ruling`,
+      subMenus: [
+        { path: `/appeal/${caseNo}/ruling/upload`, title: '재결서 첨부' },
+        { path: `/appeal/${caseNo}/ruling/analysis`, title: '재결서 분석' },
+      ],
+    },
+  ];
 
   return (
     <aside className="w-64 fixed left-0 top-14 h-[calc(100vh-3.5rem)] bg-[#f4f7fb] border-r border-gray-200 flex flex-col z-40 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">

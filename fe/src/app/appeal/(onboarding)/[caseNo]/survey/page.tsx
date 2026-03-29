@@ -9,7 +9,7 @@ import {
   type SetStateAction,
 } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, useParams } from 'next/navigation';
 import {
   Bot,
   Building2,
@@ -20,8 +20,6 @@ import {
   UsersRound,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-const CURRENT_CASE_KEY = 'currentCaseNo';
 
 const CLAIMANT_OPTIONS = [
   {
@@ -84,16 +82,8 @@ interface SurveySaveResponse {
   data?: unknown;
 }
 
-function resolveStoredValue(key: string) {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
-  return window.sessionStorage.getItem(key) || window.localStorage.getItem(key);
-}
-
-function resolveGovDocNo(caseNo: string | null, documentType: string): string | null {
-  if (!caseNo || typeof window === 'undefined') return null;
+function resolveGovDocNo(caseNo: string, documentType: string): string | null {
+  if (typeof window === 'undefined') return null;
   const key = `govDocNo_${caseNo}_${documentType}`;
   return window.sessionStorage.getItem(key) || window.localStorage.getItem(key);
 }
@@ -219,6 +209,7 @@ function sanitizeDateInput(value: string) {
 
 export default function AppealSurveyPage() {
   const router = useRouter();
+  const { caseNo } = useParams<{ caseNo: string }>();
   const searchParams = useSearchParams();
   const hasUploadedNotice = searchParams.get('source') === 'upload';
   const helpLayerRef = useRef<HTMLDivElement | null>(null);
@@ -255,10 +246,9 @@ export default function AppealSurveyPage() {
   }, [openHelp]);
 
   useEffect(() => {
-    const caseNo = searchParams.get('caseNo') || resolveStoredValue(CURRENT_CASE_KEY);
     const govDocNo = resolveGovDocNo(caseNo, 'NOTICE');
 
-    if (!caseNo || !govDocNo) {
+    if (!govDocNo) {
       return;
     }
 
@@ -343,7 +333,7 @@ export default function AppealSurveyPage() {
     return () => {
       isMounted = false;
     };
-  }, [hasUploadedNotice, searchParams]);
+  }, [hasUploadedNotice, caseNo]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -356,12 +346,6 @@ export default function AppealSurveyPage() {
       !actionDate ||
       !agency.trim()
     ) {
-      return;
-    }
-
-    const caseNo = searchParams.get('caseNo') || resolveStoredValue(CURRENT_CASE_KEY);
-    if (!caseNo) {
-      alert('사건 번호를 찾지 못했습니다. 처음부터 다시 진행해 주세요.');
       return;
     }
 
@@ -671,7 +655,7 @@ export default function AppealSurveyPage() {
                   className="justify-start px-0 text-slate-500 hover:bg-transparent hover:text-slate-900"
                   asChild
                 >
-                  <Link href="/appeal/start">
+                  <Link href={`/appeal/${caseNo}/start`}>
                     <ChevronLeft className="mr-1 h-4 w-4" />
                     이전 단계
                   </Link>

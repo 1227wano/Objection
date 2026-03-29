@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import ChecklistItem from './ChecklistItem';
-import { Evidence } from '@/app/appeal/claim/suggest/_types/evidence';
+import { Evidence } from '@/app/appeal/[caseNo]/claim/suggest/_types/evidence';
+
 
 interface ChecklistGroupProps {
   items: Evidence[]; // 공통 Evidence 타입으로 변경

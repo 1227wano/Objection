@@ -1,14 +1,19 @@
 'use client';
 
-import { useEffect, useRef, useState, type ChangeEvent, type DragEvent, type MouseEvent } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import {
+  useRef,
+  useState,
+  type ChangeEvent,
+  type DragEvent,
+  type MouseEvent,
+} from 'react';
+import { useRouter } from 'next/navigation';
 import { CheckCircle2, FileText, FileUp, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import NoticeDocumentConfirmModal from './NoticeDocumentConfirmModal';
+import OcrLoadingModal from './OcrLoadingModal';
 
 const ACCEPTED_FILE_TYPES = '.pdf,.jpg,.jpeg,.png';
-const CURRENT_CASE_KEY = 'currentCaseNo';
-const CURRENT_NOTICE_DOC_KEY = 'currentNoticeGovDocNo';
 
 function formatFileSize(size: number) {
   if (size >= 1024 * 1024) {
@@ -22,44 +27,10 @@ function getSourceType(file: File) {
   return file.type.startsWith('image/') ? 'IMAGE' : 'FILE';
 }
 
-function persistCaseNo(caseNo: string | null) {
-  if (typeof window === 'undefined' || !caseNo) {
-    return;
-  }
-
-  window.sessionStorage.setItem(CURRENT_CASE_KEY, caseNo);
-  window.localStorage.setItem(CURRENT_CASE_KEY, caseNo);
-}
-
-function persistNoticeGovDocNo(govDocNo: string | null) {
-  if (typeof window === 'undefined' || !govDocNo) {
-    return;
-  }
-
-  window.sessionStorage.setItem(CURRENT_NOTICE_DOC_KEY, govDocNo);
-  window.localStorage.setItem(CURRENT_NOTICE_DOC_KEY, govDocNo);
-}
-
-function persistNoticeGovDocNoForCase(caseNo: string, govDocNo: string | null) {
-  if (typeof window === 'undefined' || !govDocNo) {
-    return;
-  }
-
-  const storageKey = `${CURRENT_NOTICE_DOC_KEY}:${caseNo}`;
-  window.sessionStorage.setItem(storageKey, govDocNo);
-  window.localStorage.setItem(storageKey, govDocNo);
-}
-
-function resolveCaseNo(searchCaseNo: string | null) {
-  if (typeof window === 'undefined') {
-    return searchCaseNo;
-  }
-
-  return (
-    searchCaseNo ||
-    window.sessionStorage.getItem(CURRENT_CASE_KEY) ||
-    window.localStorage.getItem(CURRENT_CASE_KEY)
-  );
+function persistGovDocNo(caseNo: string, documentType: string, govDocNo: string) {
+  const key = `govDocNo_${caseNo}_${documentType}`;
+  window.sessionStorage.setItem(key, govDocNo);
+  window.localStorage.setItem(key, govDocNo);
 }
 
 interface SelectedFileSummaryProps {
@@ -75,6 +46,10 @@ interface UploadNoticeDocumentResponse {
     govDocNo?: number;
     documentType?: string;
   } | null;
+}
+
+interface UploadStartCardProps {
+  caseNo: string;
 }
 
 function SelectedFileSummary({ fileName, fileSizeLabel, onClear }: SelectedFileSummaryProps) {
@@ -103,20 +78,15 @@ function SelectedFileSummary({ fileName, fileSizeLabel, onClear }: SelectedFileS
   );
 }
 
-export default function UploadStartCard() {
+export default function UploadStartCard({ caseNo }: UploadStartCardProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [cardStep, setCardStep] = useState<'idle' | 'selected' | 'uploading'>('idle');
   const isCompleted = !!selectedFile;
-  const caseNoFromQuery = searchParams.get('caseNo');
-
-  useEffect(() => {
-    persistCaseNo(caseNoFromQuery);
-  }, [caseNoFromQuery]);
 
   function handleSelectFile(file: File | null) {
     if (!file || isUploading) {
@@ -124,6 +94,7 @@ export default function UploadStartCard() {
     }
 
     setSelectedFile(file);
+    setCardStep('selected');
   }
 
   function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
@@ -142,6 +113,7 @@ export default function UploadStartCard() {
     }
 
     setSelectedFile(null);
+    setCardStep('idle');
 
     if (inputRef.current) {
       inputRef.current.value = '';
@@ -153,13 +125,9 @@ export default function UploadStartCard() {
       return;
     }
 
-    const caseNo = resolveCaseNo(caseNoFromQuery);
-    if (!caseNo) {
-      alert('사건 번호를 찾지 못했습니다. 새 케이스를 먼저 생성한 뒤 다시 시도해 주세요.');
-      return;
-    }
-
     setIsUploading(true);
+    setCardStep('uploading');
+    setIsConfirmModalOpen(false);
 
     try {
       const formData = new FormData();
@@ -172,7 +140,9 @@ export default function UploadStartCard() {
         body: formData,
         credentials: 'include',
       });
-      const result = (await response.json().catch(() => null)) as UploadNoticeDocumentResponse | null;
+      const result = (await response
+        .json()
+        .catch(() => null)) as UploadNoticeDocumentResponse | null;
 
       if (!response.ok) {
         throw new Error(result?.message || '처분서 업로드에 실패했습니다. 다시 시도해 주세요.');
@@ -180,16 +150,15 @@ export default function UploadStartCard() {
 
       if (result?.data?.govDocNo) {
         const nextGovDocNo = String(result.data.govDocNo);
-        persistNoticeGovDocNo(nextGovDocNo);
-        persistNoticeGovDocNoForCase(caseNo, nextGovDocNo);
+        persistGovDocNo(caseNo, 'NOTICE', nextGovDocNo);
       }
 
-      router.push('/appeal/survey?source=upload');
+      router.push(`/appeal/${caseNo}/survey?source=upload`);
     } catch (error) {
+      setCardStep('selected');
       alert(error instanceof Error ? error.message : '처분서 업로드 중 문제가 발생했습니다.');
     } finally {
       setIsUploading(false);
-      setIsConfirmModalOpen(false);
     }
   }
 
@@ -314,7 +283,9 @@ export default function UploadStartCard() {
         </div>
 
         {!isCompleted ? (
-          <p className="mt-4 min-h-[28px] text-sm font-medium text-first/70">선택한 파일이 없습니다</p>
+          <p className="mt-4 min-h-[28px] text-sm font-medium text-first/70">
+            선택한 파일이 없습니다
+          </p>
         ) : null}
       </div>
 
@@ -340,6 +311,8 @@ export default function UploadStartCard() {
           isSubmitting={isUploading}
         />
       ) : null}
+
+      {cardStep === 'uploading' ? <OcrLoadingModal /> : null}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 export const STAGE_CONFIG = {
   '처분서 분석': {
-    detailSteps: [] as string[],
+    detailSteps: ['처분서 첨부', '처분서 분석 대기', '처분서 분석 중', '분석 결과 검토', '분석 실패'],
     badgeClassName: 'bg-slate-100 text-slate-700',
   },
   '행정심판청구서 작성': {
