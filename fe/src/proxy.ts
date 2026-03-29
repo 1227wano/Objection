@@ -48,7 +48,16 @@ export default function proxy(request: NextRequest) {
       '/api/auth/logout',
       '/api/user/me',
     ];
-    if (!nextApiRoutes.includes(pathname)) {
+
+    // /api/analysis/.../documents POST 는 route.ts(Node.js)가 직접 처리 → rewrite 제외
+    // GET 등 다른 메소드는 기존 rewrite 로 백엔드 통과
+    const isAnalysisDocuments =
+      request.method === 'POST' &&
+      pathname.startsWith('/api/analysis/') &&
+      pathname.endsWith('/documents');
+
+    if (!nextApiRoutes.includes(pathname) && !isAnalysisDocuments) {
+
       const baseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://j14a102.p.ssafy.io:8080').replace(/\/$/, '');
       const backendUrl = new URL(request.nextUrl.pathname, `${baseUrl}/`);
       

@@ -24,11 +24,12 @@ function resolveAnalysisNo(): number {
 }
 
 // API committeeType 문자열 → 폼 CommitteeType 매핑
+// 중앙행정심판위원회, 기타가 아닌 모든 값(시도, 특별시 등)은 '시도'
 function mapCommitteeType(value: string | null): '중앙' | '시도' | '기타' {
   if (!value) return '기타';
-  if (value.includes('중앙')) return '중앙';
-  if (value.includes('시도')) return '시도';
-  return '기타';
+  if (value === '중앙행정심판위원회') return '중앙';
+  if (value === '기타') return '기타';
+  return '시도';
 }
 
 const EMPTY_DOCUMENT_DATA: DocumentData = {
@@ -101,6 +102,8 @@ export default function WritePage() {
           methods.reset({
             ...EMPTY_DOCUMENT_DATA,
             appealCommitteeType: mapCommitteeType(committeeType),
+            // '시도'인 경우 원본 이름을 appealCommittee에 보존
+            appealCommittee: mapCommitteeType(committeeType) === '시도' ? (committeeType ?? '') : '',
             dispositionContent,
             claimPurpose,
             claimReason: {

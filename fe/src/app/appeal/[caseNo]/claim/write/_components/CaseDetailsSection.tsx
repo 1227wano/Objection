@@ -60,16 +60,14 @@ export default function CaseDetailsSection() {
                 className="flex items-center gap-1 cursor-pointer text-left hover:bg-gray-50 rounded px-0.5 -mx-0.5 transition-colors whitespace-nowrap"
               >
                 <span className="w-5 text-center">[{selectedCommitteeType === type ? 'V' : ' '}]</span>{' '}
-                {type === '중앙' ? '중앙행정심판위원회' : type === '시도' ? 'OO시·도행정심판위원회' : '기타'}
+                {type === '중앙'
+                  ? '중앙행정심판위원회'
+                  : type === '시도'
+                  ? (appealCommittee || 'OO시·도행정심판위원회')
+                  : '기타'}
               </button>
             ))}
           </div>
-          {appealCommitteeType !== '중앙' && (
-            <div className="mt-2 text-sm text-gray-500 flex items-center gap-2">
-              선택된 위원회:{' '}
-              <span className="text-black font-semibold">{appealCommittee}</span>
-            </div>
-          )}
         </td>
       </tr>
 

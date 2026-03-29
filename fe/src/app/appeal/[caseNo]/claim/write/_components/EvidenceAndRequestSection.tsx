@@ -7,7 +7,15 @@ import { DocumentData } from '../_types/document';
 import { useEvidence } from '@/app/appeal/[caseNo]/claim/suggest/_hook/useEvidence';
 
 
-const analysisNo = 1;
+const CURRENT_ANALYSIS_KEY = 'currentAnalysisNo';
+
+function resolveAnalysisNo(): number {
+  if (typeof window === 'undefined') return 0;
+  const val =
+    window.sessionStorage.getItem(CURRENT_ANALYSIS_KEY) ||
+    window.localStorage.getItem(CURRENT_ANALYSIS_KEY);
+  return val ? Number(val) : 0;
+}
 
 export default function EvidenceAndRequestSection() {
   const { watch, setValue } = useFormContext<DocumentData>();
@@ -15,6 +23,7 @@ export default function EvidenceAndRequestSection() {
   const publicDefenderRequest = watch('publicDefenderRequest');
   const oralHearingRequest = watch('oralHearingRequest');
 
+  const analysisNo = resolveAnalysisNo();
   const [selectedPublicDefender, setSelectedPublicDefender] = useState<boolean | null>(publicDefenderRequest ?? null);
   const [selectedOralHearing, setSelectedOralHearing] = useState<boolean | null>(oralHearingRequest ?? null);
 

@@ -151,10 +151,13 @@ function checkbox(checked: boolean) {
   return checked ? '[V]' : '[ ]';
 }
 
-function committeeCheckboxLine(appealCommittee: string) {
-  const isCentral = appealCommittee.includes('중앙');
-  const isSido = !isCentral && (appealCommittee.includes('특별시') || appealCommittee.includes('광역시') || appealCommittee.includes('도'));
-  return `${checkbox(isCentral)} 중앙  ${checkbox(isSido)} 시도  ${checkbox(!isCentral && !isSido)} 기타`;
+function committeeCheckboxLine(committeeType: string, appealCommittee: string) {
+  const isCentral = committeeType === '중앙';
+  const isSido = committeeType === '시도';
+  const isEtc = !isCentral && !isSido;
+  // '시도'일 때 실제 위원회명을 표시, 없으면 기본라벨
+  const sidoLabel = isSido && appealCommittee ? appealCommittee : 'OO시·도행정심판위원회';
+  return `${checkbox(isCentral)} 중앙행정심판위원회    ${checkbox(isSido)} ${sidoLabel}    ${checkbox(isEtc)} 기타`;
 }
 
 interface AppealClaimPdfProps {
@@ -257,9 +260,8 @@ export default function AppealClaimPdf({ data }: AppealClaimPdfProps) {
           <View style={styles.row}>
             <View style={styles.headerCell}><Text style={styles.headerCellText}>{'소관\n행정심판\n위원회'}</Text></View>
             <View style={{ flex: 1, padding: 6 }}>
-              <Text style={styles.valueCellText}>{committeeCheckboxLine(appealCommittee)}</Text>
-              <Text style={[styles.valueCellText, { marginTop: 4, color: '#6B7280' }]}>
-                위원회: {appealCommittee}
+              <Text style={styles.valueCellText}>
+                {committeeCheckboxLine(contentJson.committeeType, appealCommittee)}
               </Text>
             </View>
           </View>
