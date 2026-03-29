@@ -1,4 +1,5 @@
-import type { MainPoint } from '../../_components/MainPointCard';
+import type { MainPoint } from '../../../_components/MainPointCard';
+
 
 export type { MainPoint };
 
