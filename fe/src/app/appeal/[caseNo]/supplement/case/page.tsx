@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { apiClient } from '@/lib/api-client';
 import SectionHeader from '../../../_components/SectionHeader';
 import RightSidebar from './_components/RightSidebar';
+import AnalysisLoadingScreen from '../../../_components/AnalysisLoadingScreen';
 
 const CURRENT_ANALYSIS_KEY = 'currentAnalysisNo';
 
@@ -61,39 +62,6 @@ interface AnalysisResponse {
 }
 
 type PageStep = 'form' | 'loading';
-
-// ── 로딩 화면 ──────────────────────────────────────────
-function AnalysisLoadingScreen() {
-  return (
-    <div className="flex w-full min-h-[60vh] items-center justify-center">
-      <style>{`
-        @keyframes orbPulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(0.88); }
-        }
-      `}</style>
-
-      <div className="flex flex-col items-center gap-8 w-full max-w-[480px] px-6">
-        <div
-          className="w-28 h-28 rounded-full flex items-center justify-center shadow-lg"
-          style={{
-            background: 'linear-gradient(135deg, #4F46E5 0%, #6366F1 50%, #818CF8 100%)',
-            animation: 'orbPulse 2s ease-in-out infinite',
-          }}
-        >
-          <span className="text-4xl select-none">⚖️</span>
-        </div>
-
-        <div className="text-center flex flex-col gap-2">
-          <h2 className="text-[22px] font-bold text-[#111827]">보충서면 전략을 수립하고 있어요</h2>
-          <p className="text-sm text-[#6B7280]">
-            입력하신 내용을 바탕으로 법리 분석 및 전략을 수립합니다.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ── 메인 페이지 ────────────────────────────────────────
 export default function SupplementCasePage() {
@@ -170,7 +138,25 @@ export default function SupplementCasePage() {
   };
 
   if (pageStep === 'loading') {
-    return <AnalysisLoadingScreen />;
+    return (
+      <AnalysisLoadingScreen
+        title="보충서면 전략을 수립하고 있어요"
+        checklist={[
+          { text: '답변서를 꼼꼼히 읽어보셨나요?', hint: '피청구인 주장을 파악해야 반박이 가능해요' },
+          { text: '반박할 핵심 포인트를 정리해뒀나요?', hint: '구체적일수록 설득력이 높아집니다' },
+          { text: '주장을 뒷받침할 추가 증거가 있나요?', hint: '새로운 자료가 있다면 이 단계에서 제출하세요' },
+          { text: '처분 이후 추가로 발생한 피해가 있나요?', hint: '피해 규모가 클수록 감경 가능성이 높아요' },
+          { text: '사실관계 오류를 발견하셨나요?', hint: '피청구인의 사실 오인은 강력한 반박 근거예요' },
+        ]}
+        tips={[
+          '보충서면은 피청구인 답변서 수령 후 제출하는 최후 반박 기회입니다.',
+          '구체적인 사실과 증거를 중심으로 작성할수록 인용 가능성이 높아집니다.',
+          '감정적 표현보다 법적 근거와 사실관계 중심으로 작성하는 게 효과적이에요.',
+          '보충서면은 분량보다 핵심 논점의 명확성이 더 중요합니다.',
+          '제출 전 사건번호와 당사자 정보가 정확한지 반드시 확인하세요.',
+        ]}
+      />
+    );
   }
 
   return (

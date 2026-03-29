@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle2, FileText, FileUp, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import NoticeDocumentConfirmModal from './NoticeDocumentConfirmModal';
+import OcrLoadingScreen from '@/app/appeal/_components/OcrLoadingScreen';
 
 const ACCEPTED_FILE_TYPES = '.pdf,.jpg,.jpeg,.png';
 
@@ -79,6 +80,7 @@ export default function UploadStartCard() {
   const [isDragging, setIsDragging] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [cardStep, setCardStep] = useState<'idle' | 'selected' | 'uploading'>('idle');
   const isCompleted = !!selectedFile;
   const caseNoFromQuery = searchParams.get('caseNo');
 
@@ -92,6 +94,7 @@ export default function UploadStartCard() {
     }
 
     setSelectedFile(file);
+    setCardStep('selected');
   }
 
   function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
@@ -110,6 +113,7 @@ export default function UploadStartCard() {
     }
 
     setSelectedFile(null);
+    setCardStep('idle');
 
     if (inputRef.current) {
       inputRef.current.value = '';
@@ -128,6 +132,7 @@ export default function UploadStartCard() {
     }
 
     setIsUploading(true);
+    setCardStep('uploading');
 
     try {
       const formData = new FormData();
@@ -153,11 +158,20 @@ export default function UploadStartCard() {
 
       router.push(`/appeal/${caseNo}/analysis`);
     } catch (error) {
+      setCardStep('selected');
       alert(error instanceof Error ? error.message : '처분서 업로드 중 문제가 발생했습니다.');
     } finally {
       setIsUploading(false);
       setIsConfirmModalOpen(false);
     }
+  }
+
+  if (cardStep === 'uploading') {
+    return (
+      <div className="flex h-[460px] flex-col rounded-3xl border border-first/12 bg-white items-center justify-center shadow-[0_10px_28px_rgba(15,15,112,0.06)]">
+        <OcrLoadingScreen />
+      </div>
+    );
   }
 
   return (

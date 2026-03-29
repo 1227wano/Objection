@@ -8,6 +8,7 @@ import { DocumentInput } from '@/components/ui/DocumentInput';
 import { Button } from '@/components/ui/button';
 import { apiClient } from '@/lib/api-client';
 import SectionHeader from '../../../_components/SectionHeader';
+import AnalysisLoadingScreen from '../../../_components/AnalysisLoadingScreen';
 
 const CURRENT_ANALYSIS_KEY = 'currentAnalysisNo';
 
@@ -68,39 +69,6 @@ async function pollUntilDone(analysisNo: string): Promise<void> {
 }
 
 type PageStep = 'form' | 'loading';
-
-// ── 로딩 화면 ──────────────────────────────────────────
-function AnalysisLoadingScreen() {
-  return (
-    <div className="flex w-full min-h-[60vh] items-center justify-center">
-      <style>{`
-        @keyframes orbPulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(0.88); }
-        }
-      `}</style>
-
-      <div className="flex flex-col items-center gap-8 w-full max-w-[480px] px-6">
-        <div
-          className="w-28 h-28 rounded-full flex items-center justify-center shadow-lg"
-          style={{
-            background: 'linear-gradient(135deg, #4F46E5 0%, #6366F1 50%, #818CF8 100%)',
-            animation: 'orbPulse 2s ease-in-out infinite',
-          }}
-        >
-          <span className="text-4xl select-none">⚖️</span>
-        </div>
-
-        <div className="text-center flex flex-col gap-2">
-          <h2 className="text-[22px] font-bold text-[#111827]">AI가 사건을 분석하고 있어요</h2>
-          <p className="text-sm text-[#6B7280]">
-            입력하신 사건 경위를 바탕으로 법리 분석 및 전략을 수립합니다.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ── 메인 페이지 ────────────────────────────────────────
 export default function CaseDetailsPage() {
@@ -177,7 +145,25 @@ export default function CaseDetailsPage() {
   };
 
   if (pageStep === 'loading') {
-    return <AnalysisLoadingScreen />;
+    return (
+      <AnalysisLoadingScreen
+        title="AI가 사건을 분석하고 있어요"
+        checklist={[
+          { text: '처분통지서 원본을 보관하고 있나요?', hint: '심판 중 언제든 제출 요구가 있을 수 있어요' },
+          { text: '처분을 안 날짜를 정확히 기억하나요?', hint: '청구 기간(90일) 계산의 기준이 됩니다' },
+          { text: '관련 사진·영수증 등 증거를 모아뒀나요?', hint: '자료가 많을수록 유리해요' },
+          { text: '처분 이후 시정 노력을 한 게 있나요?', hint: '자발적 개선 노력은 감경 사유가 됩니다' },
+          { text: '이전 행정 처분 기록이 있나요?', hint: '초범 여부 확인에 중요한 자료예요' },
+        ]}
+        tips={[
+          '행정심판은 행정소송보다 평균 3~4배 빠르게 결과가 나옵니다.',
+          '행정심판 인용률은 약 15~20% 수준이지만, 전문적 준비로 크게 높아집니다.',
+          '집행정지 신청을 하면 심판 결과 전까지 처분 효력을 멈출 수 있어요.',
+          '행정심판은 비용이 무료이며 변호사 없이도 직접 청구할 수 있습니다.',
+          '청구서 제출 후 위원회는 60일 이내에 재결을 내려야 합니다.',
+        ]}
+      />
+    );
   }
 
   return (

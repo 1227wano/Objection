@@ -21,7 +21,7 @@ export default function OcrLoadingScreen() {
   }, []);
 
   return (
-    <div className="flex w-full min-h-screen items-center justify-center">
+    <div className="flex w-full h-full items-center justify-center">
       <style>{`
         @keyframes pageFloat {
           0%, 100% { transform: translateY(0px) rotate(-2deg); }
