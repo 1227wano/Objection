@@ -1,11 +1,17 @@
 'use client';
 
-import { useEffect, useRef, useState, type ChangeEvent, type DragEvent, type MouseEvent } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import {
+  useRef,
+  useState,
+  type ChangeEvent,
+  type DragEvent,
+  type MouseEvent,
+} from 'react';
+import { useRouter } from 'next/navigation';
 import { CheckCircle2, FileText, FileUp, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import NoticeDocumentConfirmModal from './NoticeDocumentConfirmModal';
-import OcrLoadingScreen from '@/app/appeal/_components/OcrLoadingScreen';
+import OcrLoadingModal from './OcrLoadingModal';
 
 const ACCEPTED_FILE_TYPES = '.pdf,.jpg,.jpeg,.png';
 
@@ -27,10 +33,6 @@ function persistGovDocNo(caseNo: string, documentType: string, govDocNo: string)
   window.localStorage.setItem(key, govDocNo);
 }
 
-function resolveCaseNo(searchCaseNo: string | null) {
-  return searchCaseNo;
-}
-
 interface SelectedFileSummaryProps {
   fileName: string;
   fileSizeLabel: string;
@@ -44,6 +46,10 @@ interface UploadNoticeDocumentResponse {
     govDocNo?: number;
     documentType?: string;
   } | null;
+}
+
+interface UploadStartCardProps {
+  caseNo: string;
 }
 
 function SelectedFileSummary({ fileName, fileSizeLabel, onClear }: SelectedFileSummaryProps) {
@@ -72,9 +78,8 @@ function SelectedFileSummary({ fileName, fileSizeLabel, onClear }: SelectedFileS
   );
 }
 
-export default function UploadStartCard() {
+export default function UploadStartCard({ caseNo }: UploadStartCardProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -82,11 +87,6 @@ export default function UploadStartCard() {
   const [isUploading, setIsUploading] = useState(false);
   const [cardStep, setCardStep] = useState<'idle' | 'selected' | 'uploading'>('idle');
   const isCompleted = !!selectedFile;
-  const caseNoFromQuery = searchParams.get('caseNo');
-
-  useEffect(() => {
-    // caseNo is now purely from URL search params; no localStorage persist needed
-  }, [caseNoFromQuery]);
 
   function handleSelectFile(file: File | null) {
     if (!file || isUploading) {
@@ -125,14 +125,9 @@ export default function UploadStartCard() {
       return;
     }
 
-    const caseNo = resolveCaseNo(caseNoFromQuery);
-    if (!caseNo) {
-      alert('사건 번호를 찾지 못했습니다. 새 케이스를 먼저 생성한 뒤 다시 시도해 주세요.');
-      return;
-    }
-
     setIsUploading(true);
     setCardStep('uploading');
+    setIsConfirmModalOpen(false);
 
     try {
       const formData = new FormData();
@@ -145,7 +140,9 @@ export default function UploadStartCard() {
         body: formData,
         credentials: 'include',
       });
-      const result = (await response.json().catch(() => null)) as UploadNoticeDocumentResponse | null;
+      const result = (await response
+        .json()
+        .catch(() => null)) as UploadNoticeDocumentResponse | null;
 
       if (!response.ok) {
         throw new Error(result?.message || '처분서 업로드에 실패했습니다. 다시 시도해 주세요.');
@@ -156,22 +153,13 @@ export default function UploadStartCard() {
         persistGovDocNo(caseNo, 'NOTICE', nextGovDocNo);
       }
 
-      router.push(`/appeal/${caseNo}/analysis`);
+      router.push(`/appeal/${caseNo}/survey?source=upload`);
     } catch (error) {
       setCardStep('selected');
       alert(error instanceof Error ? error.message : '처분서 업로드 중 문제가 발생했습니다.');
     } finally {
       setIsUploading(false);
-      setIsConfirmModalOpen(false);
     }
-  }
-
-  if (cardStep === 'uploading') {
-    return (
-      <div className="flex h-[460px] flex-col rounded-3xl border border-first/12 bg-white items-center justify-center shadow-[0_10px_28px_rgba(15,15,112,0.06)]">
-        <OcrLoadingScreen />
-      </div>
-    );
   }
 
   return (
@@ -295,7 +283,9 @@ export default function UploadStartCard() {
         </div>
 
         {!isCompleted ? (
-          <p className="mt-4 min-h-[28px] text-sm font-medium text-first/70">선택한 파일이 없습니다</p>
+          <p className="mt-4 min-h-[28px] text-sm font-medium text-first/70">
+            선택한 파일이 없습니다
+          </p>
         ) : null}
       </div>
 
@@ -321,6 +311,8 @@ export default function UploadStartCard() {
           isSubmitting={isUploading}
         />
       ) : null}
+
+      {cardStep === 'uploading' ? <OcrLoadingModal /> : null}
     </div>
   );
 }

@@ -49,10 +49,6 @@ function getCaseTitle(item: CaseListItem) {
 }
 
 function getCaseHref(statusHref: string, caseNo: number) {
-  const standalone = ['/appeal/start', '/appeal/survey', '/appeal/documents'];
-  if (standalone.some((p) => statusHref.startsWith(p))) {
-    return `${statusHref}?caseNo=${caseNo}`;
-  }
   return statusHref.replace('/appeal/', `/appeal/${caseNo}/`);
 }
 
@@ -81,7 +77,7 @@ export default function DashboardHome({ cases }: DashboardHomeProps) {
       const caseNo = String(result.data.caseNo);
 
       startTransition(() => {
-        router.push(`/appeal/start?caseNo=${caseNo}`);
+        router.push(`/appeal/${caseNo}/start`);
       });
     } catch (error) {
       alert(error instanceof Error ? error.message : '새 케이스 생성 중 문제가 발생했습니다.');
