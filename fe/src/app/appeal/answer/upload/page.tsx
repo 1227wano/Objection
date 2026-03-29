@@ -62,8 +62,9 @@ export default function AnswerAttachPage() {
 
       const result = await res.json();
       if (result.data?.govDocNo) {
-        window.sessionStorage.setItem('currentGovDocNo', String(result.data.govDocNo));
-        window.localStorage.setItem('currentGovDocNo', String(result.data.govDocNo));
+        const key = `govDocNo_${caseNo}_ANSWER`;
+        window.sessionStorage.setItem(key, String(result.data.govDocNo));
+        window.localStorage.setItem(key, String(result.data.govDocNo));
       }
 
       router.push('/appeal/answer/report');

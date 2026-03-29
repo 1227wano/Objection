@@ -5,16 +5,18 @@ import type { CaseApiResponse, AnalysisData, Eligibility } from '../_types/analy
 import { apiClient } from '@/lib/api-client';
 
 const CURRENT_CASE_KEY = 'currentCaseNo';
-const CURRENT_GOV_DOC_KEY = 'currentNoticeGovDocNo';
+
+function resolveGovDocNo(caseNo: string, documentType: string): string | null {
+  const key = `govDocNo_${caseNo}_${documentType}`;
+  return window.sessionStorage.getItem(key) || window.localStorage.getItem(key);
+}
 
 function resolveKeys(): { caseNo: string | null; govDocNo: string | null } {
   if (typeof window === 'undefined') return { caseNo: null, govDocNo: null };
   const caseNo =
     window.sessionStorage.getItem(CURRENT_CASE_KEY) ||
     window.localStorage.getItem(CURRENT_CASE_KEY);
-  const govDocNo =
-    window.sessionStorage.getItem(CURRENT_GOV_DOC_KEY) ||
-    window.localStorage.getItem(CURRENT_GOV_DOC_KEY);
+  const govDocNo = caseNo ? resolveGovDocNo(caseNo, 'NOTICE') : null;
   return { caseNo, govDocNo };
 }
 

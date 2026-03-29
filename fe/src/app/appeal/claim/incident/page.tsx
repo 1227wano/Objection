@@ -11,7 +11,6 @@ import SectionHeader from '../../_components/SectionHeader';
 
 const CURRENT_CASE_KEY = 'currentCaseNo';
 const CURRENT_ANALYSIS_KEY = 'currentAnalysisNo';
-const CURRENT_NOTICE_DOC_KEY = 'currentNoticeGovDocNo';
 
 function resolveCaseNo(): string | null {
   if (typeof window === 'undefined') return null;
@@ -22,13 +21,8 @@ function resolveCaseNo(): string | null {
 
 function resolveGovDocNo(caseNo: string): string | null {
   if (typeof window === 'undefined') return null;
-  const perCaseKey = `${CURRENT_NOTICE_DOC_KEY}:${caseNo}`;
-  return (
-    window.sessionStorage.getItem(perCaseKey) ||
-    window.localStorage.getItem(perCaseKey) ||
-    window.sessionStorage.getItem(CURRENT_NOTICE_DOC_KEY) ||
-    window.localStorage.getItem(CURRENT_NOTICE_DOC_KEY)
-  );
+  const key = `govDocNo_${caseNo}_NOTICE`;
+  return window.sessionStorage.getItem(key) || window.localStorage.getItem(key);
 }
 
 function persistAnalysisNo(analysisNo: string) {

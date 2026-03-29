@@ -9,7 +9,6 @@ import { apiClient } from '@/lib/api-client';
 import LoadingSpinner from '../../_components/LoadingSpinner';
 
 const CURRENT_CASE_KEY = 'currentCaseNo';
-const CURRENT_GOV_DOC_KEY = 'currentGovDocNo';
 
 function resolveCaseNo(): string | null {
   if (typeof window === 'undefined') return null;
@@ -18,12 +17,10 @@ function resolveCaseNo(): string | null {
   );
 }
 
-function resolveGovDocNo(): string | null {
+function resolveGovDocNo(caseNo: string): string | null {
   if (typeof window === 'undefined') return null;
-  return (
-    window.sessionStorage.getItem(CURRENT_GOV_DOC_KEY) ||
-    window.localStorage.getItem(CURRENT_GOV_DOC_KEY)
-  );
+  const key = `govDocNo_${caseNo}_ANSWER`;
+  return window.sessionStorage.getItem(key) || window.localStorage.getItem(key);
 }
 
 interface GovDocumentData {
@@ -49,7 +46,7 @@ export default function RebuttalAnalysisPage() {
 
   useEffect(() => {
     const caseNo = resolveCaseNo();
-    const govDocNo = resolveGovDocNo();
+    const govDocNo = caseNo ? resolveGovDocNo(caseNo) : null;
 
     if (!caseNo || !govDocNo) {
       setError('사건 번호 또는 문서 번호를 찾을 수 없습니다.');

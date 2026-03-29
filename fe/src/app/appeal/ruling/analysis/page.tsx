@@ -8,7 +8,6 @@ import LoadingSpinner from '../../_components/LoadingSpinner';
 import { apiClient } from '@/lib/api-client';
 
 const CURRENT_CASE_KEY = 'currentCaseNo';
-const CURRENT_DECISION_DOC_KEY = 'currentDecisionGovDocNo';
 
 interface GovDocumentResponse {
   status: string;
@@ -27,9 +26,10 @@ export default function RulingAnalysisPage() {
     const caseNo =
       window.sessionStorage.getItem(CURRENT_CASE_KEY) ||
       window.localStorage.getItem(CURRENT_CASE_KEY);
-    const govDocNo =
-      window.sessionStorage.getItem(CURRENT_DECISION_DOC_KEY) ||
-      window.localStorage.getItem(CURRENT_DECISION_DOC_KEY);
+    const govDocNo = caseNo
+      ? window.sessionStorage.getItem(`govDocNo_${caseNo}_DECISION`) ||
+        window.localStorage.getItem(`govDocNo_${caseNo}_DECISION`)
+      : null;
 
     if (!caseNo || !govDocNo) {
       setError('사건 번호 또는 문서 번호를 찾을 수 없습니다.');

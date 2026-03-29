@@ -62,8 +62,9 @@ export default function RulingUploadPage() {
 
       const result = await res.json();
       if (result.data?.govDocNo) {
-        window.sessionStorage.setItem('currentDecisionGovDocNo', String(result.data.govDocNo));
-        window.localStorage.setItem('currentDecisionGovDocNo', String(result.data.govDocNo));
+        const key = `govDocNo_${caseNo}_DECISION`;
+        window.sessionStorage.setItem(key, String(result.data.govDocNo));
+        window.localStorage.setItem(key, String(result.data.govDocNo));
       }
 
       router.push('/appeal/ruling/analysis');

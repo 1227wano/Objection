@@ -22,7 +22,6 @@ import {
 import { Button } from '@/components/ui/button';
 
 const CURRENT_CASE_KEY = 'currentCaseNo';
-const CURRENT_NOTICE_DOC_KEY = 'currentNoticeGovDocNo';
 
 const CLAIMANT_OPTIONS = [
   {
@@ -93,17 +92,10 @@ function resolveStoredValue(key: string) {
   return window.sessionStorage.getItem(key) || window.localStorage.getItem(key);
 }
 
-function resolveNoticeGovDocNo(caseNo: string | null) {
-  if (!caseNo || typeof window === 'undefined') {
-    return resolveStoredValue(CURRENT_NOTICE_DOC_KEY);
-  }
-
-  const storageKey = `${CURRENT_NOTICE_DOC_KEY}:${caseNo}`;
-  return (
-    window.sessionStorage.getItem(storageKey) ||
-    window.localStorage.getItem(storageKey) ||
-    resolveStoredValue(CURRENT_NOTICE_DOC_KEY)
-  );
+function resolveGovDocNo(caseNo: string | null, documentType: string): string | null {
+  if (!caseNo || typeof window === 'undefined') return null;
+  const key = `govDocNo_${caseNo}_${documentType}`;
+  return window.sessionStorage.getItem(key) || window.localStorage.getItem(key);
 }
 
 function normalizeActionType(value: string | undefined) {
@@ -264,7 +256,7 @@ export default function AppealSurveyPage() {
 
   useEffect(() => {
     const caseNo = searchParams.get('caseNo') || resolveStoredValue(CURRENT_CASE_KEY);
-    const govDocNo = resolveNoticeGovDocNo(caseNo);
+    const govDocNo = resolveGovDocNo(caseNo, 'NOTICE');
 
     if (!caseNo || !govDocNo) {
       return;

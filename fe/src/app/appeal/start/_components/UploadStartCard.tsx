@@ -8,7 +8,6 @@ import NoticeDocumentConfirmModal from './NoticeDocumentConfirmModal';
 
 const ACCEPTED_FILE_TYPES = '.pdf,.jpg,.jpeg,.png';
 const CURRENT_CASE_KEY = 'currentCaseNo';
-const CURRENT_NOTICE_DOC_KEY = 'currentNoticeGovDocNo';
 
 function formatFileSize(size: number) {
   if (size >= 1024 * 1024) {
@@ -31,23 +30,10 @@ function persistCaseNo(caseNo: string | null) {
   window.localStorage.setItem(CURRENT_CASE_KEY, caseNo);
 }
 
-function persistNoticeGovDocNo(govDocNo: string | null) {
-  if (typeof window === 'undefined' || !govDocNo) {
-    return;
-  }
-
-  window.sessionStorage.setItem(CURRENT_NOTICE_DOC_KEY, govDocNo);
-  window.localStorage.setItem(CURRENT_NOTICE_DOC_KEY, govDocNo);
-}
-
-function persistNoticeGovDocNoForCase(caseNo: string, govDocNo: string | null) {
-  if (typeof window === 'undefined' || !govDocNo) {
-    return;
-  }
-
-  const storageKey = `${CURRENT_NOTICE_DOC_KEY}:${caseNo}`;
-  window.sessionStorage.setItem(storageKey, govDocNo);
-  window.localStorage.setItem(storageKey, govDocNo);
+function persistGovDocNo(caseNo: string, documentType: string, govDocNo: string) {
+  const key = `govDocNo_${caseNo}_${documentType}`;
+  window.sessionStorage.setItem(key, govDocNo);
+  window.localStorage.setItem(key, govDocNo);
 }
 
 function resolveCaseNo(searchCaseNo: string | null) {
@@ -180,8 +166,7 @@ export default function UploadStartCard() {
 
       if (result?.data?.govDocNo) {
         const nextGovDocNo = String(result.data.govDocNo);
-        persistNoticeGovDocNo(nextGovDocNo);
-        persistNoticeGovDocNoForCase(caseNo, nextGovDocNo);
+        persistGovDocNo(caseNo, 'NOTICE', nextGovDocNo);
       }
 
       router.push('/appeal/survey?source=upload');
