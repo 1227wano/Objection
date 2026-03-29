@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import NoticeDocumentConfirmModal from './NoticeDocumentConfirmModal';
 
 const ACCEPTED_FILE_TYPES = '.pdf,.jpg,.jpeg,.png';
-const CURRENT_CASE_KEY = 'currentCaseNo';
 
 function formatFileSize(size: number) {
   if (size >= 1024 * 1024) {
@@ -21,15 +20,6 @@ function getSourceType(file: File) {
   return file.type.startsWith('image/') ? 'IMAGE' : 'FILE';
 }
 
-function persistCaseNo(caseNo: string | null) {
-  if (typeof window === 'undefined' || !caseNo) {
-    return;
-  }
-
-  window.sessionStorage.setItem(CURRENT_CASE_KEY, caseNo);
-  window.localStorage.setItem(CURRENT_CASE_KEY, caseNo);
-}
-
 function persistGovDocNo(caseNo: string, documentType: string, govDocNo: string) {
   const key = `govDocNo_${caseNo}_${documentType}`;
   window.sessionStorage.setItem(key, govDocNo);
@@ -37,15 +27,7 @@ function persistGovDocNo(caseNo: string, documentType: string, govDocNo: string)
 }
 
 function resolveCaseNo(searchCaseNo: string | null) {
-  if (typeof window === 'undefined') {
-    return searchCaseNo;
-  }
-
-  return (
-    searchCaseNo ||
-    window.sessionStorage.getItem(CURRENT_CASE_KEY) ||
-    window.localStorage.getItem(CURRENT_CASE_KEY)
-  );
+  return searchCaseNo;
 }
 
 interface SelectedFileSummaryProps {
@@ -101,7 +83,7 @@ export default function UploadStartCard() {
   const caseNoFromQuery = searchParams.get('caseNo');
 
   useEffect(() => {
-    persistCaseNo(caseNoFromQuery);
+    // caseNo is now purely from URL search params; no localStorage persist needed
   }, [caseNoFromQuery]);
 
   function handleSelectFile(file: File | null) {
@@ -169,7 +151,7 @@ export default function UploadStartCard() {
         persistGovDocNo(caseNo, 'NOTICE', nextGovDocNo);
       }
 
-      router.push('/appeal/survey?source=upload');
+      router.push(`/appeal/${caseNo}/analysis`);
     } catch (error) {
       alert(error instanceof Error ? error.message : '처분서 업로드 중 문제가 발생했습니다.');
     } finally {
