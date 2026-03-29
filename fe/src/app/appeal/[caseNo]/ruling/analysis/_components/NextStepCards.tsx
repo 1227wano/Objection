@@ -20,8 +20,7 @@ const CARDS: NextStepCard[] = [
       },
       {
         label: '분할 납부 검토',
-        description:
-          '과징금일 경우 관할 관청에 분할 납부 또는 기한 연장 신청 가능 여부 문의',
+        description: '과징금일 경우 관할 관청에 분할 납부 또는 기한 연장 신청 가능 여부 문의',
       },
       {
         label: '절차 종료',
@@ -31,8 +30,7 @@ const CARDS: NextStepCard[] = [
   },
   {
     title: '결과 불복 및 행정소송 준비',
-    subtitle:
-      '재결 결과에 승복하기 어렵다면 관할 행정법원에 정식으로 소송을 제기할 수 있습니다.',
+    subtitle: '재결 결과에 승복하기 어렵다면 관할 행정법원에 정식으로 소송을 제기할 수 있습니다.',
     items: [
       {
         label: '기한 엄수 (중요)',
@@ -52,34 +50,59 @@ const CARDS: NextStepCard[] = [
   },
 ];
 
+const CARD_STYLES = [
+  {
+    wrapper: 'bg-blue-50 border border-blue-200',
+    titleColor: 'text-blue-900',
+    subtitleColor: 'text-blue-700',
+    dot: 'bg-blue-400',
+    labelColor: 'text-blue-900',
+    descColor: 'text-blue-700',
+    badge: 'bg-blue-500 text-white',
+  },
+  {
+    wrapper: 'bg-amber-50 border border-amber-200',
+    titleColor: 'text-amber-900',
+    subtitleColor: 'text-amber-700',
+    dot: 'bg-amber-400',
+    labelColor: 'text-amber-900',
+    descColor: 'text-amber-700',
+    badge: 'bg-amber-500 text-white',
+  },
+];
+
 export default function NextStepCards() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {CARDS.map((card, idx) => (
-        <div
-          key={idx}
-          className="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col gap-4"
-        >
-          <div className="flex flex-col gap-1.5">
-            <h3 className="text-lg font-bold text-gray-900">{card.title}</h3>
-            <p className="text-sm text-gray-500 leading-relaxed">{card.subtitle}</p>
-          </div>
+      {CARDS.map((card, idx) => {
+        const s = CARD_STYLES[idx] ?? CARD_STYLES[1];
+        return (
+          <div
+            key={idx}
+            className={`${s.wrapper} rounded-2xl p-6 flex flex-col gap-4 shadow-sm`}
+          >
+            <div className="flex flex-col gap-2">
+              <span className={`self-start text-xs font-bold px-2.5 py-1 rounded-full ${s.badge}`}>
+                {idx === 0 ? '수용' : '불복'}
+              </span>
+              <h3 className={`text-base font-bold leading-snug ${s.titleColor}`}>{card.title}</h3>
+              <p className={`text-sm leading-relaxed ${s.subtitleColor}`}>{card.subtitle}</p>
+            </div>
 
-          <ul className="flex flex-col gap-4 mt-2">
-            {card.items.map((item, itemIdx) => (
-              <li key={itemIdx} className="flex items-start gap-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2 shrink-0" />
-                <div>
-                  <p className="text-sm font-semibold text-gray-800">{item.label}</p>
-                  <p className="text-sm text-gray-500 leading-relaxed mt-0.5">
-                    {item.description}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+            <ul className="flex flex-col gap-3 mt-1">
+              {card.items.map((item, itemIdx) => (
+                <li key={itemIdx} className="flex items-start gap-3">
+                  <span className={`w-2 h-2 rounded-full ${s.dot} mt-1.5 shrink-0`} />
+                  <div>
+                    <p className={`text-sm font-semibold ${s.labelColor}`}>{item.label}</p>
+                    <p className={`text-sm leading-relaxed mt-0.5 ${s.descColor}`}>{item.description}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
     </div>
   );
 }

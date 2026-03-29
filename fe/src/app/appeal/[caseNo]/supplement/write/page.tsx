@@ -21,13 +21,16 @@ function resolveAnalysisNo(): string | null {
 }
 
 function parseSubmissionContent(text: string): SubmissionSection[] {
-  const lines = text.split('\n');
+  // \\n(이스케이프 문자열)과 실제 \n 둘 다 처리
+  const normalized = text.replace(/\\n/g, '\n');
+  const lines = normalized.split('\n');
   const sections: SubmissionSection[] = [];
   let currentTitle = '';
   let currentLines: string[] = [];
 
   for (const line of lines) {
-    if (/^\d+\.\s/.test(line)) {
+    // "1. " 또는 "1." 으로 시작하는 줄을 섹션 제목으로 인식 (너무 긴 줄은 본문으로 처리)
+    if (/^\d+\.\s*\S/.test(line) && line.length < 60) {
       if (currentTitle) {
         sections.push({ title: currentTitle, content: currentLines.join('\n').trim() });
       }
@@ -42,7 +45,7 @@ function parseSubmissionContent(text: string): SubmissionSection[] {
     sections.push({ title: currentTitle, content: currentLines.join('\n').trim() });
   }
 
-  return sections.length > 0 ? sections : [{ title: '본문', content: text }];
+  return sections.length > 0 ? sections : [{ title: '본문', content: normalized }];
 }
 
 const EMPTY_DEFAULTS: SupplementDocumentData = {
@@ -64,30 +67,38 @@ export default function SupplementWritePage() {
   const router = useRouter();
   const { caseNo } = useParams<{ caseNo: string }>();
   const methods = useForm<SupplementDocumentData>({ defaultValues: EMPTY_DEFAULTS });
+  const resetForm = methods.reset;
 
   useEffect(() => {
     const analysisNo = resolveAnalysisNo();
     if (!analysisNo) return;
 
-    apiClient
-      .get<{
+    Promise.all([
+      apiClient.get<{
         status: string;
-        data: {
-          contentJson: {
-            submissionContent: string;
-          };
-        };
-      }>(`/analysis/${analysisNo}/documents`)
-      .then((res) => {
-        if (res.status === 'SUCCESS' && res.data?.contentJson?.submissionContent) {
-          methods.reset({
-            ...EMPTY_DEFAULTS,
-            submissionContent: parseSubmissionContent(res.data.contentJson.submissionContent),
-          });
-        }
+        data: { contentJson: { submissionContent: string } };
+      }>(`/analysis/${analysisNo}/documents`),
+      apiClient.get<{
+        status: string;
+        data: { evidenceId: number; evidenceType: string; submitted: boolean }[];
+      }>(`/analysis/${analysisNo}/evidence`),
+    ])
+      .then(([docRes, evidenceRes]) => {
+        const rawContent = docRes.data?.contentJson?.submissionContent;
+        const submissionContent =
+          docRes.status === 'SUCCESS' && rawContent
+            ? parseSubmissionContent(rawContent)
+            : EMPTY_DEFAULTS.submissionContent;
+
+        const attachments =
+          evidenceRes.status === 'SUCCESS' && Array.isArray(evidenceRes.data)
+            ? evidenceRes.data.filter((e) => e.submitted).map((e) => e.evidenceType)
+            : [];
+
+        resetForm({ ...EMPTY_DEFAULTS, submissionContent, attachments });
       })
       .catch(() => {});
-  }, [methods]);
+  }, [resetForm]);
 
   const onSubmit = async (data: SupplementDocumentData) => {
     const analysisNo = resolveAnalysisNo();

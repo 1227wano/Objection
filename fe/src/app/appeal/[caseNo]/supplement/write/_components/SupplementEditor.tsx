@@ -1,21 +1,19 @@
 'use client';
 
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { EditableInput, EditableTextarea } from '@/app/appeal/_components/FormInputs';
 import { SupplementDocumentData } from '../_types/document';
 
 export default function SupplementEditor() {
-  const { watch } = useFormContext<SupplementDocumentData>();
+  const { control } = useFormContext<SupplementDocumentData>();
 
-  const filingDate = watch('filingDate') || '';
-  const submitterName = watch('submitterName') || '';
-  const committee = watch('committee') || '';
-  const sections = watch('submissionContent') || [];
-  const attachments = watch('attachments') || [];
+  const filingDate = useWatch({ control, name: 'filingDate' }) ?? '';
+  const committee = useWatch({ control, name: 'committee' }) ?? '';
+  const sections = useWatch({ control, name: 'submissionContent' }) ?? [];
+  const attachments = useWatch({ control, name: 'attachments' }) ?? [];
 
   const dateParts = filingDate.split('.');
   const hasDate = dateParts.length >= 3;
-
   return (
     <div className="bg-white shadow-sm border border-gray-200 rounded-lg p-10 md:p-12 max-w-[850px] mx-auto text-black font-medium leading-relaxed">
       {/* 제목 */}
@@ -132,13 +130,14 @@ export default function SupplementEditor() {
         ) : (
           <p className="tracking-widest">년 월 일</p>
         )}
-        <p className="text-base">
-          <span className="tracking-widest mr-4">제출인</span>
-          <span className="inline-block border-b border-black w-32 text-center pb-0.5 relative top-1">
-            {submitterName}
-          </span>
-          <span className="ml-2 text-sm tracking-tighter text-gray-600">(서명 또는 인)</span>
-        </p>
+        <div className="text-base flex items-center gap-2">
+          <span className="tracking-widest">제출인</span>
+          <EditableInput
+            name="submitterName"
+            className="border-b border-black w-32 text-center pb-0.5"
+          />
+          <span className="text-sm tracking-tighter text-gray-600">(서명 또는 인)</span>
+        </div>
       </div>
 
       {/* 수신처 */}

@@ -12,6 +12,29 @@ import RightSidebar from './_components/RightSidebar';
 
 const CURRENT_ANALYSIS_KEY = 'currentAnalysisNo';
 
+const POLL_INTERVAL_MS = 1500;
+const POLL_MAX_ATTEMPTS = 120; // 최대 3분 (1.5초 × 120)
+
+interface AnalysisStatusResponse {
+  status: string;
+  message: string;
+  data: {
+    precedentResult: unknown;
+    [key: string]: unknown;
+  } | null;
+}
+
+async function pollUntilDone(analysisNo: string): Promise<void> {
+  for (let attempt = 0; attempt < POLL_MAX_ATTEMPTS; attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+    const res = await apiClient.get<AnalysisStatusResponse>(`/analysis/${analysisNo}`);
+    if (res.data?.precedentResult !== null && res.data?.precedentResult !== undefined) {
+      return;
+    }
+  }
+  throw new Error('AI 분석 시간이 초과되었습니다. 잠시 후 다시 시도해 주세요.');
+}
+
 function resolveGovDocNo(caseNo: string): string | null {
   if (typeof window === 'undefined') return null;
   const key = `govDocNo_${caseNo}_NOTICE`;
@@ -118,17 +141,22 @@ export default function SupplementCasePage() {
       // 4) AI 분석 요청 (보충서면 단계)
       const result = await apiClient.post<AnalysisResponse>(`/cases/${caseNo}/analysis`, {
         govDocNo: Number(govDocNo),
-        caseStage: 'REPLY',
+        caseStage: 'APPEAL',
       });
 
       if (result.status !== 'SUCCESS' || !result.data?.analysisNo) {
         throw new Error(result.message || 'AI 분석 요청에 실패했습니다.');
       }
 
-      // 5) analysisNo 저장
-      persistAnalysisNo(String(result.data.analysisNo));
+      const analysisNo = String(result.data.analysisNo);
 
-      // 6) 보충서면 분석 결과 페이지로 이동
+      // 5) analysisNo 저장
+      persistAnalysisNo(analysisNo);
+
+      // 6) 분석 완료까지 폴링 대기 (precedentResult가 null이 아닐 때까지)
+      await pollUntilDone(analysisNo);
+
+      // 7) 보충서면 분석 결과 페이지로 이동
       router.push(`/appeal/${caseNo}/supplement/report`);
     } catch (error) {
       console.error('보충 경위서 저장 또는 AI 분석 실패:', error);

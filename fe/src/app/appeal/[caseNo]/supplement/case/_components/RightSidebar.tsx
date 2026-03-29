@@ -6,8 +6,6 @@ import RightSidebarFrame from '@/components/layout/RightSidebarFrame';
 import { SidebarCard } from '@/components/ui/SidebarCard';
 import { apiClient } from '@/lib/api-client';
 
-const CURRENT_GOV_DOC_KEY = 'currentGovDocNo';
-
 interface GovDocumentData {
   summary: string | null;
 }
@@ -24,8 +22,8 @@ export default function RightSidebar() {
 
   useEffect(() => {
     const govDocNo =
-      window.sessionStorage.getItem(CURRENT_GOV_DOC_KEY) ||
-      window.localStorage.getItem(CURRENT_GOV_DOC_KEY);
+      window.sessionStorage.getItem(`govDocNo_${caseNo}_ANSWER`) ||
+      window.localStorage.getItem(`govDocNo_${caseNo}_ANSWER`);
 
     if (!caseNo || !govDocNo) return;
 

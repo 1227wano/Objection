@@ -4,14 +4,13 @@ import { SidebarCard } from '@/components/ui/SidebarCard';
 import ChecklistCard from '../../../claim/write/_components/ChecklistCard';
 import IssuePointCard from '../../../claim/write/_components/IssuePointCard';
 import RightSidebarFrame from '@/components/layout/RightSidebarFrame';
-import { MOCK_SUPPLEMENT_ISSUES } from '../_mock/mockDocumentData';
 
 const SUPPLEMENT_CHECKLIST = [
   {
     id: 'case-info',
     label: '사건번호 일치',
     description: '사건번호가 청구서에 기재한 번호와 동일한가요?',
-    defaultChecked: true,
+    defaultChecked: false,
   },
   {
     id: 'rebuttal-complete',
@@ -38,22 +37,6 @@ export default function RightSidebar() {
     <RightSidebarFrame>
       {/* 보충서면용 체크리스트 */}
       <ChecklistCard title="보충서면 제출 전 필수 확인" items={SUPPLEMENT_CHECKLIST} />
-
-      {/* AI 주요 검토 쟁점 */}
-      <SidebarCard title="AI 주요 검토 쟁점">
-        <div className="flex flex-col gap-3">
-          {MOCK_SUPPLEMENT_ISSUES.map((issue, idx) => (
-            <IssuePointCard key={idx} issue={issue} />
-          ))}
-        </div>
-      </SidebarCard>
-
-      {/* 보충 경위서 보기 */}
-      <SidebarCard>
-        <Button asChild variant="outline" className="w-full text-sm">
-          <Link href="/appeal/supplement/case">내가 작성한 보충 경위서 보기</Link>
-        </Button>
-      </SidebarCard>
     </RightSidebarFrame>
   );
 }

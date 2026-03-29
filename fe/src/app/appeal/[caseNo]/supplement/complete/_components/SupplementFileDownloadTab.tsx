@@ -2,45 +2,31 @@
 
 import { useState } from 'react';
 import { Download, FileText } from 'lucide-react';
-import type { ContentJson, PersonalInfo, RepresentativeInfo } from '../../_store/useDocumentStore';
+import { SupplementDocumentData } from '../../write/_types/document';
 
-interface DocumentData {
-  contentJson: ContentJson;
-  personalInfo: PersonalInfo | null;
-  representative: RepresentativeInfo | null;
-  respondent: string;
-  appealCommittee: string;
-  dispositionKnownDate: string;
-  evidenceList: string[];
-  grievanceNotified: boolean;
-  publicDefenderRequest: boolean;
-  oralHearingRequest: boolean;
-  filingDate: string;
+interface Props {
+  documentData: SupplementDocumentData;
 }
 
-interface FileDownloadTabProps {
-  documentData?: DocumentData;
-}
-
-export default function FileDownloadTab({ documentData }: FileDownloadTabProps) {
+export default function SupplementFileDownloadTab({ documentData }: Props) {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handlePdfDownload = async () => {
-    if (!documentData) return;
+    if (!documentData?.submissionContent?.length) return;
     setIsGenerating(true);
     try {
       const { pdf } = await import('@react-pdf/renderer');
-      const { default: AppealClaimPdf } = await import('./AppealClaimPdf');
+      const { default: SupplementPdf } = await import('./SupplementPdf');
       const React = (await import('react')).default;
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const blob = await pdf(
-        React.createElement(AppealClaimPdf, { data: documentData }) as any,
+        React.createElement(SupplementPdf, { data: documentData }) as any,
       ).toBlob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = '행정심판_청구서.pdf';
+      a.download = '보충서면.pdf';
       a.click();
       URL.revokeObjectURL(url);
     } catch (error) {
@@ -58,7 +44,7 @@ export default function FileDownloadTab({ documentData }: FileDownloadTabProps) 
           <FileText className="w-6 h-6 text-indigo-600" />
         </div>
         <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-bold text-gray-900">청구서 PDF 다운로드</h2>
+          <h2 className="text-xl font-bold text-gray-900">보충서면 PDF 다운로드</h2>
           <p className="text-sm text-gray-500">
             인쇄하여 등기 우편으로 제출하거나 온라인 첨부파일로 활용하실 수 있습니다.
           </p>
@@ -67,7 +53,7 @@ export default function FileDownloadTab({ documentData }: FileDownloadTabProps) 
       <button
         type="button"
         onClick={handlePdfDownload}
-        disabled={isGenerating || !documentData}
+        disabled={isGenerating || !documentData?.submissionContent?.length}
         className="w-full sm:w-auto px-6 h-12 rounded-[10px] text-white text-[15px] font-semibold transition-colors disabled:opacity-60 flex items-center justify-center gap-2 shrink-0"
         style={{ background: '#1E1B4B' }}
       >
