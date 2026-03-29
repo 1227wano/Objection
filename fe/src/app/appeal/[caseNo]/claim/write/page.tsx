@@ -11,7 +11,7 @@ import SavingModal from './_components/SavingModal';
 import { DocumentData } from './_types/document';
 import { apiClient } from '@/lib/api-client';
 import { useDocumentStore } from '../_store/useDocumentStore';
-import { AnalysisApiResponse } from '../report/types';
+
 
 const CURRENT_ANALYSIS_KEY = 'currentAnalysisNo';
 
@@ -70,7 +70,7 @@ export default function WritePage() {
   useEffect(() => {
     const loadDocument = async () => {
       try {
-        const [res, analysisRes] = await Promise.all([
+        const [res, caseRes] = await Promise.all([
           apiClient.get<{
             status: string;
             data: {
@@ -84,7 +84,13 @@ export default function WritePage() {
               };
             };
           }>(`/analysis/${analysisNo}/documents`),
-          apiClient.get<AnalysisApiResponse>(`/analysis/${analysisNo}`),
+          apiClient.get<{
+            status: string;
+            data: {
+              awareDate: string | null;
+              disposalDate: string | null;
+            };
+          }>(`/cases/${caseNo}`),
         ]);
 
         if (res.status === 'SUCCESS' && res.data?.contentJson) {
@@ -96,7 +102,8 @@ export default function WritePage() {
             grievanceContent,
             grievanceNotified,
           } = res.data.contentJson;
-          const awareDate = analysisRes.data?.awareDate ?? '';
+          // cases API에서 awareDate 읽기 (처분이 있음을 안 날)
+          const awareDate = caseRes.data?.awareDate ?? '';
           const today = new Date();
           const todayFormatted = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}.`;
           methods.reset({

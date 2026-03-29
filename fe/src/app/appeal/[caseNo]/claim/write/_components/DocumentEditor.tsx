@@ -1,18 +1,15 @@
 'use client';
 
-import { useFormContext } from 'react-hook-form';
-import { DocumentData } from '../_types/document';
+
+
 import ClaimantSection from './ClaimantSection';
 import RepresentativeSection from './RepresentativeSection';
 import CaseDetailsSection from './CaseDetailsSection';
 import EvidenceAndRequestSection from './EvidenceAndRequestSection';
 import ClaimReasonSection from './ClaimReasonSection';
+import { EditableInput } from '@/app/appeal/_components/FormInputs';
 
 export default function DocumentEditor() {
-  const { watch } = useFormContext<DocumentData>();
-  
-  const filingDate = watch('filingDate') || '';
-  const claimantName = watch('claimant.name') || '';
 
   return (
     <div className="bg-white shadow-sm border border-gray-200 rounded-lg p-10 md:p-12 max-w-[850px] mx-auto text-black font-medium leading-relaxed">
@@ -59,21 +56,15 @@ export default function DocumentEditor() {
         </p>
         {/* Date and Signature grouped on the right side */}
         <div className="flex flex-col items-end gap-6 mr-[15%]">
-          {filingDate && filingDate.split('.').length >= 3 ? (
-            <p className="tracking-widest">
-              {filingDate.split('.')[0].trim()} 년{' '}
-              {filingDate.split('.')[1].trim().padStart(2, ' ')} 월{' '}
-              {filingDate.split('.')[2].trim().padStart(2, ' ')} 일
-            </p>
-          ) : (
-             <p className="tracking-widest">년 월 일</p>
-          )}
-          <p className="text-base">
-            <span className="tracking-widest mr-4">청구인</span>
-            <span className="inline-block border-b border-black w-32 text-center pb-0.5 relative top-1">
-              {claimantName}
+          <p className="tracking-widest flex items-center gap-1">
+            <EditableInput name="filingDate" className="text-center tracking-widest w-48" />
+          </p>
+          <p className="text-base flex items-center gap-2">
+            <span className="tracking-widest">청구인</span>
+            <span className="inline-block border-b border-black w-32 pb-0.5 relative top-0.5">
+              <EditableInput name="claimant.name" className="text-center w-full" />
             </span>
-            <span className="ml-2 text-sm tracking-tighter text-gray-600">(서명 또는 인)</span>
+            <span className="text-sm tracking-tighter text-gray-600">(서명 또는 인)</span>
           </p>
         </div>
       </div>
