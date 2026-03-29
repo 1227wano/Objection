@@ -3,7 +3,6 @@
 import { useRouter, useParams } from 'next/navigation';
 import { useForm, FormProvider } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import StepProgress from '../../claim/complete/_components/StepProgress';
 import CompletionHeader from '../../claim/complete/_components/CompletionHeader';
 import FileDownloadTab from '../../claim/complete/_components/FileDownloadTab';
 import SupplementPortalCopyTab from './_components/SupplementPortalCopyTab';
@@ -28,11 +27,11 @@ export default function SupplementCompletePage() {
       <div className="flex w-full min-h-screen animate-in fade-in duration-500">
         <div className="flex-1 flex justify-center py-12 md:py-16">
           <div className="w-full max-w-6xl px-8 flex flex-col">
-            <StepProgress steps={SUPPLEMENT_STEPS} completedSteps={4} />
-
             <CompletionHeader
               title="보충서면 작성이 완료되었습니다."
               description="아래 두 가지 방법 중 편하신 방식을 선택하여 제출을 진행해 주세요."
+              steps={SUPPLEMENT_STEPS}
+              completedSteps={4}
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-8">

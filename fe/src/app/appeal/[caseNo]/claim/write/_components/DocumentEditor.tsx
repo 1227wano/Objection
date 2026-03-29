@@ -56,16 +56,16 @@ export default function DocumentEditor() {
         </p>
         {/* Date and Signature grouped on the right side */}
         <div className="flex flex-col items-end gap-6 mr-[15%]">
-          <p className="tracking-widest flex items-center gap-1">
+          <div className="tracking-widest flex items-center gap-1">
             <EditableInput name="filingDate" className="text-center tracking-widest w-48" />
-          </p>
-          <p className="text-base flex items-center gap-2">
+          </div>
+          <div className="text-base flex items-center gap-2">
             <span className="tracking-widest">청구인</span>
             <span className="inline-block border-b border-black w-32 pb-0.5 relative top-0.5">
               <EditableInput name="claimant.name" className="text-center w-full" />
             </span>
             <span className="text-sm tracking-tighter text-gray-600">(서명 또는 인)</span>
-          </p>
+          </div>
         </div>
       </div>
 

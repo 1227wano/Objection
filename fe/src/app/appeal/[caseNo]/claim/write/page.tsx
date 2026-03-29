@@ -133,7 +133,7 @@ export default function WritePage() {
     };
 
     loadDocument();
-  }, [methods]);
+  }, [analysisNo, caseNo]);
 
   if (isLoading) {
     return (
