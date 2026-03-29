@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FileText } from 'lucide-react';
+import { Download, FileText } from 'lucide-react';
 import type { ContentJson, PersonalInfo, RepresentativeInfo } from '../../_store/useDocumentStore';
 
 interface DocumentData {
@@ -29,7 +29,6 @@ export default function FileDownloadTab({ documentData }: FileDownloadTabProps) 
     if (!documentData) return;
     setIsGenerating(true);
     try {
-      // @react-pdf/renderer는 SSR 환경에서 동작하지 않으므로 동적으로 import
       const { pdf } = await import('@react-pdf/renderer');
       const { default: AppealClaimPdf } = await import('./AppealClaimPdf');
       const React = (await import('react')).default;
@@ -51,26 +50,28 @@ export default function FileDownloadTab({ documentData }: FileDownloadTabProps) 
   };
 
   return (
-    <div className="flex flex-col items-center gap-8 py-10 max-w-3xl mx-auto">
-      {/* 미리보기 썸네일 */}
-      <div className="w-48 h-64 bg-gray-100 border border-gray-200 rounded-lg flex flex-col items-center justify-center shadow-sm gap-3">
-        <FileText className="w-12 h-12 text-gray-300" />
-        <p className="text-xs text-gray-400 font-medium">문서 미리보기</p>
+    <div className="bg-white border border-gray-200 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full h-auto">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center shrink-0">
+          <FileText className="w-6 h-6 text-indigo-600" />
+        </div>
+        <div className="flex flex-col gap-1">
+          <h2 className="text-xl font-bold text-gray-900">서면 제출용 PDF 다운로드</h2>
+          <p className="text-sm text-gray-500">
+            인쇄하여 등기 우편으로 제출하거나 온라인 첨부파일로 활용하실 수 있습니다.
+          </p>
+        </div>
       </div>
-
-      <p className="text-sm text-gray-500 text-center">완성된 청구서를 원하는 형식으로 다운로드하세요.</p>
-
-      <div className="flex flex-col gap-3 w-full max-w-xs">
-        <button
-          type="button"
-          onClick={handlePdfDownload}
-          disabled={isGenerating || !documentData}
-          className="w-full h-12 rounded-[10px] text-white text-[15px] font-semibold transition-colors disabled:opacity-60"
-          style={{ background: '#1E1B4B' }}
-        >
-          {isGenerating ? 'PDF 생성 중...' : 'PDF 파일 다운로드'}
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={handlePdfDownload}
+        disabled={isGenerating || !documentData}
+        className="w-full sm:w-auto px-6 h-12 rounded-[10px] text-white text-[15px] font-semibold transition-colors disabled:opacity-60 flex items-center justify-center gap-2 shrink-0"
+        style={{ background: '#1E1B4B' }}
+      >
+        <Download className="w-4 h-4" />
+        {isGenerating ? 'PDF 생성 중...' : 'PDF 다운로드'}
+      </button>
     </div>
   );
 }

@@ -1,5 +1,7 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
+// ... (인터페이스 정의 생략 — 기존과 동일)
 export interface ContentJson {
   committeeType: string;
   dispositionContent: string;
@@ -17,7 +19,7 @@ export interface PersonalInfo {
 }
 
 export interface RepresentativeInfo {
-  type: string | null; // null이면 해당사항 없음
+  type: string | null;
   name: string;
   address: string;
   residentNo: string;
@@ -26,10 +28,8 @@ export interface RepresentativeInfo {
 
 interface DocumentStoreData {
   contentJson: ContentJson | null;
-  // 민감정보 — 서버에 보내지 않음, 프론트에서만 사용
   personalInfo: PersonalInfo | null;
   representative: RepresentativeInfo | null;
-  // 기타 문서 필드 — 서버에 보내지 않음
   respondent: string;
   appealCommittee: string;
   dispositionKnownDate: string;
@@ -60,9 +60,17 @@ const initialData: DocumentStoreData = {
   filingDate: '',
 };
 
-export const useDocumentStore = create<DocumentStoreState>()((set, get) => ({
-  ...initialData,
-  setDocumentData: (data) => set((state) => ({ ...state, ...data })),
-  clear: () => set(initialData),
-  hasData: () => get().contentJson !== null,
-}));
+export const useDocumentStore = create<DocumentStoreState>()(
+  persist(
+    (set, get) => ({
+      ...initialData,
+      setDocumentData: (data) => set((state) => ({ ...state, ...data })),
+      clear: () => set(initialData),
+      hasData: () => get().contentJson !== null,
+    }),
+    {
+      name: 'document-storage',
+      storage: createJSONStorage(() => sessionStorage),
+    }
+  )
+);

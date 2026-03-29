@@ -47,10 +47,12 @@ export default function ClaimCompletePage() {
           {/* 완료 헤더 (StepProgress 포함) */}
           <CompletionHeader />
 
-          {/* 제출 방법 카드 2열 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-8">
-            {/* 왼쪽: 온라인 포털 직접 입력 */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col gap-4">
+          <div className="flex flex-col gap-6 mb-8 w-full">
+            {/* 상단: PDF 다운로드 (가로로 얇은 카드) */}
+            <FileDownloadTab documentData={documentData} />
+
+            {/* 하단: 온라인 포털 직접 입력(복사) */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col gap-5">
               <div className="flex flex-col gap-1">
                 <h2 className="text-xl font-bold text-gray-900">
                   온라인 포털 직접 입력 (텍스트 복사)
@@ -64,19 +66,6 @@ export default function ClaimCompletePage() {
                 claimPurpose={store.contentJson.claimPurpose}
                 claimReason={store.contentJson.claimReason}
               />
-            </div>
-
-            {/* 오른쪽: 서면 제출 및 첨부파일용 */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col gap-4">
-              <div className="flex flex-col gap-1">
-                <h2 className="text-xl font-bold text-gray-900">
-                  서면 제출 및 첨부파일용 (다운로드)
-                </h2>
-                <p className="text-base text-gray-500">
-                  온라인 제출 시 첨부파일로 활용하거나, 인쇄하여 등기 우편으로 제출하실 수 있습니다.
-                </p>
-              </div>
-              <FileDownloadTab documentData={documentData} />
             </div>
           </div>
 
