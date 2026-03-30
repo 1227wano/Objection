@@ -284,163 +284,49 @@ Client → 답변서 업로드 → A-0 (답변서 추출)
 
 ## 📊 ERD
 
-```mermaid
-erDiagram
-    users {
-        INT user_no PK "AUTO_INCREMENT"
-        VARCHAR user_id "사용자 이메일"
-        CHAR user_pw "Hashed 비밀번호"
-        VARCHAR user_name "사용자 이름"
-        TIMESTAMP created_at "생성 일시"
-        TIMESTAMP deleted_at "탈퇴 일시 (소프트 딜리트)"
-    }
+> ERD 이미지는 프로젝트 `/docs` 디렉토리를 참고하세요.
 
-    cases {
-        INT case_no PK "AUTO_INCREMENT"
-        INT user_no FK "사용자 번호"
-        VARCHAR title "사건 제목 (LLM 생성, 수정 가능)"
-        VARCHAR status "사건 상태 (30개 상태)"
-        VARCHAR stay_status "집행정지 상태"
-        DATE disposal_date "처분일"
-        DATE aware_date "처분 인지일"
-        VARCHAR agency_name "처분청"
-        VARCHAR claim_type "심판 유형 (CANCEL/INVALID/ORDER)"
-        VARCHAR sanction_type "처분 유형 (영업정지/과징금 등)"
-        SMALLINT sanction_days "정지 일수 또는 과징금 금액"
-        VARCHAR claimant "청구인"
-        VARCHAR violation_type "위반 유형"
-        VARCHAR business_name "사업장명"
-        VARCHAR business_address "사업장 주소"
-        BOOLEAN is_direct "본인 처분 여부"
-        TIMESTAMP created_at "생성 일시"
-        TIMESTAMP updated_at "수정 일시"
-    }
+### 테이블 구조
 
-    gov_documents {
-        INT gov_doc_no PK "AUTO_INCREMENT"
-        INT case_no FK "사건 번호"
-        VARCHAR document_type "문서 유형 (NOTICE/ANSWER/DECISION/STAY_DECISION)"
-        VARCHAR source_type "입력 방식 (IMAGE/FILE/MANUAL)"
-        VARCHAR file_key "S3 파일 키"
-        TEXT extracted_text "추출된 텍스트"
-        TEXT summary "요약"
-        JSONB parsed_json "AI 파싱 결과"
-        TEXT fact "사건 경위"
-        TEXT opinion "사용자 의견"
-        TIMESTAMP created_at "생성 일시"
-    }
+#### 사건 도메인
 
-    case_analysis {
-        INT analysis_no PK "AUTO_INCREMENT"
-        INT gov_doc_no FK "문서 번호"
-        JSONB law_result "법적 쟁점 분석 결과"
-        JSONB precedent_result "전략/판례 분석 결과"
-        TIMESTAMP created_at "생성 일시"
-    }
+| 테이블 | 주요 컬럼 | 설명 |
+| --- | --- | --- |
+| `users` | user_no(PK), user_id, user_pw, user_name, deleted_at | 사용자 (소프트 딜리트) |
+| `cases` | case_no(PK), user_no(FK), title, status, stay_status, sanction_type, sanction_days | 사건 (30개 상태 코드) |
+| `gov_documents` | gov_doc_no(PK), case_no(FK), document_type, source_type, file_key, parsed_json | 관공서 문서 (처분서/답변서/재결서) |
+| `case_embeddings` | embedding_no(PK), case_no(FK), embedding_vector(1536) | 사건 임베딩 벡터 |
 
-    gen_documents {
-        INT analysis_no PK FK "분석 번호"
-        VARCHAR document_type "문서 유형 (APPEAL_CLAIM/SUPPLEMENT_STATEMENT)"
-        JSONB content_json "문서 내용"
-        TIMESTAMP created_at "생성 일시"
-        TIMESTAMP updated_at "수정 일시"
-    }
+#### 분석 도메인
 
-    evidence_documents {
-        INT evidence_id PK "AUTO_INCREMENT"
-        INT analysis_no FK "분석 번호"
-        VARCHAR evidence_type "증거 유형 (AI 추천)"
-        BOOLEAN submitted "제출 여부"
-        TIMESTAMP checked_at "체크 일시"
-    }
+| 테이블 | 주요 컬럼 | 설명 |
+| --- | --- | --- |
+| `case_analysis` | analysis_no(PK), gov_doc_no(FK), law_result(JSONB), precedent_result(JSONB) | AI 분석 결과 |
+| `gen_documents` | analysis_no(PK/FK), document_type, content_json(JSONB) | 생성 문서 (청구서/보충서면) |
+| `evidence_documents` | evidence_id(PK), analysis_no(FK), evidence_type, submitted | AI 추천 증거 체크리스트 |
+| `case_precedent_matches` | match_no(PK), analysis_no(FK), precedent_no(FK), similarity_score | 유사 판례 매칭 |
 
-    case_precedent_matches {
-        INT match_no PK "AUTO_INCREMENT"
-        INT analysis_no FK "분석 번호"
-        VARCHAR precedent_no FK "판례 번호"
-        REAL similarity_score "유사도 점수"
-        TEXT match_reason "매칭 사유"
-        TIMESTAMP created_at "생성 일시"
-    }
+#### 법률 데이터 도메인
 
-    case_embeddings {
-        INT embedding_no PK "AUTO_INCREMENT"
-        INT case_no FK "사건 번호"
-        VARCHAR case_stage "분석 단계"
-        VECTOR embedding_vector "임베딩 벡터 (1536차원)"
-        TIMESTAMP created_at "생성 일시"
-    }
-
-    Precedents {
-        VARCHAR precedent_no PK "판례 번호"
-        VARCHAR precedent_name "판례명"
-        VARCHAR precedent_code "업종 코드"
-        DATE precedent_date "판결 일자"
-        TIMESTAMP created_at "생성 일시"
-    }
-
-    Precedent_vectors {
-        INT vector_no PK "AUTO_INCREMENT"
-        VARCHAR precedent_no FK "판례 번호"
-        TEXT vector_text "청크 텍스트"
-        TEXT vector_summary "요약"
-        VECTOR vector_data "임베딩 벡터 (1536차원)"
-        TIMESTAMP created_at "생성 일시"
-    }
-
-    Laws {
-        VARCHAR law_no PK "법령 번호"
-        VARCHAR law_name "법령명"
-        VARCHAR law_type "법/시행령/시행규칙"
-        DATE effective_at "시행일"
-        TIMESTAMP created_at "생성 일시"
-    }
-
-    Law_Provisions {
-        SMALLINT provision_no PK "AUTO_INCREMENT"
-        VARCHAR law_no FK "법령 번호"
-        VARCHAR chapter_no "장 번호"
-        VARCHAR article_no "조 번호"
-        VARCHAR paragraph_no "항 번호"
-        TEXT provision_text "조문 내용"
-        TIMESTAMP created_at "생성 일시"
-    }
-
-    %% 관계 정의
-    users ||--o{ cases : "생성"
-    cases ||--o{ gov_documents : "업로드"
-    cases ||--o{ case_embeddings : "임베딩"
-    gov_documents ||--o{ case_analysis : "분석"
-    case_analysis ||--|| gen_documents : "문서 생성"
-    case_analysis ||--o{ evidence_documents : "증거 추천"
-    case_analysis ||--o{ case_precedent_matches : "판례 매칭"
-    Precedents ||--o{ case_precedent_matches : "매칭"
-    Precedents ||--o{ Precedent_vectors : "벡터화"
-    Laws ||--o{ Law_Provisions : "조문"
-```
+| 테이블 | 주요 컬럼 | 설명 |
+| --- | --- | --- |
+| `Precedents` | precedent_no(PK), precedent_name, precedent_code, precedent_date | 판례 메타데이터 |
+| `Precedent_vectors` | vector_no(PK), precedent_no(FK), vector_data(1536) | 판례 임베딩 벡터 (RAG) |
+| `Laws` | law_no(PK), law_name, law_type, effective_at | 법령 정보 |
+| `Law_Provisions` | provision_no(PK), law_no(FK), article_no, provision_text | 법령 조문 |
 
 ### 주요 테이블 관계
-
-**사건 도메인**
 
 ```
 users (1) ─── (N) cases
 cases (1) ─── (N) gov_documents
 cases (1) ─── (N) case_embeddings
-```
 
-**분석 도메인**
-
-```
 gov_documents (1) ─── (N) case_analysis
 case_analysis (1) ─── (1) gen_documents
 case_analysis (1) ─── (N) evidence_documents
 case_analysis (1) ─── (N) case_precedent_matches
-```
 
-**법률 데이터 도메인**
-
-```
 Precedents (1) ─── (N) Precedent_vectors
 Precedents (1) ─── (N) case_precedent_matches
 Laws (1) ─── (N) Law_Provisions
