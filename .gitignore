@@ -1,0 +1,37 @@
+# =========================
+# Common (OS & IDE)
+# =========================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# =========================
+# Data Pipeline & AI (Python)
+# =========================
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+.venv/
+env/
+
+# PySpark 특화 (로컬 실행 시 생성되는 폴더/파일)
+derby.log
+metastore_db/
+spark-warehouse/
+
+
+# =========================
+# Environment Variables
+# =========================
+# 중요 보안 정보 (DB 비밀번호 등)가 담긴 환경변수 파일
+.env
+.env.*
+*.env
+
+Java를 사용하는 Backend나 Next를 사용하는 Frontend는 각각 폴더마다 gitignore가 있으니까 위와 같이만 사용해도 될까?
