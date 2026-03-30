@@ -1,105 +1,961 @@
-# “이의있음!(Objection!)” 프로젝트
-# : 음식점 소상공인 행정심판 보조 서비스
+# ⚖️ 이의있음! (Objection!)
 
-## 프로젝트 개요
-행정처분을 받은 음식점 사장님들을 대상으로, 
-과거의 판례를 분석하여 법적 논리가 담긴 맞춤형 서류 생성을 지원한다.
+### 음식점 소상공인 행정심판 AI 보조 서비스
 
-이 과정에서, 세 종류의 데이터를 목적에 맞게 분리 저장하고 조합해서 활용
-- 현행 법령 데이터
-- 과거 법령 데이터
-- 판례 / 재결례 데이터
+*행정처분을 받은 음식점 사장님, 법을 몰라도 괜찮습니다. AI가 처음부터 끝까지 함께합니다.*
 
+---
 
-## 7단계 프로세스별 에이전트 배치도
-분석 및 문서 작성에 관해서는, 총 6개의 Agent를 통해 AtoA로 진행한다.
+## 📋 목차
 
-### 행정심판 AI 정예 요원 7단계 임무 수행서
+- [프로젝트 소개](#-프로젝트-소개)
+- [주요 기능](#-주요-기능)
+- [기술 스택](#-기술-스택)
+- [시스템 아키텍처](#-시스템-아키텍처)
+- [멀티 에이전트 AI 구성](#-멀티-에이전트-ai-구성)
+- [ERD](#-erd)
+- [시작하기](#-시작하기)
+- [API 문서](#-api-문서)
+- [프로젝트 구조](#-프로젝트-구조)
+- [주요 화면](#-주요-화면)
+- [데이터 파이프라인](#-데이터-파이프라인)
+- [개발 가이드](#-개발-가이드)
+- [배포](#-배포)
+- [팀 소개](#-팀-소개)
+- [참고 자료](#-참고-자료)
 
-### **1단계: [기록 요원] 사건의 첫 단추를 꿰다**
-- **Agent A-0 (GPT-5):** 유저가 올린 통지서를 뚫어지게 쳐다보고 `처분일`, `법조항`, `위반 수위`를 정확히 읽어내어 장부에 적습니다.
-- **Agent A-1 (Sonnet 4.5):** A-0가 적은 날짜를 보고 "사장님, 90일 기한까지 딱 45일 남았습니다!"라고 기한을 계산합니다.
-- **Agent C (Haiku 4.5):** 이 모든 상황을 유저에게 친절하게 브리핑하며 안심시킵니다.
+---
 
-### **1-1단계: [판단 요원] 싸울 수 있는 판인지 결정하다**
-- **Agent A-1 (Sonnet 4.5):** 이 처분이 법적으로 다툴 가치가 있는지 냉정하게 판단합니다.
-- **Agent A-1 & Agent C:** "이건 집행정지 신청서도 같이 넣어야 사장님 가게 문 안 닫고 싸울 수 있습니다"라고 유저에게 전략적 방향을 제시합니다.
+## 🎯 프로젝트 소개
 
-### **2단계: [전략 요원] 하둡에서 필승 카드를 꺼내다**
-- **Agent A-1 (Sonnet 4.5):** 유저의 억울한 사연에서 '신분증 위조' 같은 핵심 쟁점을 뽑아냅니다.
-- **Agent A-2 (Sonnet 4.5):** 하둡(Hadoop)에 저장된 **7,000건의 판례**를 샅샅이 뒤져 "이 상황에서 이긴 판례 3건 찾았습니다!"라고 승소 전략을 세웁니다.
-- **Agent C (Haiku 4.5):** A-2의 전략을 토대로 유저에게 "사장님, 승소 판례와 맞추려면 CCTV 사진이 꼭 필요해요!"라고 증거를 요청합니다.
+### 왜 이의있음! 인가?
 
-### **3단계: [집필 요원] 무결점의 서류를 완성하다**
-- **Agent A-3 (GPT-5):** A-0(데이터), A-1(분석), A-2(판례)가 모은 모든 재료를 버무려 위원회가 감동할 수준의 **청구서**를 써 내려갑니다.
-- **Agent B (Sonnet 4.5):** A-3이 쓴 글을 가차 없이 검토하며 "법령 번호 틀렸어, 다시 써!"라고 채찍질하여 무결점 서류를 만듭니다.
-- **Agent C (Haiku 4.5):** 완성된 서류를 유저에게 보여주며 최종 승인을 받습니다.
+> "행정처분을 받은 4명 중 1명은 뒤집을 수 있는 처분입니다."
 
-### **4단계: [감시 요원] 적(구청)의 움직임을 포착하다**
-- **Agent A-0 (GPT-5):** 구청에서 날아온 공격적인 답변서를 즉시 읽어 들입니다.
-- **Agent C (Haiku 4.5):** 현재 사건이 '답변서 수령 완료' 상태임을 알리고 유저에게 다음 단계 대응 로직을 설명합니다.
-    - **(분기 처리):** 만약 집행정지가 기각되면, **A-1**이 기각 사유를 분석하고 **A-3**가 재신청서를 쓰는 작전으로 즉시 전환합니다.
+2025년 상반기 기준 행정심판 인용률은 **27.4%**, 시도 행정심판위원회 연평균 인용률은 **34.6%** 에 달합니다. 그러나 대부분의 음식점 소상공인은 법률 지식 부재, 비용 부담, 서류 작성 능력 부족으로 인해 대응을 포기합니다.
 
-### **5단계: [반격 요원] 답변서를 해체하고 결정타를 날리다**
-- **Agent A-1 (Sonnet 4.5):** 구청 답변서를 낱낱이 파헤쳐서 "여기 거짓말이 있네요!"라고 허점을 찾아냅니다.
-- **Agent A-2 (Sonnet 4.5):** 구청의 공격을 무력화할 **'반격용 판례'**를 하둡에서 다시 꺼내옵니다.
-- **Agent A-3 (GPT-5):** 찾아낸 허점과 판례를 엮어 구청의 주장을 박살 내는 강력한 **보충서면**을 작성합니다.
-- **Agent C (Haiku 4.5):** "사장님, 저희가 구청의 논리를 완벽하게 반박했습니다!"라고 반격 내용을 요약 보고합니다.
+**이의있음!** 은 AI 멀티 에이전트 시스템을 활용하여 행정심판의 전 과정(처분서 분석 → 법적 쟁점 도출 → 유사 판례 검색 → 청구서 자동 작성 → 답변서 반박 → 재결서 해석)을 **무료로, 처음부터 끝까지** 지원합니다.
 
-### **6단계: [해석 요원] 승전보를 분석하다**
-- **Agent A-0 (GPT-5):** 최종 재결서(결과지)를 읽습니다.
-- **Agent A-1 (Sonnet 4.5):** 어려운 법률 용어로 된 결과를 "영업정지 2개월이 6일로 줄었습니다"라고 사장님 눈높이에서 해석합니다.
-- **Agent C (Haiku 4.5):** 결과를 축하하며, 이후 행정 절차나 패소 시 소송 단계로 넘어가는 법을 안내합니다.
+### 핵심 가치
 
-### **7단계: [컨설팅 요원] 내일을 대비하다**
-- **Agent A-1 & A-2 (Sonnet 4.5):** 이번 사건의 모든 데이터를 분석하여 사장님 매장의 취약점을 찾아냅니다.
-- **Agent C (Haiku 4.5):** "다시는 이런 일 겪지 않으시도록 제가 매달 체크리스트 보내드릴게요"라며 예방 리포트를 전달합니다.
+- ⚡ **골든타임 사수**: 접속 즉시 잔여 청구기간(90일/180일) 자동 계산 및 D-Day 알림
+- 🧠 **멀티 에이전트 AI**: 5개의 전문화된 AI 에이전트가 역할을 분담하여 법률 서류 품질 극대화
+- 📊 **7,000건 판례 RAG**: Hadoop HDFS + Vector DB 기반 유사 판례 실시간 검색
+- 📝 **자동 서류 생성**: 행정심판 청구서, 집행정지 신청서, 보충서면 자동 작성
+- 🔍 **법령 버전 관리**: 처분일 당시 법령을 자동 매칭하여 법령 오적용 탐지
+- 💰 **완전 무료**: 변호사 선임 비용 없이 A to Z 지원
 
+### 시장 배경
 
-## 사용자 흐름
-### **[1단계] 사진 한 장으로 시작하는 진단 (Intake)**
-- **유저:** 메인 화면의 '사건 시작' 버튼을 누르고 구청에서 받은 **[행정처분 통지서]**를 촬영해 올립니다.
-- **Agent C:** "반갑습니다, 사장님! 보내주신 통지서를 분석 중이에요. 아, 확인해보니 청구 기한이 **45일** 남았네요. 아직 충분히 대응할 수 있으니 안심하세요!"
+| 지표 | 수치 | 출처 |
+| --- | --- | --- |
+| 2025년 상반기 행정심판 인용률 | **27.4%** | 국민권익위 |
+| 시도 행심위 연평균 인용률 | **34.6%** | 법률신문 |
+| 2024년 폐업 사업자 수 | **100만 8,282명** (역대 최초 100만 돌파) | 코리아비즈리뷰 |
+| 음식점업 폐업률 | **15.7%** (업종 중 최상위권) | 한국은행 |
+| 소상공인 부채 보유율 / 평균 부채 | 51.9% / 평균 1억 7,100만 원 | 중기부 실태조사 |
 
-### **[1-1단계] 맞춤형 대응 방향 제안 (Legal Filter)**
-- **유저:** AI가 분석한 처분 내용을 확인합니다. (위반 항목, 정지 기간 등)
-- **Agent C:** "사장님, 이번 처분은 바로 영업정지가 시작될 수 있는 사안이에요. 청구서와 함께 **'영업을 계속하게 해달라'는 집행정지 신청**도 같이 진행하는 게 좋겠어요. 제가 준비해 드릴까요?"
-- **유저:** "네, 그렇게 해주세요." 버튼 클릭.
+### 타겟 유저
 
-### **[2단계] 1:1 심층 상담 및 증거 준비 (Strategy & Evidence)**
-- **유저:** "직원이 신분증 검사를 했는데, 손님이 위조된 걸 보여준 것 같아요"라고 **억울한 사정**을 타이핑합니다.
-- **Agent C:** "하둡 판례를 분석해보니 비슷한 상황에서 승소한 사례들이 많네요! 사장님의 주장을 입증하려면 **[CCTV 영상]**과 **[직원 교육 일지]**가 꼭 필요해요. 지금 찍어서 올려주실 수 있나요?"
-- **유저:** 스마트폰으로 증거 사진들을 찍어서 업로드합니다.
+| 항목 | 내용 |
+| --- | --- |
+| 타겟 | 영업정지·허가취소·과징금·영업장 폐쇄명령을 받은 음식점 사업주 |
+| 연령 | 주로 40~60대 (소상공인 중 50대 34.2%, 40대 26.7%) |
+| 디지털 리터러시 | 낮은 편. 법률 용어 취약, 복잡한 서식 작성 어려움 |
+| 심리 상태 | 처분 직후 극도로 위축. "어차피 안 된다"는 포기 심리 |
 
-### **[3단계] 완성된 서류 확인 및 제출 (Drafting)**
-- **유저:** AI가 작성한 서류 초안을 웹 에디터 화면에서 확인합니다.
-- **Agent C:** "사장님만을 위한 **전문 청구서**가 완성되었습니다! 법률 검수(Agent B)까지 마쳐서 완벽해요. 혹시 더 보태고 싶은 말씀이 없다면 이대로 제출할게요."
-- **유저:** 내용을 훑어본 뒤 '제출하기' 클릭.
+---
 
-### **[4단계] 답변서 수령 및 상태 모니터링 (Monitoring)**
-- **유저:** 며칠 뒤 구청에서 온 **[답변서]**를 받으면 사진을 찍어 올립니다.
-- **Agent C:** "구청 답변서를 확인했습니다. 현재 타임라인을 보니 집행정지는 인용되어 영업을 계속하실 수 있는 상태예요! 이제 저희가 구청의 주장을 무너뜨릴 차례입니다."
+## ✨ 주요 기능
 
-> **※ [4-Branch] 만약 집행정지가 기각되었다면?**
-> - **Agent C:** "사장님, 안타깝게도 집행정지가 한 번 거절되었습니다. 하지만 실망 마세요! 최근 매출 장부와 대출금 연체 내역을 보완해서 **'재신청'**하면 판을 뒤집을 수 있습니다. 추가 서류를 도와드릴까요?"
+### 1. 📸 처분서 분석 (1단계)
 
-### **[5단계] 답변서 분석 및 정밀 반격 (Rebuttal)**
-- **유저:** AI가 분석한 **'구청의 3가지 거짓말'** 리포트를 읽어봅니다.
-- **Agent C:** "구청이 사장님의 주의의무 위반을 강조하고 있네요. 저희가 하둡에서 찾은 **반격 판례**를 넣어 구청 논리를 깨트리는 **보충서면**을 준비했습니다. 확인해보세요!"
-- **유저:** 강력하게 작성된 반격 문구를 확인하고 전송 승인.
+- **문서 입력**: 행정처분 통지서를 촬영(이미지), PDF 업로드, 또는 수기 입력
+- **AI 추출 (A-0)**: OCR + LLM으로 처분일, 처분청, 위반 법조항, 처분 수위 자동 추출
+- **D-Day 알림**: 잔여 청구기간(90일/180일) 즉시 계산
+- **적법요건 판단**: 청구인 적격, 대상 적격, 청구기간 등 자동 체크
 
-### **[6단계] 최종 결과 해석 (Conclusion)**
-- **유저:** 위원회로부터 온 최종 **[재결서]**를 업로드합니다.
-- **Agent C:** "사장님, 축하드려요! 영업정지 2개월이 **6일로 줄었습니다!** 어려운 법률 용어는 제가 쉽게 풀어서 요약해 드릴게요. 이제 정해진 날짜부터 다시 힘내서 장사하시면 됩니다."
+### 2. ⚖️ 법적 쟁점 분석 (2단계)
 
-### **[7단계] 사후 관리 리포트 수령 (Prevention)**
-- **유저:** 이번 사건을 통해 생성된 **'우리 매장 전용 예방 가이드'**를 확인합니다.
-- **Agent C:** "사장님, 다시는 이런 고생 안 하시도록 제가 **맞춤형 체크리스트**를 만들었어요. 매달 제가 알림으로 챙겨드릴 테니, 앞으로는 안전하게 영업하세요!"
+- **본안판단 AI 분석**: 4가지 쟁점 자동 분석
+  - 사실오인: 처분 근거 사실이 틀렸는가
+  - 법령 오적용: 잘못된 법령을 적용하지 않았는가
+  - 재량권 일탈·남용: 비슷한 사건 대비 과한 처분인가
+  - 절차적 하자: 사전통지·의견제출 기회 부여 등 절차 위반
+- **인용 가능성 산출**: HIGH / MEDIUM / LOW 구간으로 가능성 제시
+- **유사 판례 검색**: Hadoop RAG 기반 7,000건 판례에서 최적 매칭
 
+### 3. 📝 서류 자동 생성 (3단계)
 
-# 현재 진행 사항
-- 프로젝트 정의서 작성
-- 기능 명세서 작성
-- 데이터 전처리 진행
-- 와이어프레임 진행
-- ERD 설계 진행
+- **행정심판 청구서**: AI가 법적 논리와 판례 근거를 포함한 전문 청구서 작성
+- **집행정지 신청서**: 영업정지 시 영업 지속을 위한 신청서 동시 작성
+- **증거 체크리스트**: 승소에 필요한 입증 서류를 우선순위로 추천 (CCTV, 교육일지, 부채증명 등)
+- **문서 검증 (Agent B)**: 작성된 서류의 오류, 누락, 논리 불일치 자동 검수
+
+### 4. 🛡️ 답변서 분석 & 보충서면 (4~5단계)
+
+- **답변서 분석**: 행정청 답변서의 논리적 허점 자동 포착
+- **보충서면 자동 작성**: 답변서 반박 판례를 새로 검색하여 1:1 반박 구조의 보충서면 생성
+- **집행정지 재신청**: 기각 시 새로운 사정을 반영한 재신청서 자동 작성
+
+### 5. 📋 재결서 해석 (6단계)
+
+- **재결서 분석**: 최종 결과(인용/기각/각하)를 쉬운 말로 해석
+- **후속 조치 안내**: 행정소송 등 다음 단계 가이드 제공
+
+### 6. 🔐 회원 관리
+
+- **회원가입/로그인**: 이메일 인증 기반 가입, JWT 토큰 인증
+- **비밀번호 찾기**: 이메일 인증 후 비밀번호 재설정
+- **설문조사**: 사건 생성 시 처분 유형, 본인 여부 등 초기 설문
+
+---
+
+## 🛠 기술 스택
+
+### Backend
+
+| 기술 | 버전 | 용도 |
+| --- | --- | --- |
+| Spring Boot | 4.0.3 | 메인 백엔드 프레임워크 |
+| Java | 21 | 백엔드 언어 |
+| PostgreSQL | - | 주 데이터베이스 (JSONB 지원) |
+| Redis | - | 캐싱, 세션 관리 |
+| Spring Security + JWT | - | 인증/인가 |
+| Spring Cloud OpenFeign | - | AI 서버 API 통신 |
+| Spring Mail | - | 이메일 인증, 비밀번호 찾기 |
+| AWS S3 | - | 파일 업로드 저장소 |
+
+**선택 이유:**
+- **Spring Boot 4.0**: 최신 LTS, 가상 스레드 지원으로 AI 파이프라인 비동기 처리에 적합
+- **PostgreSQL**: JSONB 타입으로 AI 분석 결과를 유연하게 저장, pgvector 확장으로 임베딩 벡터 저장
+- **OpenFeign**: AI 서버와의 마이크로서비스 통신을 선언적으로 구현
+
+### AI / Data
+
+| 기술 | 용도 |
+| --- | --- |
+| GPT-5 (A-0, A-3) | OCR 문서 추출, 법률 문서 작성 |
+| Claude Sonnet 4.5 (A-1, A-2, B) | 법리 분석, 판례 전략, 문서 검증 |
+| LangGraph | 멀티 에이전트 오케스트레이션 |
+| Hadoop HDFS | 판례 원본 데이터 저장 (빅데이터 레이크) |
+| PySpark + YARN | 판례 데이터 분산 처리 (중복제거, 정제) |
+| Vector DB | 판례 임베딩 저장 및 RAG 검색 |
+| GMS API (GPT-4.1-mini) | 법령명 정제 (Refine Step 1) |
+| 법제처 API | 법령 데이터 수집, 조문 조회 |
+
+### Frontend
+
+| 기술 | 용도 |
+| --- | --- |
+| Next.js | React 기반 풀스택 프레임워크 (SSR/SSG) |
+| TypeScript | 프론트엔드 언어 |
+| pnpm | 패키지 매니저 (workspace 지원) |
+| shadcn/ui | UI 컴포넌트 라이브러리 |
+| Tailwind CSS (PostCSS) | 유틸리티 CSS 프레임워크 |
+| ESLint + Prettier | 코드 린팅 및 포맷팅 |
+
+**선택 이유:**
+- **Next.js**: SSR을 통한 SEO 최적화, API Routes로 BFF 패턴 구현 용이, 법률 서비스 특성상 초기 로딩 속도 중요
+- **pnpm**: npm 대비 디스크 공간 절약 및 빠른 설치, workspace 모노레포 지원
+- **shadcn/ui**: 커스터마이징 가능한 접근성 우수 컴포넌트, 디지털 리터러시가 낮은 타겟 유저에게 적합
+
+### Infrastructure
+
+| 기술 | 용도 |
+| --- | --- |
+| Docker | 컨테이너화 |
+| Jenkins | CI/CD 파이프라인 |
+| Nginx | 리버스 프록시, SSL |
+| AWS EC2 | 클라우드 배포 |
+| AWS S3 | 파일 스토리지 |
+
+### Development Tools
+
+| 도구 | 용도 |
+| --- | --- |
+| Gradle 8.x | 빌드 도구 |
+| Swagger (springdoc-openapi) | API 문서화 |
+| Git / GitLab | 버전 관리 |
+| Jira | 이슈 트래킹 |
+| Notion / Discord | 커뮤니케이션 |
+
+---
+
+## 🏗 시스템 아키텍처
+
+### 전체 구조도
+
+```
+[Client] Next.js (TypeScript) ── HTTPS ──▶ [Nginx :443]
+                                              │
+                      ┌───────────────────────┼───────────────────────┐
+                      ▼                       ▼                       ▼
+               [Frontend :3000]        [Backend :8080]          [AI Server]
+                  Next.js            Spring Boot 4.0           Agent Server
+                                          │                       │
+          ┌───────────┬───────────────────┤                       │
+          ▼           ▼                   ▼                       ▼
+    [PostgreSQL]   [Redis]          [OpenFeign] ◀────────▶ [AI Agents]
+     - users       - Session         API 통신            - A-0 (문서추출)
+     - cases       - Cache                               - A-1 (법리분석)
+     - gov_docs    - Token                               - A-2 (전략/판례)
+     - analysis                                          - A-3 (문서작성)
+     - gen_docs                                          - B   (검증)
+     - evidence
+     - precedents
+                                          │
+          ┌───────────────────────────────┤
+          ▼               ▼               ▼
+    [Hadoop HDFS]     [Spark]        [Vector DB]
+     - 판례 7K건      - 중복제거      - 임베딩 검색
+     - 법령 데이터    - 정제          - RAG
+     - 크롤링 데이터                  - 하이브리드검색
+
+    [법제처 API]      [AWS S3]
+     - 법령 조문 조회  - 파일 업로드
+     - 판례 수집       - 문서 저장
+```
+
+### 데이터 플로우
+
+#### 1. 사용자 인증 플로우
+
+```
+Client → Spring Boot (POST /api/auth/login) → PostgreSQL (User 검증)
+→ JWT Access Token 발급 (24시간)
+→ Refresh Token 발급 (7일) → Redis 저장
+→ Client (Token 반환)
+```
+
+#### 2. 사건 분석 파이프라인
+
+```
+Client → 처분서 업로드 → S3 저장 → A-0 (문서 추출)
+→ A-1 (법적 쟁점 분석) → Vector DB (판례 임베딩 검색)
+→ A-2 (전략/판례 매칭) → A-3 (청구서 초안 작성)
+→ Agent B (교차 검증) → 최종 문서 → Client
+```
+
+#### 3. 답변서 반박 플로우
+
+```
+Client → 답변서 업로드 → A-0 (답변서 추출)
+→ A-1 (허점 분석) → A-2 (반격 판례 검색)
+→ A-3 (보충서면 작성) → Agent B (검증)
+→ Client (보충서면 완성)
+```
+
+---
+
+## 🤖 멀티 에이전트 AI 구성
+
+단일 모델이 모든 것을 판단하지 않습니다. **역할을 철저히 분리하여 AI가 할 일과 시스템 로직이 할 일을 구분**하는 것이 이 서비스의 기술적 핵심입니다.
+
+### 에이전트 구성
+
+| 에이전트 | 별칭 | 전담 모델 | 핵심 임무 |
+| --- | --- | --- | --- |
+| **A-0** | 눈 (The Eye) | GPT-5 | 처분서/답변서/재결서 OCR 및 데이터 추출 |
+| **A-1** | 뇌 (The Brain) | Sonnet 4.5 | 청구기한 계산, 적법요건 체크, 법리 분석, 논리적 허점 포착 |
+| **A-2** | 사냥꾼 (Hunter) | Sonnet 4.5 | Hadoop RAG 기반 7,000건 판례 검색, 반격 시나리오 구성 |
+| **A-3** | 손 (The Pen) | GPT-5 | 청구서, 보충서면 등 위원회를 설득할 고품격 법률 문서 작성 |
+| **B** | 감시관 (Auditor) | Sonnet 4.5 | A-3 작성 서류의 오타, 법령 오기재, 논리 결함 교차 검토 |
+
+### 7단계 AI 프로세스
+
+```
+1단계: A-0 → 통지서 데이터 추출, A-1 → 기한 계산
+   ↓
+1-1단계: A-1 → 적법요건 판단 + 집행정지 필요성 분석
+   ↓
+2단계: A-1 → 핵심 쟁점 추출, A-2 → 판례 검색 + 전략 수립
+   ↓
+3단계: A-3 → 청구서 작성, B → 검증
+   ↓
+4단계: A-0 → 답변서 추출
+   ↓
+5단계: A-1 → 허점 분석, A-2 → 반격 판례, A-3 → 보충서면, B → 검증
+   ↓
+6단계: A-0 → 재결서 추출, A-1 → 결과 해석
+```
+
+---
+
+## 📊 ERD
+
+```mermaid
+erDiagram
+    users {
+        INT user_no PK "AUTO_INCREMENT"
+        VARCHAR user_id "사용자 이메일"
+        CHAR user_pw "Hashed 비밀번호"
+        VARCHAR user_name "사용자 이름"
+        TIMESTAMP created_at "생성 일시"
+        TIMESTAMP deleted_at "탈퇴 일시 (소프트 딜리트)"
+    }
+
+    cases {
+        INT case_no PK "AUTO_INCREMENT"
+        INT user_no FK "사용자 번호"
+        VARCHAR title "사건 제목 (LLM 생성, 수정 가능)"
+        VARCHAR status "사건 상태 (30개 상태)"
+        VARCHAR stay_status "집행정지 상태"
+        DATE disposal_date "처분일"
+        DATE aware_date "처분 인지일"
+        VARCHAR agency_name "처분청"
+        VARCHAR claim_type "심판 유형 (CANCEL/INVALID/ORDER)"
+        VARCHAR sanction_type "처분 유형 (영업정지/과징금 등)"
+        SMALLINT sanction_days "정지 일수 또는 과징금 금액"
+        VARCHAR claimant "청구인"
+        VARCHAR violation_type "위반 유형"
+        VARCHAR business_name "사업장명"
+        VARCHAR business_address "사업장 주소"
+        BOOLEAN is_direct "본인 처분 여부"
+        TIMESTAMP created_at "생성 일시"
+        TIMESTAMP updated_at "수정 일시"
+    }
+
+    gov_documents {
+        INT gov_doc_no PK "AUTO_INCREMENT"
+        INT case_no FK "사건 번호"
+        VARCHAR document_type "문서 유형 (NOTICE/ANSWER/DECISION/STAY_DECISION)"
+        VARCHAR source_type "입력 방식 (IMAGE/FILE/MANUAL)"
+        VARCHAR file_key "S3 파일 키"
+        TEXT extracted_text "추출된 텍스트"
+        TEXT summary "요약"
+        JSONB parsed_json "AI 파싱 결과"
+        TEXT fact "사건 경위"
+        TEXT opinion "사용자 의견"
+        TIMESTAMP created_at "생성 일시"
+    }
+
+    case_analysis {
+        INT analysis_no PK "AUTO_INCREMENT"
+        INT gov_doc_no FK "문서 번호"
+        JSONB law_result "법적 쟁점 분석 결과"
+        JSONB precedent_result "전략/판례 분석 결과"
+        TIMESTAMP created_at "생성 일시"
+    }
+
+    gen_documents {
+        INT analysis_no PK FK "분석 번호"
+        VARCHAR document_type "문서 유형 (APPEAL_CLAIM/SUPPLEMENT_STATEMENT)"
+        JSONB content_json "문서 내용"
+        TIMESTAMP created_at "생성 일시"
+        TIMESTAMP updated_at "수정 일시"
+    }
+
+    evidence_documents {
+        INT evidence_id PK "AUTO_INCREMENT"
+        INT analysis_no FK "분석 번호"
+        VARCHAR evidence_type "증거 유형 (AI 추천)"
+        BOOLEAN submitted "제출 여부"
+        TIMESTAMP checked_at "체크 일시"
+    }
+
+    case_precedent_matches {
+        INT match_no PK "AUTO_INCREMENT"
+        INT analysis_no FK "분석 번호"
+        VARCHAR precedent_no FK "판례 번호"
+        REAL similarity_score "유사도 점수"
+        TEXT match_reason "매칭 사유"
+        TIMESTAMP created_at "생성 일시"
+    }
+
+    case_embeddings {
+        INT embedding_no PK "AUTO_INCREMENT"
+        INT case_no FK "사건 번호"
+        VARCHAR case_stage "분석 단계"
+        VECTOR embedding_vector "임베딩 벡터 (1536차원)"
+        TIMESTAMP created_at "생성 일시"
+    }
+
+    Precedents {
+        VARCHAR precedent_no PK "판례 번호"
+        VARCHAR precedent_name "판례명"
+        VARCHAR precedent_code "업종 코드"
+        DATE precedent_date "판결 일자"
+        TIMESTAMP created_at "생성 일시"
+    }
+
+    Precedent_vectors {
+        INT vector_no PK "AUTO_INCREMENT"
+        VARCHAR precedent_no FK "판례 번호"
+        TEXT vector_text "청크 텍스트"
+        TEXT vector_summary "요약"
+        VECTOR vector_data "임베딩 벡터 (1536차원)"
+        TIMESTAMP created_at "생성 일시"
+    }
+
+    Laws {
+        VARCHAR law_no PK "법령 번호"
+        VARCHAR law_name "법령명"
+        VARCHAR law_type "법/시행령/시행규칙"
+        DATE effective_at "시행일"
+        TIMESTAMP created_at "생성 일시"
+    }
+
+    Law_Provisions {
+        SMALLINT provision_no PK "AUTO_INCREMENT"
+        VARCHAR law_no FK "법령 번호"
+        VARCHAR chapter_no "장 번호"
+        VARCHAR article_no "조 번호"
+        VARCHAR paragraph_no "항 번호"
+        TEXT provision_text "조문 내용"
+        TIMESTAMP created_at "생성 일시"
+    }
+
+    %% 관계 정의
+    users ||--o{ cases : "생성"
+    cases ||--o{ gov_documents : "업로드"
+    cases ||--o{ case_embeddings : "임베딩"
+    gov_documents ||--o{ case_analysis : "분석"
+    case_analysis ||--|| gen_documents : "문서 생성"
+    case_analysis ||--o{ evidence_documents : "증거 추천"
+    case_analysis ||--o{ case_precedent_matches : "판례 매칭"
+    Precedents ||--o{ case_precedent_matches : "매칭"
+    Precedents ||--o{ Precedent_vectors : "벡터화"
+    Laws ||--o{ Law_Provisions : "조문"
+```
+
+### 주요 테이블 관계
+
+**사건 도메인**
+
+```
+users (1) ─── (N) cases
+cases (1) ─── (N) gov_documents
+cases (1) ─── (N) case_embeddings
+```
+
+**분석 도메인**
+
+```
+gov_documents (1) ─── (N) case_analysis
+case_analysis (1) ─── (1) gen_documents
+case_analysis (1) ─── (N) evidence_documents
+case_analysis (1) ─── (N) case_precedent_matches
+```
+
+**법률 데이터 도메인**
+
+```
+Precedents (1) ─── (N) Precedent_vectors
+Precedents (1) ─── (N) case_precedent_matches
+Laws (1) ─── (N) Law_Provisions
+```
+
+---
+
+## 🚀 시작하기
+
+### Prerequisites
+
+- **Java 21+** ([다운로드](https://www.oracle.com/java/technologies/downloads/))
+- **Node.js 18+** ([다운로드](https://nodejs.org/))
+- **pnpm** (`npm install -g pnpm`)
+- **PostgreSQL** ([다운로드](https://www.postgresql.org/download/))
+- **Redis** ([다운로드](https://redis.io/download))
+- **Docker** (선택, [다운로드](https://www.docker.com/products/docker-desktop))
+
+### 환경 변수 설정
+
+```bash
+# Database
+DB_URL=jdbc:postgresql://localhost:5432/objection
+DB_USERNAME=postgres
+DB_PASSWORD=your-db-password
+
+# JWT
+JWT_SECRET=your-256-bit-secret
+
+# Email (SMTP)
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-app-password
+
+# AWS S3
+AWS_ACCESS_KEY=your-access-key
+AWS_SECRET_KEY=your-secret-key
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+```
+
+### 실행
+
+```bash
+# 1. 저장소 클론
+git clone https://lab.ssafy.com/s14-bigdata-dist-sub1/S14P21A102.git
+cd S14P21A102
+
+# 2. 백엔드 실행
+cd backend
+./gradlew bootRun
+
+# 3. 프론트엔드 실행 (새 터미널)
+cd frontend
+pnpm install
+pnpm dev
+```
+
+### 접속
+
+| 서비스 | URL |
+| --- | --- |
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:8080/api |
+| Swagger UI | http://localhost:8080/swagger-ui.html |
+
+---
+
+## 📚 API 문서
+
+### 인증 방법
+
+모든 API는 JWT 토큰 기반 인증을 사용합니다.
+
+```bash
+# 1. 로그인
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "userId": "user@example.com",
+  "userPw": "password123"
+}
+
+# Response
+{
+  "status": "SUCCESS",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
+    "tokenType": "Bearer",
+    "expiresIn": 86400
+  }
+}
+
+# 2. API 요청 시 헤더에 토큰 포함
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
+```
+
+### 주요 API 엔드포인트
+
+#### 인증 (Auth)
+
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| POST | `/api/auth/login` | 로그인 |
+| POST | `/api/auth/signup` | 회원가입 |
+| POST | `/api/auth/logout` | 로그아웃 |
+| POST | `/api/auth/refresh` | 토큰 재발급 |
+| GET | `/api/auth/validate` | 토큰 검증 (로그인 유지) |
+| DELETE | `/api/user` | 회원 탈퇴 (소프트 딜리트) |
+
+#### 이메일 인증
+
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| POST | `/api/email/send` | 인증 코드 발송 |
+| POST | `/api/email/verify` | 인증 코드 확인 |
+
+#### 비밀번호
+
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| POST | `/api/password/reset` | 비밀번호 찾기 (임시 비밀번호 발급) |
+| PATCH | `/api/password/change` | 비밀번호 변경 |
+
+#### 사건 관리 (Cases)
+
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| POST | `/api/cases` | 사건 생성 |
+| GET | `/api/cases` | 사건 목록 조회 |
+| GET | `/api/cases/{caseNo}` | 사건 상세 조회 |
+| PATCH | `/api/cases/{caseNo}` | 사건 제목 수정 |
+| GET | `/api/cases/{caseNo}/status` | 사건 상태 조회 |
+| POST | `/api/cases/{caseNo}/survey` | 설문조사 저장 |
+
+#### 문서 업로드 (Gov Documents)
+
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| POST | `/api/cases/{caseNo}/documents` | 처분서/답변서/재결서 업로드 |
+| GET | `/api/cases/{caseNo}/documents/{govDocNo}` | 문서 상세 조회 |
+
+#### 사건 경위 (Narrative)
+
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| POST | `/api/cases/{caseNo}/narrative` | 사건 경위 저장 |
+| GET | `/api/cases/{caseNo}/narrative` | 사건 경위 조회 |
+
+#### AI 분석 (Analysis)
+
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| POST | `/api/cases/{caseNo}/analysis` | AI 사건 분석 요청 |
+| GET | `/api/analysis/{analysisNo}/legal` | 적법요건 판단 결과 조회 |
+| GET | `/api/analysis/{analysisNo}/merit` | 본안판단 결과 조회 |
+| GET | `/api/analysis/{analysisNo}/precedents` | 유사 판례 조회 |
+
+#### 증거 관리 (Evidence)
+
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| GET | `/api/analysis/{analysisNo}/evidence` | 증거 목록 조회 |
+| PATCH | `/api/analysis/{analysisNo}/evidence/{evidenceId}` | 증거 제출 여부 업데이트 |
+
+#### 생성 문서 (Gen Documents)
+
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| GET | `/api/analysis/{analysisNo}/documents` | 생성 문서 조회 (청구서/보충서면) |
+| POST | `/api/analysis/{analysisNo}/documents` | 문서 생성 요청 |
+| PATCH | `/api/analysis/{analysisNo}/documents` | 문서 수정 |
+| GET | `/api/analysis/{analysisNo}/documents/download` | 문서 다운로드 |
+
+### 공통 응답 형식
+
+```json
+{
+  "status": "SUCCESS",    // SUCCESS / FAIL / ERROR
+  "message": "요청이 성공했습니다.",
+  "data": { ... }
+}
+```
+
+### 공통 에러 코드
+
+| HTTP Status | 설명 |
+| --- | --- |
+| 400 | 요청 파라미터 유효성 검사 실패 |
+| 401 | JWT 토큰 누락, 만료, 또는 유효하지 않음 |
+| 403 | 해당 리소스 접근 권한 없음 |
+| 404 | 요청한 리소스가 존재하지 않음 |
+| 409 | 이미 존재하는 데이터 |
+| 410 | 만료된 데이터 (인증 코드 등) |
+| 500 | 서버 내부 오류 (LLM, OCR 파이프라인 포함) |
+
+### Agent API 엔드포인트
+
+AI 서버와의 내부 통신용 API입니다.
+
+| Method | Endpoint | Agent | 설명 |
+| --- | --- | --- | --- |
+| POST | `/ai/agents/document-extract` | A-0 | 문서 OCR 및 데이터 추출 |
+| POST | `/ai/agents/legal-issue-analysis` | A-1 | 법적 쟁점 분석 |
+| POST | `/ai/agents/strategy-precedent-analysis` | A-2 | 전략/판례 매칭 분석 |
+| POST | `/ai/agents/document-draft` | A-3 | 법률 문서 초안 작성 |
+| POST | `/ai/agents/document-review` | B | 문서 검증 및 교차 검토 |
+| POST | `/ai/agents/text-embedding` | - | 텍스트 임베딩 생성 |
+
+---
+
+## 📁 프로젝트 구조
+
+```
+objection/
+├── backend/                     # Spring Boot 4.0 (Java 21)
+│   ├── src/main/java/com/objection/
+│   │   ├── auth/                # 인증/인가
+│   │   ├── cases/               # 사건 관리
+│   │   ├── govdocument/         # 관공서 문서 (처분서/답변서/재결서)
+│   │   ├── analysis/            # AI 분석 파이프라인
+│   │   ├── gendocument/         # 생성 문서 (청구서/보충서면)
+│   │   ├── evidence/            # 증거 관리
+│   │   ├── narrative/           # 사건 경위
+│   │   └── common/              # Security, S3, 예외처리
+│   ├── build.gradle
+│   └── Dockerfile
+│
+├── frontend/                    # Next.js (TypeScript, pnpm)
+│   ├── public/
+│   ├── src/
+│   ├── next.config.ts
+│   └── Dockerfile
+│
+├── ai/
+│   ├── data-pipeline/           # 판례 수집/정제
+│   │   ├── collect/             # 법제처 API 크롤러
+│   │   ├── dedup/               # Spark 중복 제거
+│   │   ├── refine/              # 법령 정제
+│   │   ├── common/              # HDFS 유틸리티
+│   │   └── Dockerfile
+│   └── agents/                  # AI 에이전트 (A-0 ~ B)
+│
+└── docker-compose.yml
+```
+
+---
+
+## 📱 주요 화면
+
+### 1. 랜딩 페이지
+
+- 서비스 소개 (행정심판이란?, 절차 안내)
+- 서비스 가이드 / 사례 연구 / FAQ
+- 회원가입 / 로그인 모달
+
+### 2. 메인 페이지 (로그인 시)
+
+- 나의 행정심판 목록 (진행중/완료, D-Day 표시)
+- 새로운 행정심판 생성 버튼
+- 서비스 소개
+
+### 3. 행정심판 시작 단계
+
+- 처분서 업로드 (촬영/파일/수기입력)
+- 설문조사 (처분 유형, 본인 여부 등)
+- AI 분석 진행 상태 표시
+
+### 4. 행정심판 진행 단계
+
+- 적법요건 판단 결과
+- 본안판단 결과 (법적 쟁점 분석)
+- 유사 판례 목록 및 상세
+- 증거 체크리스트
+- 생성 문서 확인 및 수정 (청구서/보충서면)
+
+### 5. 집행정지 신청 페이지
+
+- 집행정지 필요성 안내
+- 집행정지 신청서 자동 작성
+- 기각 시 재신청 가이드
+
+---
+
+## 🔄 데이터 파이프라인
+
+### 판례 데이터 수집 및 정제
+
+법제처 API와 크롤링으로 음식업 관련 행정심판 재결례를 수집하고, Hadoop HDFS에 저장한 뒤 **PySpark + YARN**으로 정제합니다.
+
+```
+1. Collect (수집)
+   법제처 API 크롤링 (키워드: 식품접객업, 음식점, 주점, 제과점 등)
+   → 본문검색 + 최신순 정렬 + 사건번호 공백 제거
+   → HDFS /raw/ 에 JSONL 저장
+
+2. Dedup (중복 제거) — PySpark + YARN 분산 처리
+   → 사건번호 + 의결일자 기준 3중 중복 체크
+   → HDFS /deduped/ 에 결과 저장
+
+3. Refine (정제) — 4단계 파이프라인
+   → Step 0: 처분유형 분류 (영업정지/과징금/허가취소/폐쇄명령)
+   → Step 1: LLM(GMS API)으로 모호한 법령명을 정확한 법령명으로 교체
+   → Step 2: 정규표현식으로 「법령명」제X조 패턴 추출
+   → Step 3: 법제처 API로 해당 조문의 실제 내용을 가져와서 원문에 삽입
+   → HDFS /cleaned/ 에 최종 결과 저장
+```
+
+### HDFS 데이터 저장 구조
+
+```
+/raw/precedents/          ← 과거 원본 데이터 (3,710건)
+/raw/new/                 ← 크롤링 수집 신규 데이터
+/deduped/                 ← Spark 중복 제거 결과
+/cleaned/                 ← 정제 완료 최종 데이터
+/cleaned/_index.txt       ← 처리 완료 키 인덱스
+```
+
+### 임베딩 & RAG 파이프라인
+
+```
+정제된 판례 → 섹션 분리 (처분개요/주장/판단/결론)
+  → 청킹 (500~700자, 100~150자 overlap)
+  → 임베딩 (1536차원 벡터)
+  → Vector DB 저장 (메타데이터: 사건번호, 쟁점 태그, 증거 태그)
+  → 하이브리드 검색 (BM25 + Dense Vector)
+```
+
+---
+
+## 💻 개발 가이드
+
+### 코드 컨벤션
+
+#### Git Branch 전략
+
+| 분야별 | 설명 |
+| --- | --- |
+| Backend | 백엔드 |
+| Frontend | 프론트엔드 |
+| AI | AI 에이전트/파이프라인 |
+
+각 파트 브랜치 별로 하위 브랜치(Jira 티켓번호)를 파서 작업합니다. (master push 금지)
+
+#### 커밋 메시지 규칙
+
+```
+<type>: <subject>
+```
+
+| 타입 | 설명 |
+| --- | --- |
+| `feat` | 새로운 기능 추가 |
+| `fix` | 버그 수정 |
+| `chore` | 빌드 설정, 패키지 매니저 설정 수정 |
+| `test` | 테스트 코드 작성 및 수정 |
+| `docs` | README, 주석 등 문서 수정 |
+| `style` | 코드 포맷팅, 세미콜론 누락 등 (로직 변경 없음) |
+| `refactor` | 코드 리팩토링 (기능 변화 없이 구조 개선) |
+
+**예시:**
+
+```bash
+feat: 처분서 인식 기능 추가
+fix: JWT 토큰 만료 시 리프레시 로직 수정
+```
+
+#### Java 네이밍 규칙
+
+```java
+// 클래스: PascalCase
+public class CaseService {}
+
+// 메서드/변수: camelCase
+public CaseDetailResponse getCaseDetail() {}
+private String caseTitle;
+
+// 상수: UPPER_SNAKE_CASE
+public static final int MAX_FILE_SIZE = 50;
+```
+
+#### 패키지 구조 (도메인별)
+
+```
+com.objection.{domain}
+├── controller      // API 엔드포인트
+├── service         // 비즈니스 로직
+├── repository      // DB 접근
+├── dto             // Request/Response DTO
+│   ├── request
+│   ├── response
+│   └── ai          // AI 서버 통신용 DTO (Feign Client)
+├── entity          // JPA Entity
+└── enums           // Enum 정의
+```
+
+---
+
+## 🚢 배포
+
+### Docker 배포
+
+```bash
+# Dockerfile (Java 21 기반)
+FROM eclipse-temurin:21-jdk-alpine
+WORKDIR /app
+COPY app.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
+
+### Jenkins CI/CD
+
+GitLab push 시 자동으로 빌드 및 배포됩니다.
+
+```
+GitLab Push → Jenkins Pipeline → Docker Build → Deploy
+```
+
+### 서비스 구성
+
+| 서비스 | 포트 | 설명 |
+| --- | --- | --- |
+| Nginx | 80/443 | 리버스 프록시 + SSL |
+| Frontend | 3000 | Next.js 앱 |
+| Backend | 8080 | Spring Boot API |
+| AI Server | - | 에이전트 서버 |
+| PostgreSQL | 5432 | 주 데이터베이스 |
+| Redis | 6379 | 캐싱/세션 |
+| Hadoop | - | 판례 데이터 저장 |
+
+---
+
+## 📊 Enum 정의 (상태 코드)
+
+### 사건 상태 (CaseStatus) — 30개 상태
+
+```
+STARTED → DOC_UPLOADED → ANALYZING → ANALYSIS_DONE
+→ NARRATIVE_WRITING → STRATEGY_GENERATING → STRATEGY_DONE
+→ CHECKLIST_WRITING → DOC_GENERATING → DOC_GENERATED
+→ APPEAL_SUBMITTED → ANSWER_RECEIVED → ANSWER_ANALYZING → ANSWER_DONE
+→ SUPPLEMENT_NARRATIVE → SUPPLEMENT_GENERATING → SUPPLEMENT_STRATEGY_DONE
+→ SUPPLEMENT_DOC_GENERATING → SUPPLEMENT_DONE → SUPPLEMENT_SUBMITTED
+→ DECISION_RECEIVED → DECISION_ANALYZING → DECISION_DONE → COMPLETED
+```
+
+### 집행정지 상태 (StayStatus)
+
+| 값 | 설명 |
+| --- | --- |
+| NONE | 미신청 |
+| REQUESTED | 신청 완료 |
+| GRANTED | 인용 |
+| REJECTED | 기각 |
+
+### 문서 유형
+
+| 구분 | 값 | 설명 |
+| --- | --- | --- |
+| 업로드 문서 | NOTICE | 행정처분 통지서 |
+| | ANSWER | 행정청 답변서 |
+| | DECISION | 재결서 |
+| | STAY_DECISION | 집행정지 결정서 |
+| 생성 문서 | APPEAL_CLAIM | 행정심판 청구서 |
+| | SUPPLEMENT_STATEMENT | 보충서면 |
+
+---
+
+## 👥 팀 소개
+
+SSAFY 14기 A102팀
+
+---
+
+## 📚 참고 자료
+
+### 공식 문서
+
+- [Spring Boot 4.0 Documentation](https://spring.io/projects/spring-boot)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+- [Redis Documentation](https://redis.io/documentation)
+- [Apache Hadoop](https://hadoop.apache.org/)
+- [Apache Spark](https://spark.apache.org/)
+- [LangGraph](https://python.langchain.com/docs/langgraph)
+
+### 법률 데이터
+
+- [법제처 오픈 API](https://www.law.go.kr/LSO/main.html)
+- [국민권익위원회](https://www.acrc.go.kr/)
+- [행정심판법](https://www.law.go.kr/법령/행정심판법)
+- [식품위생법](https://www.law.go.kr/법령/식품위생법)
+
+### 시장 데이터
+
+- [2025년 상반기 행정심판 인용률 27.4% — 국민권익위](https://www.acrc.go.kr/)
+- [시도 행심위 연평균 인용률 34.6% — 법률신문](https://www.lawtimes.co.kr/)
+- [2024년 폐업 사업자 100만 돌파 — 코리아비즈리뷰](https://www.koreabizreview.com/)
+
+---
+
+## ⭐️ 라이선스
+
+이 프로젝트는 SSAFY 교육 과정의 일환으로 개발되었습니다.
+
+---
+
+### 🙏 감사합니다!
+
+**법을 몰라도 괜찮습니다. AI가 처음부터 끝까지 함께합니다.**
+
+**Made with ⚖️ by 이의있음! Team (SSAFY 14기 A102)**
+
+[⬆ 맨 위로 이동](#-이의있음-objection)
