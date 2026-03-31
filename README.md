@@ -187,34 +187,41 @@
 ### 전체 구조도
 
 ```
-[Client] Next.js (TypeScript) ── HTTPS ──▶ [Nginx :443]
-                                              │
-                      ┌───────────────────────┼───────────────────────┐
-                      ▼                       ▼                       ▼
-               [Frontend :3000]        [Backend :8080]          [AI Server]
-                  Next.js            Spring Boot 4.0           Agent Server
-                                          │                       │
-          ┌───────────┬───────────────────┤                       │
-          ▼           ▼                   ▼                       ▼
-    [PostgreSQL]   [Redis]          [OpenFeign] ◀────────▶ [AI Agents]
-     - users       - Session         API 통신            - A-0 (문서추출)
-     - cases       - Cache                               - A-1 (법리분석)
-     - gov_docs    - Token                               - A-2 (전략/판례)
-     - analysis                                          - A-3 (문서작성)
-     - gen_docs                                          - B   (검증)
-     - evidence
-     - precedents
-                                          │
-          ┌───────────────────────────────┤
-          ▼               ▼               ▼
-    [Hadoop HDFS]     [Spark]        [Vector DB]
-     - 판례 7K건      - 중복제거      - 임베딩 검색
-     - 법령 데이터    - 정제          - RAG
-     - 크롤링 데이터                  - 하이브리드검색
+                        [Client]
+                    Next.js (TypeScript)
+                           │
+                        HTTPS
+                           │
+                     [Nginx :443]
+                     /     |     \
+                    /      |      \
+          [FE :3000]  [BE :8080]  [AI Server]
+           Next.js    Spring Boot  Agent Server
+                        |    \          |
+                   ┌────┘     └────┐    |
+                   |               |    |
+            [PostgreSQL] [Redis]   └────┤
+             - users     - Session      |
+             - cases     - Cache   [OpenFeign]
+             - gov_docs  - Token     API 통신
+             - analysis                 |
+             - gen_docs            [AI Agents]
+             - evidence            - A-0 (문서추출)
+             - precedents          - A-1 (법리분석)
+                                   - A-2 (전략/판례)
+                   |               - A-3 (문서작성)
+              ┌────┼────┐          - B   (검증)
+              |    |    |
+        [Hadoop] [Spark] [Vector DB]
+        HDFS     - 중복   - 임베딩
+        - 판례    제거    - RAG
+          7K건  - 정제   - 하이브리드
+        - 법령               검색
+        - 크롤링
 
-    [법제처 API]      [AWS S3]
-     - 법령 조문 조회  - 파일 업로드
-     - 판례 수집       - 문서 저장
+        [법제처 API]  [AWS S3]
+        - 조문 조회   - 파일 업로드
+        - 판례 수집   - 문서 저장
 ```
 
 ### 데이터 플로우
@@ -284,52 +291,61 @@ Client → 답변서 업로드 → A-0 (답변서 추출)
 
 ## 📊 ERD
 
-> ERD 이미지는 프로젝트 `/docs` 디렉토리를 참고하세요.
-
-### 테이블 구조
-
-#### 사건 도메인
-
-| 테이블 | 주요 컬럼 | 설명 |
-| --- | --- | --- |
-| `users` | user_no(PK), user_id, user_pw, user_name, deleted_at | 사용자 (소프트 딜리트) |
-| `cases` | case_no(PK), user_no(FK), title, status, stay_status, sanction_type, sanction_days | 사건 (30개 상태 코드) |
-| `gov_documents` | gov_doc_no(PK), case_no(FK), document_type, source_type, file_key, parsed_json | 관공서 문서 (처분서/답변서/재결서) |
-| `case_embeddings` | embedding_no(PK), case_no(FK), embedding_vector(1536) | 사건 임베딩 벡터 |
-
-#### 분석 도메인
-
-| 테이블 | 주요 컬럼 | 설명 |
-| --- | --- | --- |
-| `case_analysis` | analysis_no(PK), gov_doc_no(FK), law_result(JSONB), precedent_result(JSONB) | AI 분석 결과 |
-| `gen_documents` | analysis_no(PK/FK), document_type, content_json(JSONB) | 생성 문서 (청구서/보충서면) |
-| `evidence_documents` | evidence_id(PK), analysis_no(FK), evidence_type, submitted | AI 추천 증거 체크리스트 |
-| `case_precedent_matches` | match_no(PK), analysis_no(FK), precedent_no(FK), similarity_score | 유사 판례 매칭 |
-
-#### 법률 데이터 도메인
-
-| 테이블 | 주요 컬럼 | 설명 |
-| --- | --- | --- |
-| `Precedents` | precedent_no(PK), precedent_name, precedent_code, precedent_date | 판례 메타데이터 |
-| `Precedent_vectors` | vector_no(PK), precedent_no(FK), vector_data(1536) | 판례 임베딩 벡터 (RAG) |
-| `Laws` | law_no(PK), law_name, law_type, effective_at | 법령 정보 |
-| `Law_Provisions` | provision_no(PK), law_no(FK), article_no, provision_text | 법령 조문 |
-
-### 주요 테이블 관계
-
 ```
-users (1) ─── (N) cases
-cases (1) ─── (N) gov_documents
-cases (1) ─── (N) case_embeddings
+┌─────────────┐1    N┌─────────────────┐1    N┌──────────────────┐
+│   users     │─────▶│     cases       │─────▶│  gov_documents   │
+├─────────────┤      ├─────────────────┤      ├──────────────────┤
+│ user_no  PK │      │ case_no      PK │      │ gov_doc_no    PK │
+│ user_id     │      │ user_no      FK │      │ case_no       FK │
+│ user_pw     │      │ title           │      │ document_type    │
+│ user_name   │      │ status          │      │ source_type      │
+│ deleted_at  │      │ stay_status     │      │ file_key         │
+└─────────────┘      │ sanction_type   │      │ extracted_text   │
+                     │ sanction_days   │      │ parsed_json JSONB│
+                     │ claim_type      │      │ fact / opinion   │
+                     │ agency_name     │      └────────┬─────────┘
+                     │ business_name   │               │1
+                     └────────┬────────┘               │
+                              │1                       │N
+                              │N              ┌────────▼─────────┐
+                     ┌────────▼─────────┐     │  case_analysis   │
+                     │ case_embeddings  │     ├──────────────────┤
+                     ├──────────────────┤     │ analysis_no   PK │
+                     │ embedding_no  PK │     │ gov_doc_no    FK │
+                     │ case_no       FK │     │ law_result  JSONB│
+                     │ case_stage       │     │ precedent_result │
+                     │ embedding_vector │     └──┬─────┬─────┬──┘
+                     │          (1536)  │        │1    │1    │1
+                     └──────────────────┘        │     │     │
+                         ┌──────────────────────┘     │     └──────────────────┐
+                         │N                           │1                       │N
+                ┌────────▼─────────┐        ┌────────▼─────────┐    ┌─────────▼────────────┐
+                │evidence_documents│        │  gen_documents   │    │case_precedent_matches│
+                ├──────────────────┤        ├──────────────────┤    ├──────────────────────┤
+                │ evidence_id   PK │        │ analysis_no PK/FK│    │ match_no          PK │
+                │ analysis_no   FK │        │ document_type    │    │ analysis_no       FK │
+                │ evidence_type    │        │ content_json     │    │ precedent_no      FK │──┐
+                │ submitted        │        │          JSONB   │    │ similarity_score     │  │
+                │ checked_at       │        └──────────────────┘    │ match_reason         │  │
+                └──────────────────┘                                └──────────────────────┘  │
+                                                                                              │
+                ┌─────────────────┐1    N┌──────────────────┐                                 │
+                │   Precedents    │─────▶│Precedent_vectors │           FK 참조               │
+                ├─────────────────┤      ├──────────────────┤◀─────────────────────────────────┘
+                │ precedent_no PK │      │ vector_no     PK │
+                │ precedent_name  │      │ precedent_no  FK │
+                │ precedent_code  │      │ vector_text      │
+                │ precedent_date  │      │ vector_data(1536)│
+                └─────────────────┘      └──────────────────┘
 
-gov_documents (1) ─── (N) case_analysis
-case_analysis (1) ─── (1) gen_documents
-case_analysis (1) ─── (N) evidence_documents
-case_analysis (1) ─── (N) case_precedent_matches
-
-Precedents (1) ─── (N) Precedent_vectors
-Precedents (1) ─── (N) case_precedent_matches
-Laws (1) ─── (N) Law_Provisions
+                ┌─────────────────┐1    N┌──────────────────┐
+                │      Laws       │─────▶│  Law_Provisions  │
+                ├─────────────────┤      ├──────────────────┤
+                │ law_no       PK │      │ provision_no  PK │
+                │ law_name        │      │ law_no        FK │
+                │ law_type        │      │ article_no       │
+                │ effective_at    │      │ provision_text   │
+                └─────────────────┘      └──────────────────┘
 ```
 
 ---
@@ -583,35 +599,93 @@ objection/
 
 ### 1. 랜딩 페이지
 
-- 서비스 소개 (행정심판이란?, 절차 안내)
-- 서비스 가이드 / 사례 연구 / FAQ
-- 회원가입 / 로그인 모달
+![랜딩 페이지](./img/랜딩%20페이지.png)
 
-### 2. 메인 페이지 (로그인 시)
+- 서비스 슬로건 및 소개 ("초보자도 쉬운 행정심판, 당신의 든든한 AI 파트너")
+- 행정심판 5단계 프로세스 시각 안내 (처분서 수령 → 청구서 작성 → 답변서 분석 → 보충서면 → 재결서)
+- 핵심 기능 소개 카드 (쉬운 AI 작성 / 문서 분석 / 법률 안내)
+- 로그인 · 회원가입 버튼
 
-- 나의 행정심판 목록 (진행중/완료, D-Day 표시)
-- 새로운 행정심판 생성 버튼
-- 서비스 소개
+### 2. 로그인 · 회원가입
 
-### 3. 행정심판 시작 단계
+|회원가입|로그인|
+|:---:|:---:|
+|![로그인](./img/로그인%20·%20회원가입.png)|![회원가입](./img/로그인%20·%20회원가입2.png)|
 
-- 처분서 업로드 (촬영/파일/수기입력)
-- 설문조사 (처분 유형, 본인 여부 등)
-- AI 분석 진행 상태 표시
+- 아이디(이메일) / 비밀번호 로그인, 자동 로그인 옵션
+- 회원가입 (이름, 이메일, 비밀번호) → 이메일 인증 코드 확인
 
-### 4. 행정심판 진행 단계
+### 3. 메인 대시보드 (로그인 후)
 
-- 적법요건 판단 결과
-- 본안판단 결과 (법적 쟁점 분석)
-- 유사 판례 목록 및 상세
-- 증거 체크리스트
-- 생성 문서 확인 및 수정 (청구서/보충서면)
+![메인페이지](./img/메인페이지.png)
 
-### 5. 집행정지 신청 페이지
+- 나의 행정심판 목록 (사건 제목, 현재 단계, D-Day, 최근 업데이트)
+- 새 사건 시작하기 버튼
 
-- 집행정지 필요성 안내
-- 집행정지 신청서 자동 작성
-- 기각 시 재신청 가이드
+### 4. 사건 시작 페이지
+
+![사건 시작](./img/사건%20시작%20페이지.jpg)
+
+- **시작 방식 선택**: 처음부터 시작 / 중간부터 시작 (단계 선택)
+- **약관 동의**: 서비스 이용약관 확인
+- **처분서 입력**: 처분 통지서 업로드(PDF/JPEG/PNG) 또는 수동 입력
+  - 처분 '사전' 통지서 구분 안내 (사전통지서는 아직 확정 아님을 경고)
+- **설문조사**: 처분 유형, 본인 여부 등
+
+### 5. AI 분석 진행 화면
+
+### 5. AI 분석 진행 화면
+
+|분석 진행|분석 진행|
+|:---:|:---:|
+|![AI 분석 1](./img/AI%20분석%20진행%20화면.jpg)|![AI 분석 2](./img/AI%20분석%20진행%20화면2.jpg)|
+
+
+### 6. 적법요건 판단 결과
+
+![적법요건 판단 결과](./img/적법요건%20판단%20결과.png)
+
+- 처분서 내용 요약 (처분서가 있을 경우)
+- 행정심판 가능 여부 판단 (청구인 적격 / 대상 적격 / 청구기간)
+- D-Day 타임라인 (청구 마감일까지 남은 일수)
+- AI 법률 비서 채팅 (실시간 Q&A)
+
+### 7. 사건 경위 작성
+
+![사건 경위 작성](./img/사건%20경위%20작성.jpg)
+
+- 사실관계 (육하원칙 기반 시간순 경위)
+- 부당하다고 생각하는 이유 (불가피한 사정, 억울한 점)
+- 사이드바 진행 상황 표시 (사건경위작성 → AI판단결과 → 체크리스트 → 문서작성 → 완료)
+
+### 8. 본안 판단 결과 보고서
+
+![본안 판단 결과 보고서](./img/본안%20판단%20결과%20보고서.jpg)
+
+- AI 판단 요약 및 최적 전략 (취소심판 등)
+- 쟁점별 분석 (사실오인 / 법령오적용 / 재량권일탈 / 절차적하자)
+- 유사 판례 매칭 결과
+- 집행정지 신청 필요 시 안내 및 작성 페이지 연결
+
+### 9. 증거 체크리스트 & 문서 생성
+
+|증거 체크리스트|문서 편집|문서 생성|
+|:---:|:---:|:---:|
+|![증거1](./img/증거%20체크리스트%20%26%20문서%20생성.jpg)|![증거2](./img/증거%20체크리스트%20%26%20문서%20생성2.jpg)|![증거3](./img/증거%20체크리스트%20%26%20문서%20생성3.jpg)|
+
+- AI 추천 증거 목록 (제출 여부 체크)
+- 청구서 / 보충서면 자동 생성 및 편집
+- 문서 다운로드
+
+### 10. 답변서 · 보충서면 · 재결서 단계
+
+|답변서 분석|보충서면 작성|재결서 해석|
+|:---:|:---:|:---:|
+|![답변서1](./img/답변서%20·%20보충서면%20·%20재결서%20단계.jpg)|![답변서2](./img/답변서%20·%20보충서면%20·%20재결서%20단계2.jpg)|![답변서3](./img/답변서%20·%20보충서면%20·%20재결서%20단계3.jpg)|
+
+- 답변서 업로드 → AI 허점 분석
+- 보충서면 자동 작성 (1:1 반박 구조)
+- 재결서 업로드 → 결과 해석 및 후속 조치 안내
 
 ---
 
@@ -696,20 +770,6 @@ objection/
 ```bash
 feat: 처분서 인식 기능 추가
 fix: JWT 토큰 만료 시 리프레시 로직 수정
-```
-
-#### Java 네이밍 규칙
-
-```java
-// 클래스: PascalCase
-public class CaseService {}
-
-// 메서드/변수: camelCase
-public CaseDetailResponse getCaseDetail() {}
-private String caseTitle;
-
-// 상수: UPPER_SNAKE_CASE
-public static final int MAX_FILE_SIZE = 50;
 ```
 
 #### 패키지 구조 (도메인별)
