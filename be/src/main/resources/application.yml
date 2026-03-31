@@ -19,6 +19,10 @@ spring:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+    hikari:
+      connection-timeout: 60000
+      maximum-pool-size: 20
+      max-lifetime: 1800000
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -31,10 +35,15 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
+      timeout: 5000
+      lettuce:
+        pool:
+          max-active: 20
+          max-wait: 5000
 
   servlet:
     multipart:
-      max-file-size: 50MB # 업로드 파일 용량 제한
+      max-file-size: 50MB
       max-request-size: 50MB
 
 
@@ -62,4 +71,3 @@ server:
 
 ai-server:
   url: https://j14a102a.p.ssafy.io
-#   빌드해서 우분투 서버(172.26.0.41)에 직접 배포때는 내부 IP 172.26.6.90을 쓰는 게 속도도 빠르고 더 좋다
