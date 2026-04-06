@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from app.schemas.common import ApiResponse, BaseSchema, ReviewError
+from app.schemas.common import BaseSchema, ReviewError
 from app.schemas.document_draft import (
     AppealClaimContentJson,
     SupplementStatementContentJson,
@@ -40,5 +40,3 @@ class DocumentReviewResult(BaseSchema):
     draftDocument: DraftDocument
 
 
-class DocumentReviewResponse(ApiResponse[DocumentReviewResult]):
-    pass

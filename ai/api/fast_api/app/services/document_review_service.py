@@ -17,6 +17,7 @@ from app.schemas.document_review import (
     DraftDocument,
 )
 from app.schemas.enums import OutputDocumentType, Status
+from app.utils.json_utils import extractJsonText
 
 GMS_MESSAGES_URL = "https://gms.ssafy.io/gmsapi/api.anthropic.com/v1/messages"
 LLM_MODEL = "claude-sonnet-4-20250514"
@@ -247,7 +248,7 @@ def _parseResponse(
 ) -> DocumentReviewResult:
     try:
         content = responseBody["content"][0]["text"]
-        content = _extractJsonText(content)
+        content = extractJsonText(content)
         data = json.loads(content)
     except (KeyError, IndexError, json.JSONDecodeError) as exc:
         raise ServiceException(
@@ -310,22 +311,3 @@ def _parseResponse(
             contentJson=contentJson,
         ),
     )
-
-
-def _extractJsonText(text: str) -> str:
-    stripped = text.strip()
-
-    if stripped.startswith("```"):
-        lines = stripped.splitlines()
-        if lines:
-            lines = lines[1:]
-        if lines and lines[-1].strip() == "```":
-            lines = lines[:-1]
-        stripped = "\n".join(lines).strip()
-
-    start = stripped.find("{")
-    end = stripped.rfind("}")
-    if start == -1 or end == -1 or start > end:
-        raise ServiceException("LLM response does not contain valid JSON")
-
-    return stripped[start: end + 1]

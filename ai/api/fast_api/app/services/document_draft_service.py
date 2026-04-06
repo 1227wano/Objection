@@ -7,14 +7,11 @@ from app.core.exceptions import ServiceException
 from app.schemas.document_draft import (
     AppealClaimContentJson,
     DocumentDraftRequest,
-    DocumentDraftResponse,
     DocumentDraftResult,
     OutputDocumentType,
     SupplementStatementContentJson,
 )
-from app.schemas.document_review import DocumentReviewRequest, DraftDocument
-from app.schemas.enums import Status
-from app.services.document_review_service import reviewDocument
+from app.utils.json_utils import extractJsonText
 
 OPENAI_CHAT_COMPLETIONS_URL = "https://gms.ssafy.io/gmsapi/api.openai.com/v1/chat/completions"
 DRAFT_MODEL = os.getenv("DRAFT_MODEL", "gpt-5.2")
@@ -33,28 +30,7 @@ placeholder, 예시명, 임의의 기관명은 사용하지 않는다.
 정확한 위원회 명칭을 특정할 수 없으면 반드시 null을 반환한다."""
 
 
-def createDocumentDraft(request: DocumentDraftRequest) -> DocumentDraftResponse:
-    initialDraftResult = _generateDraftResult(request)
-    reviewRequest = DocumentReviewRequest(
-        analysisNo=request.analysisNo,
-        documentType=request.documentType,
-        draftDocument=DraftDocument(
-            title=None,
-            contentJson=initialDraftResult.contentJson,
-        ),
-        caseInfo=request.caseInfo.model_dump(mode="python"),
-        legalIssueAnalysisResult=request.legalIssueAnalysisResult.model_dump(
-            mode="python"
-        ),
-        strategyPrecedentAnalysisResult=
-        request.strategyPrecedentAnalysisResult.model_dump(mode="python"),
-        preparedEvidenceList=request.preparedEvidenceList or [],
-    )
-
-    return reviewDocument(reviewRequest)
-
-
-def _generateDraftResult(request: DocumentDraftRequest) -> DocumentDraftResult:
+def createDocumentDraft(request: DocumentDraftRequest) -> DocumentDraftResult:
     responseData = _callDraftLLM(request)
     result = _parseResult(responseData, request)
     return result
@@ -171,7 +147,7 @@ def _parseResult(
         choices = responseBody["choices"]
         firstChoice = choices[0]
         message = firstChoice["message"]
-        content = _extractJsonText(message["content"])
+        content = extractJsonText(message["content"])
         data = json.loads(content)
         contentJson = data["contentJson"]
     except (KeyError, IndexError, TypeError, json.JSONDecodeError) as exc:
@@ -197,22 +173,3 @@ def _validateCommitteeType(value: str | None) -> None:
         raise ServiceException("LLM response committeeType is invalid")
     if not value.strip():
         raise ServiceException("LLM response committeeType is invalid")
-
-
-def _extractJsonText(text: str) -> str:
-    stripped = text.strip()
-
-    if stripped.startswith("```"):
-        lines = stripped.splitlines()
-        if lines:
-            lines = lines[1:]
-        if lines and lines[-1].strip() == "```":
-            lines = lines[:-1]
-        stripped = "\n".join(lines).strip()
-
-    start = stripped.find("{")
-    end = stripped.rfind("}")
-    if start == -1 or end == -1 or start > end:
-        raise ServiceException("LLM response does not contain valid JSON")
-
-    return stripped[start:end + 1]

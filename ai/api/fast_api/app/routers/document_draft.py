@@ -1,7 +1,9 @@
 from fastapi import APIRouter
 
+from app.orchestrators.document_draft_orchestrator import (
+    createDocumentDraftOrchestration,
+)
 from app.schemas.document_draft import DocumentDraftRequest, DocumentDraftResponse
-from app.services.document_draft_service import createDocumentDraft
 
 router = APIRouter(
     prefix="/ai/agents/document-draft",
@@ -13,4 +15,4 @@ router = APIRouter(
 def documentDraft(
     request: DocumentDraftRequest,
 ) -> DocumentDraftResponse:
-    return createDocumentDraft(request)
+    return createDocumentDraftOrchestration(request)
