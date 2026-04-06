@@ -14,6 +14,7 @@ from app.schemas.strategy_precedent_analysis import (
     StrategyPrecedentAnalysisResponse,
     StrategyPrecedentAnalysisResult,
 )
+from app.utils.json_utils import extractJsonText
 
 GEMINI_API_URL = (
     "https://gms.ssafy.io/gmsapi/generativelanguage.googleapis.com/v1beta/"
@@ -156,7 +157,7 @@ def _parseResult(responseBody: dict) -> StrategyPrecedentAnalysisResult:
             for part in parts
             if isinstance(part, dict) and isinstance(part.get("text"), str)
         ]
-        content = _extractJsonText("".join(textParts))
+        content = extractJsonText("".join(textParts))
         data = json.loads(content)
     except (KeyError, IndexError, TypeError, json.JSONDecodeError) as exc:
         raise ServiceException(f"failed to parse LLM response: {responseBody}") from exc
@@ -224,22 +225,3 @@ def _parseOptionalBool(value: object) -> bool | None:
     if isinstance(value, bool):
         return value
     raise ServiceException("LLM response stayRecommended is invalid")
-
-
-def _extractJsonText(text: str) -> str:
-    stripped = text.strip()
-
-    if stripped.startswith("```"):
-        lines = stripped.splitlines()
-        if lines:
-            lines = lines[1:]
-        if lines and lines[-1].strip() == "```":
-            lines = lines[:-1]
-        stripped = "\n".join(lines).strip()
-
-    start = stripped.find("{")
-    end = stripped.rfind("}")
-    if start == -1 or end == -1 or start > end:
-        raise ServiceException("LLM response does not contain valid JSON")
-
-    return stripped[start : end + 1]

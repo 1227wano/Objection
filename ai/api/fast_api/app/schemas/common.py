@@ -2,7 +2,7 @@ from typing import Generic, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
-from app.schemas.enums import InputDocumentType, OutputDocumentType, Stage, Status
+from app.schemas.enums import InputDocumentType, Status
 
 ResultType = TypeVar("ResultType")
 
@@ -114,32 +114,6 @@ class DocumentExtractResult(BaseSchema):
 # -----------------------------------------------
 # 하위 Agent 호환 스키마 (A-1, A-2에서 사용)
 # -----------------------------------------------
-
-class ParsedFields(BaseModel):
-    model_config = ConfigDict(extra="ignore", populate_by_name=True)
-    disposalDate: str | None = None
-    agencyName: str | None = None
-    claimant: str | None = None
-    businessName: str | None = None
-    businessAddress: str | None = None
-
-
-class DocumentExtractResultSummary(BaseSchema):
-    documentType: InputDocumentType
-    caseTitle: str
-    summary: str
-    searchHints: list[str]
-    parsedFields: ParsedFields
-
-
-class LegalIssueDocumentExtractResult(BaseSchema):
-    documentType: InputDocumentType
-    caseTitle: str
-    title: str
-    rawText: str
-    summary: str
-    parsedFields: ParsedFields
-
 
 class CaseContext(BaseSchema):
     fact: str
