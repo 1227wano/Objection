@@ -137,7 +137,7 @@
 | --- | --- |
 | GPT-5 (A-0, A-3) | OCR 문서 추출, 법률 문서 작성 |
 | Claude Sonnet 4.5 (A-1, A-2, B) | 법리 분석, 판례 전략, 문서 검증 |
-| LangGraph | 멀티 에이전트 오케스트레이션 |
+| FastAPI | 역할별 AI Agent 및 오케스트레이션 구조 |
 | Hadoop HDFS | 판례 원본 데이터 저장 (빅데이터 레이크) |
 | PySpark + YARN | 판례 데이터 분산 처리 (중복제거, 정제) |
 | Vector DB | 판례 임베딩 저장 및 RAG 검색 |
@@ -255,9 +255,10 @@ Client → 답변서 업로드 → A-0 (답변서 추출)
 
 ---
 
-## 🤖 멀티 에이전트 AI 구성
+## 🤖 모듈형 AI 오케스트레이션 구성
 
 단일 모델이 모든 것을 판단하지 않습니다. **역할을 철저히 분리하여 AI가 할 일과 시스템 로직이 할 일을 구분**하는 것이 이 서비스의 기술적 핵심입니다.
+각 Agent는 FastAPI 기반 엔드포인트와 서비스 계층으로 분리되어 있으며, 단계 간 연결이 필요한 구간은 오케스트레이터가 조합합니다.
 
 ### 에이전트 구성
 
@@ -269,7 +270,7 @@ Client → 답변서 업로드 → A-0 (답변서 추출)
 | **A-3** | 손 (The Pen) | GPT-5 | 청구서, 보충서면 등 위원회를 설득할 고품격 법률 문서 작성 |
 | **B** | 감시관 (Auditor) | Sonnet 4.5 | A-3 작성 서류의 오타, 법령 오기재, 논리 결함 교차 검토 |
 
-### 7단계 AI 프로세스
+### 7단계 AI 오케스트레이션 프로세스
 
 ```
 1단계: A-0 → 통지서 데이터 추출, A-1 → 기한 계산
@@ -875,7 +876,7 @@ SSAFY 14기 A102팀
 - [Redis Documentation](https://redis.io/documentation)
 - [Apache Hadoop](https://hadoop.apache.org/)
 - [Apache Spark](https://spark.apache.org/)
-- [LangGraph](https://python.langchain.com/docs/langgraph)
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
 
 ### 법률 데이터
 
