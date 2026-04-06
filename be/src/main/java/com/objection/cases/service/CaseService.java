@@ -1,0 +1,174 @@
+package com.objection.cases.service;
+
+import com.objection.cases.dto.request.CaseTitleUpdateRequest;
+import com.objection.cases.dto.request.SurveyRequest;
+import com.objection.cases.dto.response.*;
+import com.objection.cases.entity.Case;
+import com.objection.cases.enums.CaseStatus;
+import com.objection.cases.enums.StayStatus;
+import com.objection.cases.repository.CaseRepository;
+import com.objection.common.exception.BusinessException;
+import com.objection.common.exception.ErrorCode;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class CaseService {
+
+    private final CaseRepository caseRepository;
+
+    @Transactional
+    public CaseCreateResponse createCase(Integer userNo) {
+
+        Case newCase = Case.builder()
+                .userNo(userNo)
+                .title("새 행정심판 사건")
+                .status(CaseStatus.STARTED)
+                .stayStatus(StayStatus.NONE)
+                .build();
+
+        Case saved = caseRepository.saveAndFlush(newCase);
+
+        return new CaseCreateResponse(
+                saved.getCaseNo(),
+                saved.getTitle(),
+                saved.getStatus().name(),
+                saved.getCreatedAt()
+        );
+    }
+
+    public List<CaseListResponse> getCases(Integer userNo) {
+        List<Case> cases = caseRepository.findByUserNoOrderByUpdatedAtDesc(userNo);
+
+        return cases.stream()
+                .map(c -> new CaseListResponse(
+                        c.getCaseNo(),
+                        c.getTitle(),
+                        c.getStatus().name(),
+                        c.getStayStatus().name(),
+                        c.getClaimType() != null ? c.getClaimType().name() : null,
+                        c.getSanctionType(),
+                        c.getSanctionDays(),
+                        c.getAgencyName(),
+                        c.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public CaseStatusResponse getCaseStatus(Integer caseNo, Integer userNo) {
+        Case found = getCaseOrThrow(caseNo);
+        validateOwner(found, userNo);
+
+        return new CaseStatusResponse(
+                found.getCaseNo(),
+                found.getStatus().name(),
+                found.getStayStatus().name()
+        );
+    }
+
+    @Transactional
+    public CaseTitleUpdateResponse updateTitle(Integer caseNo, Integer userNo, CaseTitleUpdateRequest request) {
+        Case found = getCaseOrThrow(caseNo);
+        validateOwner(found, userNo);
+
+        found.updateTitle(request.getTitle());
+
+        return new CaseTitleUpdateResponse(
+                found.getCaseNo(),
+                found.getTitle(),
+                found.getUpdatedAt()
+        );
+    }
+
+    @Transactional
+    public SurveySaveResponse saveSurvey(Integer caseNo, Integer userNo, SurveyRequest request) {
+        Case found = getCaseOrThrow(caseNo);
+        validateOwner(found, userNo);
+
+        found.updateSurvey(
+                request.getIsDirect(),
+                request.getSanctionType(),
+                request.getDisposalDate() != null ? LocalDate.parse(request.getDisposalDate()) : null,
+                request.getAwareDate() != null ? LocalDate.parse(request.getAwareDate()) : null,
+                request.getAgencyName()
+        );
+
+        // 적법요건 검증 1. 청구인 적격
+        if (Boolean.FALSE.equals(request.getIsDirect())) {
+            found.updateStatus(CaseStatus.ANALYSIS_FAILED);
+            return new SurveySaveResponse(found.getCaseNo(), found.getUpdatedAt());
+        }
+
+        // 적법요건 검증 2. 청구기간 90일 초과 여부
+        if (request.getAwareDate() != null) {
+            LocalDate awareDate = LocalDate.parse(request.getAwareDate());
+            long daysSinceAware = ChronoUnit.DAYS.between(awareDate, LocalDate.now());
+            if (daysSinceAware > 90) {
+                found.updateStatus(CaseStatus.ANALYSIS_FAILED);
+                return new SurveySaveResponse(found.getCaseNo(), found.getUpdatedAt());
+            }
+        }
+
+        // 적법요건 통과 → ANALYZING → ANALYSIS_DONE
+        found.updateStatus(CaseStatus.ANALYZING);
+        found.updateStatus(CaseStatus.ANALYSIS_DONE);
+
+        return new SurveySaveResponse(found.getCaseNo(), found.getUpdatedAt());
+    }
+
+    private Case getCaseOrThrow(Integer caseNo) {
+        return caseRepository.findById(caseNo)
+                .orElseThrow(() -> new BusinessException(ErrorCode.CASE_NOT_FOUND));
+    }
+
+    private void validateOwner(Case found, Integer userNo) {
+        if (!found.getUserNo().equals(userNo)) {
+            throw new BusinessException(ErrorCode.CASE_ACCESS_DENIED);
+        }
+    }
+
+    /**
+     * 사건 상세 정보 조회
+     */
+    @Transactional(readOnly = true)
+    public CaseDetailResponse getCaseDetail(Integer caseNo, Integer userNo) {
+        // 1. 사건 조회 (없으면 예외 발생)
+        Case foundCase = getCaseOrThrow(caseNo);
+
+        // 2. 권한 검증: 본인 사건이 맞는지 확인 (보안)
+        if (!foundCase.getUserNo().equals(userNo)) {
+            // 팀 공통 예외 처리 방식에 맞게 수정하세요 (예: UNAUTHORIZED_ACCESS)
+            throw new IllegalArgumentException("해당 사건을 조회할 권한이 없습니다.");
+        }
+
+        // 3. 엔티티를 DTO로 변환하여 반환
+        return CaseDetailResponse.builder()
+                .caseNo(foundCase.getCaseNo())
+                .userNo(foundCase.getUserNo())
+                .title(foundCase.getTitle())
+                .status(foundCase.getStatus())
+                .stayStatus(foundCase.getStayStatus())
+                .disposalDate(foundCase.getDisposalDate())
+                .awareDate(foundCase.getAwareDate())
+                .agencyName(foundCase.getAgencyName())
+                .claimType(foundCase.getClaimType())
+                .sanctionType(foundCase.getSanctionType())
+                .sanctionDays(foundCase.getSanctionDays())
+                .claimant(foundCase.getClaimant())
+                .violationType(foundCase.getViolationType())
+                .businessName(foundCase.getBusinessName())
+                .businessAddress(foundCase.getBusinessAddress())
+                .isDirect(foundCase.getIsDirect())
+                .createdAt(foundCase.getCreatedAt())
+                .updatedAt(foundCase.getUpdatedAt())
+                .build();
+    }
+}

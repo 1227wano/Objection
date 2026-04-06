@@ -1,0 +1,73 @@
+spring:
+  application:
+    name: objection
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      connection-timeout: 60000
+      maximum-pool-size: 20
+      max-lifetime: 1800000
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 5000
+      lettuce:
+        pool:
+          max-active: 20
+          max-wait: 5000
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-expiration: 86400000
+  refresh-expiration: 604800000
+
+
+cloud:
+  aws:
+    s3:
+      bucket: ssafy-objection-ai-bucket
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ap-southeast-2
+      auto: false
+    stack:
+      auto: false
+
+server:
+  port: 8080
+
+ai-server:
+  url: https://j14a102a.p.ssafy.io
